@@ -1,20 +1,24 @@
-import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
-import { StringIndexed } from '@slack/bolt/dist/types/helpers'
+import { AckFn, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
+import { WebClient } from '@slack/web-api/dist/WebClient'
 
 interface Command {
   command: SlashCommand
   ack: AckFn<string>
   say: SayFn
   respond: RespondFn
+  client: WebClient
 }
 
-export default async function robotinaCommand(
-  { command, ack, say, respond }: Command,
-  app: App<StringIndexed>
-) {
+export default async function robotinaCommand({
+  command,
+  ack,
+  say,
+  respond,
+  client,
+}: Command) {
   await ack()
 
-  const { user } = await app.client.users.info({
+  const { user } = await client.users.info({
     user: command.user_id,
   })
 
