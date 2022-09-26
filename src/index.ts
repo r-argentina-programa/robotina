@@ -11,10 +11,9 @@ const app = new App({
   appToken: process.env.APP_TOKEN,
 })
 
-app.command('/robotina', async ({ command, ack, say, respond }) => {
-  await robotinaCommand({ command, ack, say, respond }, app)
-})
-
+app.command('/robotina', ({ command, ack, say, respond, client }) =>
+  robotinaCommand({ command, ack, say, respond, client })
+)
 ;(async () => {
   // Start your app
   await app.start()
