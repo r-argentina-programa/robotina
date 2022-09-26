@@ -18,7 +18,7 @@ export default async function robotinaCommand(
     user: command.user_id,
   })
 
-  const splittedCommand = commandSplitter(command.text)
+  const splittedCommand = splitCommand(command.text)
 
   // ejemplo
   if (splittedCommand[0] === 'tarea') {
@@ -38,7 +38,7 @@ export default async function robotinaCommand(
   }
 }
 
-function commandSplitter(command: string): Array<string> {
+function splitCommand(command: string): Array<string> {
   const splittedCommand = command.split(' ')
   return splittedCommand
 }
