@@ -14,3 +14,8 @@ export default async function robotinaCommand(
 ) {
   await ack()
 
+  const splittedCommand = commandSplitter(command.text)
+function commandSplitter(command: string): Array<string> {
+  const splittedCommand = command.split(' ')
+  return splittedCommand
+}
