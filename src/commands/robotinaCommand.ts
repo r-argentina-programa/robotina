@@ -14,7 +14,30 @@ export default async function robotinaCommand(
 ) {
   await ack()
 
+  const { user } = await app.client.users.info({
+    user: command.user_id,
+  })
+
   const splittedCommand = commandSplitter(command.text)
+
+  // ejemplo
+  if (splittedCommand[0] === 'tarea') {
+    const userData = {
+      user_id: user?.id,
+      user_name: user?.real_name,
+      user_email: user?.profile?.email,
+    }
+    await respond(
+      `ID: ${userData.user_id}, Name: ${userData.user_name}, Email: ${userData.user_email}`
+    )
+    await respond(
+      `Valor1: ${splittedCommand[1]}, Valor2: ${splittedCommand[2]}`
+    )
+  } else {
+    await say('Disculpa no entendí ese comando')
+  }
+}
+
 function commandSplitter(command: string): Array<string> {
   const splittedCommand = command.split(' ')
   return splittedCommand
