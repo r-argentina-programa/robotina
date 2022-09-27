@@ -1,3 +1,4 @@
+import { unknownCommandBlock } from '../blocks/unknownCommandBlock'
 import { AckFn, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 
@@ -24,7 +25,7 @@ export default async function robotinaCommand({
 
   const splittedCommand = splitCommand(command.text)
 
-  // ejemplo
+  // example
   if (splittedCommand[0] === 'tarea') {
     const userData = {
       user_id: user?.id,
@@ -34,11 +35,12 @@ export default async function robotinaCommand({
     await respond(
       `ID: ${userData.user_id}, Name: ${userData.user_name}, Email: ${userData.user_email}`
     )
-    await respond(
-      `Valor1: ${splittedCommand[1]}, Valor2: ${splittedCommand[2]}`
-    )
+    await respond(`Tarea: ${splittedCommand[1]}`)
   } else {
-    await say('Disculpa no entendí ese comando')
+    await say({
+      text: 'Comando no encontrado 🔎.',
+      blocks: unknownCommandBlock,
+    })
   }
 }
 
