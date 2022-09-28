@@ -10,7 +10,6 @@ const app = new App({
   socketMode: true,
   appToken: process.env.APP_TOKEN,
 })
-
 greetUserEvent(app)
 ;(async () => {
   // Start your app

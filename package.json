@@ -10,10 +10,10 @@
   "scripts": {
     "start": "tsc-watch --onSuccess \"node ./dist/index.js\"",
     "build": "tsc --build",
-    "test": "jest"
+    "test": "jest",
+    "test:dev": "jest --watch"
   },
   "devDependencies": {
-    "@slack-wrench/fixtures": "^2.2.4",
     "@types/jest": "^29.0.3",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
     "dotenv": "^16.0.2",
