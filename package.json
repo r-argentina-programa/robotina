@@ -10,7 +10,8 @@
   "scripts": {
     "start": "tsc-watch --onSuccess \"node ./dist/index.js\"",
     "build": "tsc --build",
-    "test": "jest"
+    "test": "jest",
+    "test:dev": "jest --watch"
   },
   "devDependencies": {
     "@types/jest": "^29.0.3",

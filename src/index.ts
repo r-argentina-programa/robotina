@@ -15,7 +15,6 @@ const app = new App({
 })
 
 tareaSlashCommand(app)
-
 greetUserEvent(app)
 ;(async () => {
   // Start your app
