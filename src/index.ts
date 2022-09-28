@@ -2,6 +2,9 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 import { App } from '@slack/bolt'
+
+import { tareaSlashCommand } from './commands/tarea'
+
 import { greetUserEvent } from './events/greeting'
 
 const app = new App({
@@ -10,6 +13,8 @@ const app = new App({
   socketMode: true,
   appToken: process.env.APP_TOKEN,
 })
+
+tareaSlashCommand(app)
 greetUserEvent(app)
 ;(async () => {
   // Start your app
