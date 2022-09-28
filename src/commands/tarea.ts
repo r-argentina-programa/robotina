@@ -1,5 +1,5 @@
 import { unknownCommandBlock } from '../blocks/unknownCommandBlock'
-import { AckFn, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
+import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 
 interface Command {
@@ -10,13 +10,18 @@ interface Command {
   client: WebClient
 }
 
-export default async function robotinaCommand({
+export const tareaSlashCommand = (app: App) => {
+  const TAREA_SLASH_COMMAND = '/tarea'
+  app.command(TAREA_SLASH_COMMAND, tareaCommandFunction)
+}
+
+export const tareaCommandFunction = async ({
   command,
   ack,
   say,
   respond,
   client,
-}: Command) {
+}: Command) => {
   await ack()
 
   const { user } = await client.users.info({
@@ -26,7 +31,7 @@ export default async function robotinaCommand({
   const splittedCommand = splitCommand(command.text)
 
   // example
-  if (splittedCommand[0] === 'tarea') {
+  if (splittedCommand[0]) {
     const userData = {
       user_id: user?.id,
       user_name: user?.real_name,
@@ -35,7 +40,7 @@ export default async function robotinaCommand({
     await respond(
       `ID: ${userData.user_id}, Name: ${userData.user_name}, Email: ${userData.user_email}`
     )
-    await respond(`Tarea: ${splittedCommand[1]}`)
+    await respond(`Tarea: ${splittedCommand[0]}`)
   } else {
     await say({
       text: 'Comando no encontrado 🔎.',

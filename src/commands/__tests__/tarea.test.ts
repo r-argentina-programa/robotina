@@ -1,7 +1,7 @@
 import { expect, jest, test } from '@jest/globals'
 import { AckFn, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api'
-import robotinaCommand from '../robotinaCommand'
+import { tareaCommandFunction } from '../tarea'
 
 jest.mock('@slack/web-api', () => {
   const properties = {
@@ -33,7 +33,7 @@ beforeEach(() => {
 
 describe('/robotina tests', () => {
   it('should run well when the right parameter are passed', async () => {
-    await robotinaCommand({ command, ack, say, respond, client })
+    await tareaCommandFunction({ command, ack, say, respond, client })
 
     expect(client.users.info).toHaveBeenCalledTimes(1)
     expect(say).toHaveBeenCalledTimes(0)
