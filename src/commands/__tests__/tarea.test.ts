@@ -24,6 +24,7 @@ beforeEach(() => {
   command = {
     text: 'tarea',
     user_id: 'mockId',
+    channel_name: 'clase-12',
   } as unknown as SlashCommand
   ack = jest.fn() as unknown as AckFn<string>
   say = jest.fn() as unknown as SayFn
@@ -36,7 +37,7 @@ describe('/robotina tests', () => {
     await tareaCommandFunction({ command, ack, say, respond, client })
 
     expect(client.users.info).toHaveBeenCalledTimes(1)
-    expect(say).toHaveBeenCalledTimes(0)
-    expect(respond).toBeCalledTimes(2)
+    expect(say).toHaveBeenCalledTimes(1)
+    expect(respond).toBeCalledTimes(0)
   })
 })
