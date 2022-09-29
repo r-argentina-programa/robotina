@@ -6,7 +6,7 @@ describe('uploadTarea test', () => {
     const returnedValues = await uploadTarea('mockId', 'mockTarea', '12')
     const expectedValues = {
       tarea: 'mockTarea',
-      user_id: `oauth2|slack|${process.env.SLACK_TEAM_NAME}-mockId`,
+      user_id: `oauth2|slack|${process.env.SLACK_TEAM_ID}-mockId`,
       slack_user_id: 'mockId',
       class_number: '12',
     }
