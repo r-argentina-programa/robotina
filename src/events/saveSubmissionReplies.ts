@@ -6,17 +6,22 @@ import { IReply } from '../interfaces/IReply'
 dotenv.config()
 
 export const saveSubmissionRepliesEvent = (app: App) => {
-  app.event('message', saveSubmissionsReplies)
+  const MESSAGE_EVENT = 'message'
+  app.event(MESSAGE_EVENT, saveSubmissionRepliesFunction)
+}
+
+export type IMessageEvent = MessageEvent & {
+  thread_ts?: string
+  parent_user_id?: string
 }
 
 interface ISaveSubmissionsReplies {
-  message: MessageEvent & { thread_ts?: string; parent_user_id?: string }
-  say: SayFn
+  message: IMessageEvent
   client: WebClient
   logger: Logger
 }
 
-const saveSubmissionsReplies = async ({
+export const saveSubmissionRepliesFunction = async ({
   client,
   logger,
   message,
