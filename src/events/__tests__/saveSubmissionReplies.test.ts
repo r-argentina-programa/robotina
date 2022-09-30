@@ -1,5 +1,5 @@
 import { expect, jest } from '@jest/globals'
-import { TeamJoinEvent, Logger, MessageEvent } from '@slack/bolt'
+import { Logger } from '@slack/bolt'
 import {
   IMessageEvent,
   saveSubmissionRepliesFunction,

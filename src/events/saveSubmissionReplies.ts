@@ -1,7 +1,7 @@
 import { App, Logger, MessageEvent, SayFn, NextFn } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 import dotenv from 'dotenv'
-import { submitReply } from '../API/submitReply'
+import { submitReply } from '../api/submitReply'
 import { IReply } from '../interfaces/IReply'
 dotenv.config()
 
