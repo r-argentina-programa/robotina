@@ -11,7 +11,8 @@
     "start": "tsc-watch --onSuccess \"node ./dist/index.js\"",
     "build": "tsc --build",
     "test": "jest",
-    "test:dev": "jest --watch"
+    "test:dev": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "devDependencies": {
     "@types/jest": "^29.0.3",
