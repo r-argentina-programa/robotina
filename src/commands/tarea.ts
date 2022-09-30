@@ -25,36 +25,42 @@ export const tareaCommandFunction = async ({
 }: Command) => {
   await ack()
 
-  const { user } = await client.users.info({
-    user: command.user_id,
-  })
-  const splittedCommand = splitCommand(command.text)
-
-  if (splittedCommand[0]) {
-    const classNumber = splitChannelName(command.channel_name)
-    const userData = await uploadTarea(
-      user?.id,
-      splittedCommand[0],
-      classNumber
-    )
-
-    await say(
-      `<@${userData.slack_user_id}> Tarea ${classNumber}: ${userData.tarea}`
-    )
-  } else {
-    await respond({
-      text: 'Comando no encontrado 🔎.',
-      blocks: unknownCommandBlock,
+  try {
+    const { user } = await client.users.info({
+      user: command.user_id,
     })
+    const classNumber = splitChannelName(command.channel_name, respond)
+
+    if (command.text && classNumber) {
+      const userData = await uploadTarea(user?.id, command.text, classNumber)
+      await say(
+        `<@${userData.slack_user_id}> Tarea ${classNumber}: ${userData.tarea}`
+      )
+    } else {
+      await respond({
+        text: 'Comando no encontrado 🔎.',
+        blocks: unknownCommandBlock,
+      })
+    }
+  } catch (error) {
+    throw new Error(`${error}`)
   }
 }
 
-function splitCommand(command: string): Array<string> {
-  const splittedCommand = command.split(' ')
-  return splittedCommand
-}
+function splitChannelName(
+  channelName: string,
+  callbackNotValidChannel: Function
+) {
+  const lessonRegEx = new RegExp('clase+-[0-9]')
 
-function splitChannelName(channelName: string) {
-  const splittedChannelName = channelName.split('-')[1]
-  return splittedChannelName
+  if (lessonRegEx.test(channelName)) {
+    const splittedChannelName = channelName.split('-')[1]
+    return splittedChannelName
+  } else {
+    callbackNotValidChannel({
+      text: 'Comando no encontrado 🔎.',
+      blocks: unknownCommandBlock,
+    })
+    throw new Error('Comando no disponible en este canal.')
+  }
 }
