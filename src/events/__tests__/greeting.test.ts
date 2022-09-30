@@ -1,8 +1,8 @@
 import { expect, jest } from '@jest/globals'
 import { TeamJoinEvent, Logger } from '@slack/bolt'
-import { greetUserEvent, greetUserFunction } from './greeting'
+import { greetUserEvent, greetUserFunction } from '../greeting'
 import { WebClient } from '@slack/web-api'
-import { greetingsBlock } from '../blocks/greetingsBlock'
+import { greetingsBlock } from '../../blocks/greetingsBlock'
 import { App } from '@slack/bolt'
 
 jest.mock('@slack/bolt', () => {
