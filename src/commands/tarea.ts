@@ -1,7 +1,7 @@
 import { unknownCommandBlock } from '../blocks/unknownCommandBlock'
 import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
-import { uploadTarea } from '../api/uploadTarea'
+import { uploadTarea } from '../API/uploadTarea'
 
 interface Command {
   command: SlashCommand
