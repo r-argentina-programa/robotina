@@ -32,10 +32,16 @@ export const tareaCommandFunction = async ({
     const classNumber = splitChannelName(command.channel_name, respond)
 
     if (command.text && classNumber) {
-      const userData = await uploadTarea(user?.id, command.text, classNumber)
-      await say(
-        `<@${userData.slack_user_id}> Tarea ${classNumber}: ${userData.tarea}`
+      const userData = await uploadTarea(
+        user?.id,
+        command.text,
+        classNumber,
+        user?.profile?.first_name,
+        user?.profile?.last_name,
+        user?.profile?.email
       )
+      await say(`<@${user?.id}> Tarea ${classNumber}: ${userData.delivery}`)
+      console.log(userData)
     } else {
       await respond({
         text: 'Comando no encontrado 🔎.',

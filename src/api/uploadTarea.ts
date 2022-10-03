@@ -1,15 +1,20 @@
 export const uploadTarea = async (
   userId: string | undefined,
-  tarea: string,
-  classNumber: string
+  delivery: string,
+  classNumber: string,
+  firstName: string | undefined,
+  lastName: string | undefined,
+  email: string | undefined
 ) => {
   const authOUserId = `oauth2|slack|${process.env.SLACK_TEAM_ID}-${userId}`
-  const upload = await Promise.resolve(tarea)
+  const upload = await Promise.resolve(delivery)
 
   return {
-    tarea: upload,
-    user_id: authOUserId,
-    slack_user_id: userId,
-    class_number: classNumber,
+    lessonId: classNumber,
+    userId: authOUserId,
+    firstName,
+    lastName,
+    email,
+    delivery: upload,
   }
 }
