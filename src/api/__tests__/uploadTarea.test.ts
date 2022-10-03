@@ -14,7 +14,7 @@ describe('uploadTarea test', () => {
     const expectedValues = {
       userId: `oauth2|slack|${process.env.SLACK_TEAM_ID}-mockId`,
       delivery: 'mockTarea',
-      classNumber: '12',
+      lessonId: '12',
       firstName: 'john',
       lastName: 'doe',
       email: 'fake@email.com',
