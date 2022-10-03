@@ -3,12 +3,21 @@ import { uploadTarea } from '../uploadTarea'
 
 describe('uploadTarea test', () => {
   it('should return the correct values', async () => {
-    const returnedValues = await uploadTarea('mockId', 'mockTarea', '12')
+    const returnedValues = await uploadTarea(
+      'mockId',
+      'mockTarea',
+      '12',
+      'john',
+      'doe',
+      'fake@email.com'
+    )
     const expectedValues = {
-      tarea: 'mockTarea',
-      user_id: `oauth2|slack|${process.env.SLACK_TEAM_ID}-mockId`,
-      slack_user_id: 'mockId',
-      class_number: '12',
+      userId: `oauth2|slack|${process.env.SLACK_TEAM_ID}-mockId`,
+      delivery: 'mockTarea',
+      classNumber: '12',
+      firstName: 'john',
+      lastName: 'doe',
+      email: 'fake@email.com',
     }
 
     expect(returnedValues).toEqual(expectedValues)
