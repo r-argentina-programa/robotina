@@ -1,4 +1,5 @@
 import { unknownCommandBlock } from '../blocks/unknownCommandBlock'
+import { wrongFormatBlock } from '../blocks/wrongFormatBlock'
 import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 import { uploadTarea } from '../api/uploadTarea'
@@ -25,36 +26,81 @@ export const tareaCommandFunction = async ({
 }: Command) => {
   await ack()
 
-  const { user } = await client.users.info({
-    user: command.user_id,
-  })
-  const splittedCommand = splitCommand(command.text)
-
-  if (splittedCommand[0]) {
-    const classNumber = splitChannelName(command.channel_name)
-    const userData = await uploadTarea(
-      user?.id,
-      splittedCommand[0],
-      classNumber
-    )
-
-    await say(
-      `<@${userData.slack_user_id}> Tarea ${classNumber}: ${userData.tarea}`
-    )
-  } else {
-    await respond({
-      text: 'Comando no encontrado 🔎.',
-      blocks: unknownCommandBlock,
+  try {
+    const { user } = await client.users.info({
+      user: command.user_id,
     })
+    const classNumber = splitChannelName(command.channel_name, respond)
+    const validSubmissionFormat = validateSubmissionDeliveryFormat(
+      Number(classNumber),
+      command.text,
+      respond
+    )
+
+    if (command.text && classNumber && validSubmissionFormat) {
+      const userData = await uploadTarea(
+        user?.id,
+        command.text,
+        classNumber,
+        user?.profile?.first_name,
+        user?.profile?.last_name,
+        user?.profile?.email
+      )
+      await say(`<@${user?.id}> Tarea ${classNumber}: ${userData.delivery}`)
+      console.log(userData)
+    } else {
+      await respond({
+        text: 'Comando no encontrado 🔎.',
+        blocks: unknownCommandBlock,
+      })
+    }
+  } catch (error) {
+    throw new Error(`${error}`)
   }
 }
 
-function splitCommand(command: string): Array<string> {
-  const splittedCommand = command.split(' ')
-  return splittedCommand
+function splitChannelName(
+  channelName: string,
+  callbackNotValidChannel: Function
+) {
+  const lessonRegEx = /clase+-[0-9]/
+
+  if (lessonRegEx.test(channelName)) {
+    const splittedChannelName = channelName.split('-')[1]
+    return splittedChannelName
+  } else {
+    callbackNotValidChannel({
+      text: 'Comando no encontrado 🔎.',
+      blocks: unknownCommandBlock,
+    })
+    throw new Error('Comando no disponible en este canal.')
+  }
 }
 
-function splitChannelName(channelName: string) {
-  const splittedChannelName = channelName.split('-')[1]
-  return splittedChannelName
+function validateSubmissionDeliveryFormat(
+  classNumber: number,
+  delivery: string,
+  callbackNotValidFormat: Function
+) {
+  const FIRST_LINK_FORMAT_LESSON_NUMBER = 5
+  const codeFormatRegex = /^```([a-zA-Z])*?\n*?([\s\S]*?)```$/
+  const linkFormatRegex = /github\.com\/[a-zA-Z]/
+
+  if (
+    classNumber < FIRST_LINK_FORMAT_LESSON_NUMBER &&
+    codeFormatRegex.test(delivery)
+  ) {
+    return true
+  } else if (
+    classNumber >= FIRST_LINK_FORMAT_LESSON_NUMBER &&
+    linkFormatRegex.test(delivery)
+  ) {
+    return true
+  } else {
+    callbackNotValidFormat({
+      text: 'Formato de la tarea inválido',
+      blocks: wrongFormatBlock,
+    })
+    throw new Error('El formato de la tarea no es válido.')
+  }
 }

@@ -13,7 +13,7 @@ export const unknownCommandBlock = [
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: 'Perdón, parece que el comando que usaste no existe.',
+      text: 'Perdón, parece que el comando que usaste no está en este canal o el valor que pasaste no es válido.',
     },
   },
 ]

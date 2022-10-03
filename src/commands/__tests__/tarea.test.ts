@@ -22,7 +22,7 @@ let client: WebClient
 
 beforeEach(() => {
   command = {
-    text: 'tarea',
+    text: 'https://github.com/mock/repo',
     user_id: 'mockId',
     channel_name: 'clase-12',
   } as unknown as SlashCommand
@@ -32,7 +32,7 @@ beforeEach(() => {
   client = webClientTest
 })
 
-describe('/robotina tests', () => {
+describe('/tarea tests', () => {
   it('should run well when the right parameter are passed', async () => {
     await tareaCommandFunction({ command, ack, say, respond, client })
 
