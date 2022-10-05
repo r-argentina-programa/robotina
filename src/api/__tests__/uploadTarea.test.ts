@@ -40,17 +40,8 @@ describe('uploadTarea test', () => {
       'doe',
       'fake@email.com'
     )
-    const expectedValues = {
-      userId: `oauth2|slack|${process.env.SLACK_TEAM_ID}-mockId`,
-      delivery: 'mockTarea',
-      lessonId: '12',
-      firstName: 'john',
-      lastName: 'doe',
-      email: 'fake@email.com',
-      data: expectedAxiosData,
-    }
 
-    expect(returnedValues).toEqual(expectedValues)
+    expect(returnedValues).toEqual(expectedAxiosData)
   })
 
   it('should throw error when gets bad response', async () => {

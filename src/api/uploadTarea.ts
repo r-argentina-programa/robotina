@@ -21,13 +21,6 @@ export const uploadTarea = async (
     }
   )
 
-  return {
-    lessonId: classNumber,
-    userId: authOUserId,
-    firstName,
-    lastName,
-    email,
-    delivery,
-    data,
-  }
+  console.log(data)
+  return data
 }

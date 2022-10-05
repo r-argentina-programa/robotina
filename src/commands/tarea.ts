@@ -46,7 +46,7 @@ export const tareaCommandFunction = async ({
         user?.profile?.last_name,
         user?.profile?.email
       )
-      await say(`<@${user?.id}> Tarea ${classNumber}: ${userData.delivery}`)
+      await say(`<@${user?.id}> Tarea ${classNumber}: ${command.text}`)
     } else {
       await respond({
         text: 'Comando no encontrado 🔎.',
