@@ -1,4 +1,5 @@
 import { expect, jest, test } from '@jest/globals'
+import axios from 'axios'
 import { AckFn, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api'
 import { tareaCommandFunction } from '../tarea'
@@ -11,6 +12,9 @@ jest.mock('@slack/web-api', () => {
   }
   return { WebClient: jest.fn(() => properties) }
 })
+
+jest.mock('axios')
+const mockedAxios = axios as jest.Mocked<typeof axios>
 
 const webClientTest = new WebClient() as jest.Mocked<WebClient>
 
@@ -34,6 +38,19 @@ beforeEach(() => {
 
 describe('/tarea tests', () => {
   it('should run well when the right parameter are passed', async () => {
+    mockedAxios.post.mockResolvedValueOnce({
+      data: {
+        taskId: 12,
+        studentId: 1,
+        completed: false,
+        viewer: null,
+        delivery: 'mockTarea',
+        deletedAt: null,
+        id: 1,
+        createdAt: '2022-10-04T12:36:57.000Z',
+        updatedAt: '2022-10-04T12:36:57.000Z',
+      },
+    })
     await tareaCommandFunction({ command, ack, say, respond, client })
 
     expect(client.users.info).toHaveBeenCalledTimes(1)
