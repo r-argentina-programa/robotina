@@ -12,10 +12,9 @@ jest.mock('@slack/web-api', () => {
   }
   return { WebClient: jest.fn(() => properties) }
 })
-
 jest.mock('axios')
-const mockedAxios = axios as jest.Mocked<typeof axios>
 
+const mockedAxios = axios as jest.Mocked<typeof axios>
 const webClientTest = new WebClient() as jest.Mocked<WebClient>
 
 let command: SlashCommand
@@ -38,17 +37,26 @@ beforeEach(() => {
 
 describe('/tarea tests', () => {
   it('should run well when the right parameter are passed', async () => {
-    mockedAxios.post.mockResolvedValueOnce({
+    mockedAxios.get.mockResolvedValue({
+      id: 11,
+      createdAt: '2022-10-06T11:33:58.000Z',
+      updatedAt: '2022-10-06T11:33:58.000Z',
+      deletedAt: null,
+      username: null,
+      externalId: 'oauth2|slack|MOCK1234567-MOCK1234567',
+      roles: ['Student'],
+    })
+    mockedAxios.post.mockResolvedValue({
       data: {
-        taskId: 12,
-        studentId: 1,
+        taskId: 11,
+        studentId: 11,
         completed: false,
         viewer: null,
-        delivery: 'mockTarea',
+        delivery: 'https://github.com/r-argentina-programa/robotina',
         deletedAt: null,
-        id: 1,
-        createdAt: '2022-10-04T12:36:57.000Z',
-        updatedAt: '2022-10-04T12:36:57.000Z',
+        id: 20,
+        createdAt: '2022-10-06T11:33:58.000Z',
+        updatedAt: '2022-10-06T11:33:58.000Z',
       },
     })
     await tareaCommandFunction({ command, ack, say, respond, client })

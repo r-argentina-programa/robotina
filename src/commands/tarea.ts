@@ -38,7 +38,7 @@ export const tareaCommandFunction = async ({
     )
 
     if (command.text && classNumber && validSubmissionFormat) {
-      const userData = await uploadTarea(
+      await uploadTarea(
         user?.id,
         command.text,
         classNumber,
