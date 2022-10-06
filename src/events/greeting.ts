@@ -13,7 +13,7 @@ export const greetUserEvent = (app: App) => {
   app.event(GREET_USER_EVENT, greetUserFunction)
 }
 
-const greetUserFunction = async ({
+export const greetUserFunction = async ({
   client,
   logger,
   event,
@@ -24,6 +24,9 @@ const greetUserFunction = async ({
       users: user,
       return_im: true,
     })
+    if (!openUserChat.ok) {
+      throw new Error('Channel not found')
+    }
     const channelId = openUserChat.channel?.id as string
     await client.chat.postMessage({
       channel: channelId,
