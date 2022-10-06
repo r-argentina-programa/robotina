@@ -38,7 +38,7 @@ export const tareaCommandFunction = async ({
     )
 
     if (command.text && classNumber && validSubmissionFormat) {
-      const userData = await uploadTarea(
+      await uploadTarea(
         user?.id,
         command.text,
         classNumber,
@@ -46,8 +46,7 @@ export const tareaCommandFunction = async ({
         user?.profile?.last_name,
         user?.profile?.email
       )
-      await say(`<@${user?.id}> Tarea ${classNumber}: ${userData.delivery}`)
-      console.log(userData)
+      await say(`<@${user?.id}> Tarea ${classNumber}: ${command.text}`)
     } else {
       await respond({
         text: 'Comando no encontrado 🔎.',
