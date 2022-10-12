@@ -1,8 +1,8 @@
-import { Axios } from 'axios'
+import axios from 'axios'
 
-export const marketplaceApi = new Axios({
+export const marketplaceApi = axios.create({
   baseURL: process.env.API_URL,
   headers: {
-    authorization: `bearer + ${process.env.BOT_AUTHORIZATION_BEARER_TOKEN}`,
+    authorization: `Bearer ${process.env.BOT_AUTHORIZATION_BEARER_TOKEN}`,
   },
 })
