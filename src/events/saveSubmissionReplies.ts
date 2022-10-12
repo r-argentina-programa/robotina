@@ -27,6 +27,8 @@ export const saveSubmissionRepliesFunction = async ({
   message,
 }: ISaveSubmissionsReplies) => {
   try {
+    const THREAD_TS = '2312323213'
+
     if (message.thread_ts && message.parent_user_id === process.env.BOT_ID) {
       //slack uses timestamps (ts) as id for messages
       const thread = await client.conversations.history({
@@ -48,10 +50,10 @@ export const saveSubmissionRepliesFunction = async ({
           const reply: IReply = {
             authorId: userId,
             //@ts-ignore message.text exist in the api
-            message: message.text,
-            threadId: message.thread_ts,
+            text: message.text,
+            threadTS: THREAD_TS,
             timestamp: message.ts,
-            user: user!.profile!.display_name,
+            username: user!.profile!.display_name,
           }
           const replyResponse = await submitReply(reply)
 
