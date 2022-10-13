@@ -8,6 +8,14 @@ import {
 import { WebClient } from '@slack/web-api'
 import { App } from '@slack/bolt'
 
+jest.mock('../../api/submitReply', () => {
+  return {
+    submitReply: jest
+      .fn()
+      .mockImplementation(() => Promise.resolve({ success: 'true' })),
+  }
+})
+
 jest.mock('@slack/bolt', () => {
   const properties = {
     event: jest.fn(),
