@@ -1,11 +1,40 @@
 import { expect, jest, test } from '@jest/globals'
-import axios from 'axios'
-import { uploadTarea } from '../uploadTarea'
+import { IUploadTarea, uploadTarea } from '../uploadTarea'
+import { sendSubmission } from '../sendSubmission'
+import { sendSubmissionAndUserCreation } from '../sendSubmissionAndUserCreation'
+import { verifyIfUserExists } from '../verifyIfUserExists'
+jest.mock('../sendSubmission', () => {
+  return {
+    sendSubmission: jest.fn(),
+  }
+})
 
-jest.mock('axios')
-const mockedAxios = axios as jest.Mocked<typeof axios>
+jest.mock('../sendSubmissionAndUserCreation', () => {
+  return {
+    sendSubmissionAndUserCreation: jest.fn(),
+  }
+})
 
-const expectedAxiosData = {
+jest.mock('../verifyIfUserExists', () => {
+  return {
+    verifyIfUserExists: jest.fn(),
+  }
+})
+
+const mockedVerifyIfUserExists = verifyIfUserExists as jest.Mocked<
+  typeof verifyIfUserExists
+>
+
+const mockedSendSubmission = sendSubmission as jest.Mocked<
+  typeof sendSubmission
+>
+
+const mockedSendSubmissionAndUserCreation =
+  sendSubmissionAndUserCreation as jest.Mocked<
+    typeof sendSubmissionAndUserCreation
+  >
+
+const EXPECTED_AXIOS_DATA = {
   taskId: 11,
   studentId: 11,
   completed: false,
@@ -18,55 +47,50 @@ const expectedAxiosData = {
 }
 
 describe('uploadTarea test', () => {
-  it('should return the correct values with good response', async () => {
-    mockedAxios.get.mockResolvedValueOnce({
-      id: 11,
+  beforeEach(() => {
+    jest.resetAllMocks()
+  })
+  const MOCKED_TAREA: IUploadTarea = {
+    userId: 'mockId',
+    delivery: 'mockTarea',
+    classNumber: '12',
+    firstName: 'john',
+    lastName: 'doe',
+    email: 'fake@email.com',
+  }
+
+  it('should just send submission + user id ', async () => {
+    mockedVerifyIfUserExists.mockResolvedValueOnce(true)
+    await uploadTarea(MOCKED_TAREA)
+    expect(mockedSendSubmission).toHaveBeenCalledTimes(1)
+  })
+
+  it("should send submission and create user if it doesn't exist ", async () => {
+    mockedVerifyIfUserExists.mockResolvedValueOnce(false)
+    mockedSendSubmissionAndUserCreation.mockResolvedValueOnce({
+      taskId: 11,
+      studentId: 11,
+      completed: false,
+      viewer: null,
+      delivery: 'https://github.com/r-argentina-programa/robotina',
+      deletedAt: null,
+      id: 20,
       createdAt: '2022-10-06T11:33:58.000Z',
       updatedAt: '2022-10-06T11:33:58.000Z',
-      deletedAt: null,
-      username: null,
-      externalId: 'oauth2|slack|MOCK1234567-MOCK1234567',
-      roles: ['Student'],
     })
-    mockedAxios.post.mockResolvedValueOnce({
-      data: {
-        taskId: 11,
-        studentId: 11,
-        completed: false,
-        viewer: null,
-        delivery: 'https://github.com/r-argentina-programa/robotina',
-        deletedAt: null,
-        id: 20,
-        createdAt: '2022-10-06T11:33:58.000Z',
-        updatedAt: '2022-10-06T11:33:58.000Z',
-      },
-    })
-    const returnedValues = await uploadTarea(
-      'mockId',
-      'mockTarea',
-      '12',
-      'john',
-      'doe',
-      'fake@email.com'
-    )
-    expect(returnedValues).toEqual(expectedAxiosData)
+
+    const returnedValues = await uploadTarea(MOCKED_TAREA)
+    expect(mockedSendSubmissionAndUserCreation).toHaveBeenCalledTimes(1)
+    expect(returnedValues).toEqual(EXPECTED_AXIOS_DATA)
   })
 
   it('should throw error when gets bad response', async () => {
-    mockedAxios.get.mockRejectedValueOnce(() => Promise.reject(false))
-
-    mockedAxios.post.mockImplementationOnce(() => Promise.reject(new Error()))
-    mockedAxios.get.mockResolvedValueOnce(true)
+    const ERROR = new Error('test error')
+    mockedVerifyIfUserExists.mockImplementationOnce(() => Promise.reject(ERROR))
+    mockedSendSubmissionAndUserCreation.mockRejectedValueOnce(ERROR)
 
     try {
-      await uploadTarea(
-        'mockId',
-        'mockTarea',
-        '12',
-        'john',
-        'doe',
-        'fake@email.com'
-      )
+      await uploadTarea(MOCKED_TAREA)
     } catch (err) {
       expect(err).toEqual(Error())
     }

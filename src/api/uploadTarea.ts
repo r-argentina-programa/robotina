@@ -1,9 +1,9 @@
-import axios from 'axios'
-import { marketplaceApi } from '.'
 import { IFullSubmission } from '../interfaces/IFullSubmission'
-import { ISubmission } from '../interfaces/ISubmission'
+import { sendSubmission } from './sendSubmission'
+import { sendSubmissionAndUserCreation } from './sendSubmissionAndUserCreation'
+import { verifyIfUserExists } from './verifyIfUserExists'
 
-interface IUploadTarea {
+export interface IUploadTarea {
   userId: string | undefined
   delivery: string
   classNumber: string
@@ -22,7 +22,8 @@ export const uploadTarea = async ({
 }: IUploadTarea) => {
   const authOUserId = `oauth2|slack|${process.env.SLACK_TEAM_ID}-${userId}`
   try {
-    const user = await getExistentUser(authOUserId)
+    const user = await verifyIfUserExists(authOUserId)
+    console.log(user)
     if (user) {
       const submission = {
         lessonId: Number(classNumber),
@@ -38,29 +39,9 @@ export const uploadTarea = async ({
         email,
         delivery,
       }
-      return sendUserAndSubmission(fullSubmission)
+      return sendSubmissionAndUserCreation(fullSubmission)
     }
   } catch (error) {
     throw new Error()
   }
-}
-
-const getExistentUser = async (authUserId: string) => {
-  const { data } = await axios.get(
-    `${process.env.API_URL}/api/user/id/${authUserId}`
-  )
-  return data
-}
-
-const sendSubmission = async (submission: ISubmission) => {
-  const { data } = await marketplaceApi.post('/api/bot/submission', submission)
-  return data
-}
-
-const sendUserAndSubmission = async (submission: IFullSubmission) => {
-  const { data } = await marketplaceApi.post(
-    '/api/bot/profile-submission',
-    submission
-  )
-  return data
 }

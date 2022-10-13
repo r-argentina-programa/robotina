@@ -3,6 +3,7 @@ import axios from 'axios'
 import { AckFn, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api'
 import { tareaCommandFunction } from '../tarea'
+import { uploadTarea } from '../../api/uploadTarea'
 
 jest.mock('@slack/web-api', () => {
   const properties = {
@@ -12,9 +13,14 @@ jest.mock('@slack/web-api', () => {
   }
   return { WebClient: jest.fn(() => properties) }
 })
-jest.mock('axios')
 
-const mockedAxios = axios as jest.Mocked<typeof axios>
+jest.mock('../../api/uploadTarea', () => {
+  return {
+    uploadTarea: jest.fn(),
+  }
+})
+
+const mockedUploadTarea = uploadTarea as jest.Mocked<typeof uploadTarea>
 const webClientTest = new WebClient() as jest.Mocked<WebClient>
 
 let command: SlashCommand
@@ -35,34 +41,13 @@ beforeEach(() => {
   client = webClientTest
 })
 
-describe('/tarea tests', () => {
-  it('should run well when the right parameter are passed', async () => {
-    mockedAxios.get.mockResolvedValue({
-      id: 11,
-      createdAt: '2022-10-06T11:33:58.000Z',
-      updatedAt: '2022-10-06T11:33:58.000Z',
-      deletedAt: null,
-      username: null,
-      externalId: 'oauth2|slack|MOCK1234567-MOCK1234567',
-      roles: ['Student'],
-    })
-    mockedAxios.post.mockResolvedValue({
-      data: {
-        taskId: 11,
-        studentId: 11,
-        completed: false,
-        viewer: null,
-        delivery: 'https://github.com/r-argentina-programa/robotina',
-        deletedAt: null,
-        id: 20,
-        createdAt: '2022-10-06T11:33:58.000Z',
-        updatedAt: '2022-10-06T11:33:58.000Z',
-      },
-    })
+describe('tareaCommandFunctiontarea', () => {
+  it('should send a submittion and send a message in slack chat', async () => {
     await tareaCommandFunction({ command, ack, say, respond, client })
 
     expect(client.users.info).toHaveBeenCalledTimes(1)
     expect(say).toHaveBeenCalledTimes(1)
-    expect(respond).toBeCalledTimes(0)
   })
+
+  
 })

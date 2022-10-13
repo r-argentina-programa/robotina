@@ -30,6 +30,9 @@ export const tareaCommandFunction = async ({
     const { user } = await client.users.info({
       user: command.user_id,
     })
+    if (!user) {
+      throw new Error('User not found')
+    }
     const classNumber = splitChannelName(command.channel_name, respond)
     const validSubmissionFormat = validateSubmissionDeliveryFormat(
       Number(classNumber),
@@ -37,16 +40,16 @@ export const tareaCommandFunction = async ({
       respond
     )
 
-    if (command.text && classNumber && validSubmissionFormat) {
-      await uploadTarea(
-        user?.id,
-        command.text,
+    if (command.text && validSubmissionFormat) {
+      await uploadTarea({
         classNumber,
-        user?.profile?.first_name,
-        user?.profile?.last_name,
-        user?.profile?.email
-      )
-      await say(`<@${user?.id}> Tarea ${classNumber}: ${command.text}`)
+        userId: user.id,
+        delivery: command.text,
+        firstName: user.profile?.first_name,
+        lastName: user.profile?.last_name,
+        email: user.profile?.email,
+      })
+      await say(`<@${user.id}> Tarea ${classNumber}: ${command.text}`)
     } else {
       await respond({
         text: 'Comando no encontrado 🔎.',
@@ -54,7 +57,7 @@ export const tareaCommandFunction = async ({
       })
     }
   } catch (error) {
-    throw new Error(`${error}`)
+    throw new Error('hubo un error')
   }
 }
 
