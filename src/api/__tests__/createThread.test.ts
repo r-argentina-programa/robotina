@@ -1,14 +1,12 @@
-import { expect, jest, test } from '@jest/globals'
+import { expect, jest } from '@jest/globals'
 import { createThread, ICreateThread } from '../createThread'
 import { marketplaceApi } from '../index'
 
-jest.mock('../index', () => {
-  return {
-    marketplaceApi: {
-      post: jest.fn(),
-    },
-  }
-})
+jest.mock('../index', () => ({
+  marketplaceApi: {
+    post: jest.fn(),
+  },
+}))
 
 const mockedMarketplaceApi = marketplaceApi as jest.MockedFunction<
   typeof marketplaceApi

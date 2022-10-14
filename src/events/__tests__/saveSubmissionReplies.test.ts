@@ -1,20 +1,17 @@
 import { expect, jest } from '@jest/globals'
-import { Logger } from '@slack/bolt'
+import { Logger, App } from '@slack/bolt'
+import { WebClient } from '@slack/web-api'
 import {
   IMessageEvent,
   saveSubmissionRepliesFunction,
   saveSubmissionRepliesEvent,
 } from '../saveSubmissionReplies'
-import { WebClient } from '@slack/web-api'
-import { App } from '@slack/bolt'
 
-jest.mock('../../api/submitReply', () => {
-  return {
-    submitReply: jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ success: 'true' })),
-  }
-})
+jest.mock('../../api/submitReply', () => ({
+  submitReply: jest
+    .fn()
+    .mockImplementation(() => Promise.resolve({ success: 'true' })),
+}))
 
 jest.mock('@slack/bolt', () => {
   const properties = {
@@ -57,7 +54,7 @@ describe('saveSubmissionRepliesFunction', () => {
       thread_ts: 'THREAD_TS_TEST',
       channel: 'CHANNEL_TEST',
       parent_user_id: 'PARENT_USER_ID_TEST',
-      //@ts-ignore message.user exists in the api
+      // @ts-ignore message.user exists in the api
       user: 'USER_ID_TEST',
     } as unknown as IMessageEvent
 
@@ -102,7 +99,7 @@ describe('saveSubmissionRepliesFunction', () => {
       inclusive: true,
     })
     expect(client.users.info).toHaveBeenCalledTimes(1)
-    //@ts-ignore message.user exists in api
+    // @ts-ignore message.user exists in api
     expect(client.users.info).toHaveBeenCalledWith({ user: message.user })
     expect(logger.error).toHaveBeenCalledTimes(0)
   })

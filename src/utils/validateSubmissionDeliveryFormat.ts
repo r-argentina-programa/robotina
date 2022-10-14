@@ -15,12 +15,12 @@ export const validateSubmissionDeliveryFormat = ({
     codeFormatRegex.test(delivery)
   ) {
     return true
-  } else if (
+  }
+  if (
     classNumber >= FIRST_LINK_FORMAT_LESSON_NUMBER &&
     linkFormatRegex.test(delivery)
   ) {
     return true
-  } else {
-    return false
   }
+  return false
 }

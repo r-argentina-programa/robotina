@@ -1,25 +1,20 @@
-import { expect, jest, test } from '@jest/globals'
+import { expect, jest } from '@jest/globals'
 import { IUploadTarea, uploadTarea } from '../uploadTarea'
 import { sendSubmission } from '../sendSubmission'
 import { sendSubmissionAndUserCreation } from '../sendSubmissionAndUserCreation'
 import { verifyIfUserExists } from '../verifyIfUserExists'
-jest.mock('../sendSubmission', () => {
-  return {
-    sendSubmission: jest.fn(),
-  }
-})
 
-jest.mock('../sendSubmissionAndUserCreation', () => {
-  return {
-    sendSubmissionAndUserCreation: jest.fn(),
-  }
-})
+jest.mock('../sendSubmission', () => ({
+  sendSubmission: jest.fn(),
+}))
 
-jest.mock('../verifyIfUserExists', () => {
-  return {
-    verifyIfUserExists: jest.fn(),
-  }
-})
+jest.mock('../sendSubmissionAndUserCreation', () => ({
+  sendSubmissionAndUserCreation: jest.fn(),
+}))
+
+jest.mock('../verifyIfUserExists', () => ({
+  verifyIfUserExists: jest.fn(),
+}))
 
 const mockedVerifyIfUserExists = verifyIfUserExists as jest.Mocked<
   typeof verifyIfUserExists
@@ -86,7 +81,7 @@ describe('uploadTarea test', () => {
 
   it('should throw error when gets bad response', async () => {
     const ERROR = new Error('test error')
-    mockedVerifyIfUserExists.mockImplementationOnce(() => Promise.reject(true))
+    mockedVerifyIfUserExists.mockResolvedValue({ data: true })
     mockedSendSubmissionAndUserCreation.mockRejectedValueOnce(ERROR)
 
     try {
