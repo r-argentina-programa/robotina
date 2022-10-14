@@ -15,8 +15,8 @@ const mockedMarketplaceApi = marketplaceApi as jest.MockedFunction<
   typeof marketplaceApi
 >
 
-describe('createThread', () => {
-  it('should submit a new thread to marketplace api', async () => {
+describe('sendSubmission', () => {
+  it('should send a submission to marketplace api', async () => {
     const API_URL = '/api/bot/submission'
     const newSubmission: ISubmission = {
       delivery: 'new-submission-delivery',
