@@ -5,6 +5,7 @@ import { WebClient } from '@slack/web-api/dist/WebClient'
 import { uploadTarea } from '../api/uploadTarea'
 import { createThread, ICreateThread } from '../api/createThread'
 import { validateSubmissionDeliveryFormat } from '../utils/validateSubmissionDeliveryFormat'
+import { validateChannelName } from '../utils/validateChannelName'
 
 interface Command {
   command: SlashCommand
@@ -27,7 +28,6 @@ export const tareaCommandFunction = async ({
   client,
 }: Command) => {
   await ack()
-
   try {
     const { user } = await client.users.info({
       user: command.user_id,
@@ -35,7 +35,14 @@ export const tareaCommandFunction = async ({
     if (!user) {
       throw new Error('User not found')
     }
-    const classNumber = splitChannelName(command.channel_name, respond)
+    const classNumber = validateChannelName(command.channel_name)
+    if (!classNumber) {
+      return await respond({
+        text: 'Comando no disponible en este canal.',
+        blocks: unknownCommandBlock,
+      })
+    }
+
     const validSubmissionFormat = validateSubmissionDeliveryFormat({
       classNumber: Number(classNumber),
       delivery: command.text,
@@ -60,7 +67,7 @@ export const tareaCommandFunction = async ({
         `<@${user.id}> Tarea ${classNumber}: ${command.text}`
       )
       const thread: ICreateThread = {
-        authorId: 'test-author-id',
+        authorId: <string>process.env.BOT_ID,
         studentId: tarea.fkStudentId,
         text: message.message?.text as string,
         timestamp: message.ts as string,
@@ -70,23 +77,5 @@ export const tareaCommandFunction = async ({
     }
   } catch (error) {
     throw new Error('hubo un error')
-  }
-}
-
-function splitChannelName(
-  channelName: string,
-  callbackNotValidChannel: Function
-) {
-  const lessonRegEx = /clase+-[0-9]/
-
-  if (lessonRegEx.test(channelName)) {
-    const splittedChannelName = channelName.split('-')[1]
-    return splittedChannelName
-  } else {
-    callbackNotValidChannel({
-      text: 'Comando no encontrado 🔎.',
-      blocks: unknownCommandBlock,
-    })
-    throw new Error('Comando no disponible en este canal.')
   }
 }
