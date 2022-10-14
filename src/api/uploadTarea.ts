@@ -23,17 +23,18 @@ export const uploadTarea = async ({
   const authOUserId = `oauth2|slack|${process.env.SLACK_TEAM_ID}-${userId}`
   try {
     const user = await verifyIfUserExists(authOUserId)
-    console.log(user)
     if (user) {
       const submission = {
         lessonId: Number(classNumber),
         userExternalId: authOUserId,
         delivery,
       }
+
       return sendSubmission(submission)
     } else {
       const fullSubmission: IFullSubmission = {
         lessonId: Number(classNumber),
+        userExternalId: authOUserId,
         firstName,
         lastName,
         email,
@@ -42,6 +43,8 @@ export const uploadTarea = async ({
       return sendSubmissionAndUserCreation(fullSubmission)
     }
   } catch (error) {
+    //@ts-ignore
+    console.log(error.response)
     throw new Error()
   }
 }

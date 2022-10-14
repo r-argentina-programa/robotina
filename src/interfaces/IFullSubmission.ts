@@ -1,6 +1,6 @@
 export interface IFullSubmission {
   lessonId: number
-  userExternalId?: string
+  userExternalId: string
   firstName?: string
   lastName?: string
   email?: string

@@ -3,6 +3,7 @@ import { wrongFormatBlock } from '../blocks/wrongFormatBlock'
 import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 import { uploadTarea } from '../api/uploadTarea'
+import { createThread, ICreateThread } from '../api/createThread'
 
 interface Command {
   command: SlashCommand
@@ -41,7 +42,7 @@ export const tareaCommandFunction = async ({
     )
 
     if (command.text && validSubmissionFormat) {
-      await uploadTarea({
+      const tarea = await uploadTarea({
         classNumber,
         userId: user.id,
         delivery: command.text,
@@ -49,7 +50,17 @@ export const tareaCommandFunction = async ({
         lastName: user.profile?.last_name,
         email: user.profile?.email,
       })
-      await say(`<@${user.id}> Tarea ${classNumber}: ${command.text}`)
+      const message = await say(
+        `<@${user.id}> Tarea ${classNumber}: ${command.text}`
+      )
+      const thread: ICreateThread = {
+        authorId: 'test-author-id',
+        studentId: tarea.fkStudentId,
+        text: message.message?.text as string,
+        timestamp: message.ts as string,
+        taskId: tarea.fkTaskId,
+      }
+      await createThread(thread)
     } else {
       await respond({
         text: 'Comando no encontrado 🔎.',
