@@ -1,50 +1,50 @@
-import axios from 'axios'
+import { IFullSubmission } from '../interfaces/IFullSubmission'
+import { createAuth0Id } from '../utils/createAuth0Id'
+import { sendSubmission } from './sendSubmission'
+import { sendSubmissionAndUserCreation } from './sendSubmissionAndUserCreation'
+import { verifyIfUserExists } from './verifyIfUserExists'
 
-export const uploadTarea = async (
-  userId: string | undefined,
-  delivery: string,
-  classNumber: string,
-  firstName: string | undefined,
-  lastName: string | undefined,
+export interface IUploadTarea {
+  userId: string
+  delivery: string
+  classNumber: string
+  firstName: string | undefined
+  lastName: string | undefined
   email: string | undefined
-) => {
-  const authOUserId = `oauth2|slack|${process.env.SLACK_TEAM_ID}-${userId}`
-
-  try {
-    if (await getExistentUser(authOUserId)) {
-      const { data } = await axios.post(
-        `${process.env.API_URL}/api/submission/bot`,
-        {
-          lessonId: classNumber,
-          userId: authOUserId,
-          delivery,
-        }
-      )
-
-      return data
-    } else {
-      const { data } = await axios.post(
-        `${process.env.API_URL}/api/submission/bot`,
-        {
-          lessonId: classNumber,
-          userId: authOUserId,
-          firstName,
-          lastName,
-          email,
-          delivery,
-        }
-      )
-
-      return data
-    }
-  } catch (error) {
-    throw new Error()
-  }
 }
 
-const getExistentUser = async (authUserId: string) => {
-  const { data } = await axios.get(
-    `${process.env.API_URL}/api/user/id/${authUserId}`
-  )
-  return data
+export const uploadTarea = async ({
+  classNumber,
+  delivery,
+  email,
+  firstName,
+  lastName,
+  userId,
+}: IUploadTarea) => {
+  const authOUserId = createAuth0Id(userId)
+  try {
+    const user = await verifyIfUserExists(authOUserId)
+    if (user) {
+      const submission = {
+        lessonId: Number(classNumber),
+        userExternalId: authOUserId,
+        delivery,
+      }
+      return sendSubmission(submission)
+    } else {
+      const fullSubmission: IFullSubmission = {
+        lessonId: Number(classNumber),
+        userExternalId: authOUserId,
+        firstName,
+        lastName,
+        email,
+        delivery,
+      }
+      return sendSubmissionAndUserCreation(fullSubmission)
+    }
+  } catch (error) {
+    //@ts-ignore
+    console.log(error.response)
+    throw new Error()
+  }
 }
