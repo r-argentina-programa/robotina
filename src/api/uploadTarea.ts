@@ -1,10 +1,11 @@
 import { IFullSubmission } from '../interfaces/IFullSubmission'
+import { createAuth0Id } from '../utils/createAuth0Id'
 import { sendSubmission } from './sendSubmission'
 import { sendSubmissionAndUserCreation } from './sendSubmissionAndUserCreation'
 import { verifyIfUserExists } from './verifyIfUserExists'
 
 export interface IUploadTarea {
-  userId: string | undefined
+  userId: string
   delivery: string
   classNumber: string
   firstName: string | undefined
@@ -20,7 +21,7 @@ export const uploadTarea = async ({
   lastName,
   userId,
 }: IUploadTarea) => {
-  const authOUserId = `oauth2|slack|${process.env.SLACK_TEAM_ID}-${userId}`
+  const authOUserId = createAuth0Id(userId)
   try {
     const user = await verifyIfUserExists(authOUserId)
     if (user) {
@@ -29,7 +30,6 @@ export const uploadTarea = async ({
         userExternalId: authOUserId,
         delivery,
       }
-
       return sendSubmission(submission)
     } else {
       const fullSubmission: IFullSubmission = {

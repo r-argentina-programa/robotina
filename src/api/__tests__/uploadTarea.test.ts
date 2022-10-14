@@ -86,7 +86,7 @@ describe('uploadTarea test', () => {
 
   it('should throw error when gets bad response', async () => {
     const ERROR = new Error('test error')
-    mockedVerifyIfUserExists.mockImplementationOnce(() => Promise.reject(ERROR))
+    mockedVerifyIfUserExists.mockImplementationOnce(() => Promise.reject(true))
     mockedSendSubmissionAndUserCreation.mockRejectedValueOnce(ERROR)
 
     try {
