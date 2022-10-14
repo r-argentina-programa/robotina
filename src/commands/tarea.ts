@@ -4,6 +4,7 @@ import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 import { uploadTarea } from '../api/uploadTarea'
 import { createThread, ICreateThread } from '../api/createThread'
+import { validateSubmissionDeliveryFormat } from '../utils/validateSubmissionDeliveryFormat'
 
 interface Command {
   command: SlashCommand
@@ -35,11 +36,16 @@ export const tareaCommandFunction = async ({
       throw new Error('User not found')
     }
     const classNumber = splitChannelName(command.channel_name, respond)
-    const validSubmissionFormat = validateSubmissionDeliveryFormat(
-      Number(classNumber),
-      command.text,
-      respond
-    )
+    const validSubmissionFormat = validateSubmissionDeliveryFormat({
+      classNumber: Number(classNumber),
+      delivery: command.text,
+    })
+    if (!validSubmissionFormat) {
+      return await respond({
+        text: 'Formato de la tarea inválido',
+        blocks: wrongFormatBlock,
+      })
+    }
 
     if (command.text && validSubmissionFormat) {
       const tarea = await uploadTarea({
@@ -61,11 +67,6 @@ export const tareaCommandFunction = async ({
         taskId: tarea.fkTaskId,
       }
       await createThread(thread)
-    } else {
-      await respond({
-        text: 'Comando no encontrado 🔎.',
-        blocks: unknownCommandBlock,
-      })
     }
   } catch (error) {
     throw new Error('hubo un error')
@@ -87,33 +88,5 @@ function splitChannelName(
       blocks: unknownCommandBlock,
     })
     throw new Error('Comando no disponible en este canal.')
-  }
-}
-
-function validateSubmissionDeliveryFormat(
-  classNumber: number,
-  delivery: string,
-  callbackNotValidFormat: Function
-) {
-  const FIRST_LINK_FORMAT_LESSON_NUMBER = 5
-  const codeFormatRegex = /^```([a-zA-Z])*?\n*?([\s\S]*?)```$/
-  const linkFormatRegex = /github\.com\/[a-zA-Z]/
-
-  if (
-    classNumber < FIRST_LINK_FORMAT_LESSON_NUMBER &&
-    codeFormatRegex.test(delivery)
-  ) {
-    return true
-  } else if (
-    classNumber >= FIRST_LINK_FORMAT_LESSON_NUMBER &&
-    linkFormatRegex.test(delivery)
-  ) {
-    return true
-  } else {
-    callbackNotValidFormat({
-      text: 'Formato de la tarea inválido',
-      blocks: wrongFormatBlock,
-    })
-    throw new Error('El formato de la tarea no es válido.')
   }
 }
