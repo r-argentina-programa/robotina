@@ -1,10 +1,11 @@
-import { App } from '@slack/bolt'
+/* eslint-disable import/first */
+// eslint-disable-next-line import/newline-after-import
 import * as dotenv from 'dotenv'
+dotenv.config()
+import { App } from '@slack/bolt'
 import { tareaSlashCommand } from './commands/tarea'
 import { greetUserEvent } from './events/greeting'
 import { saveSubmissionRepliesEvent } from './events/saveSubmissionReplies'
-
-dotenv.config()
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
