@@ -1,14 +1,10 @@
-import { App, Logger, MessageEvent, SayFn, NextFn } from '@slack/bolt'
+import { App, Logger, MessageEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 import dotenv from 'dotenv'
 import { submitReply } from '../api/submitReply'
 import { IReply } from '../interfaces/IReply'
-dotenv.config()
 
-export const saveSubmissionRepliesEvent = (app: App) => {
-  const MESSAGE_EVENT = 'message'
-  app.event(MESSAGE_EVENT, saveSubmissionRepliesFunction)
-}
+dotenv.config()
 
 export type IMessageEvent = MessageEvent & {
   thread_ts?: string
@@ -21,6 +17,15 @@ interface ISaveSubmissionsReplies {
   logger: Logger
 }
 
+const isSubmissionTask = (text: string) => {
+  const SUBMISSION_NAME = 'Tarea'
+  const submission = text.slice(0, 40).split(' ')
+  if (submission[1] === SUBMISSION_NAME) {
+    return true
+  }
+  return false
+}
+
 export const saveSubmissionRepliesFunction = async ({
   client,
   logger,
@@ -28,7 +33,7 @@ export const saveSubmissionRepliesFunction = async ({
 }: ISaveSubmissionsReplies) => {
   try {
     if (message.thread_ts && message.parent_user_id === process.env.BOT_ID) {
-      //slack uses timestamps (ts) as id for messages
+      // slack uses timestamps (ts) as id for messages
       const thread = await client.conversations.history({
         latest: message.thread_ts,
         channel: message.channel,
@@ -39,7 +44,7 @@ export const saveSubmissionRepliesFunction = async ({
       const isSubmission = isSubmissionTask(thread.messages![0].text!)
 
       if (isSubmission) {
-        //@ts-ignore message.user exists in the api
+        // @ts-ignore message.user exists in the api
         const userId = message.user
 
         const { user } = await client.users.info({ user: userId })
@@ -47,7 +52,7 @@ export const saveSubmissionRepliesFunction = async ({
         if (user && user.profile?.display_name) {
           const reply: IReply = {
             authorId: userId,
-            //@ts-ignore message.text exist in the api
+            // @ts-ignore message.text exist in the api
             text: message.text,
             threadTS: message.thread_ts,
             timestamp: message.ts,
@@ -64,12 +69,7 @@ export const saveSubmissionRepliesFunction = async ({
   }
 }
 
-const isSubmissionTask = (text: string) => {
-  const SUBMISSION_NAME = 'Tarea'
-  const submission = text.slice(0, 40).split(' ')
-  if (submission[1] === SUBMISSION_NAME) {
-    return true
-  } else {
-    return false
-  }
+export const saveSubmissionRepliesEvent = (app: App) => {
+  const MESSAGE_EVENT = 'message'
+  app.event(MESSAGE_EVENT, saveSubmissionRepliesFunction)
 }

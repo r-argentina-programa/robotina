@@ -30,21 +30,19 @@ export const uploadTarea = async ({
         userExternalId: authOUserId,
         delivery,
       }
-      return sendSubmission(submission)
-    } else {
-      const fullSubmission: IFullSubmission = {
-        lessonId: Number(classNumber),
-        userExternalId: authOUserId,
-        firstName,
-        lastName,
-        email,
-        delivery,
-      }
-      return sendSubmissionAndUserCreation(fullSubmission)
+      return await sendSubmission(submission)
     }
+    const fullSubmission: IFullSubmission = {
+      lessonId: Number(classNumber),
+      userExternalId: authOUserId,
+      firstName,
+      lastName,
+      email,
+      delivery,
+    }
+    return await sendSubmissionAndUserCreation(fullSubmission)
   } catch (error) {
-    //@ts-ignore
-    console.log(error.response)
+    // @ts-ignore
     throw new Error()
   }
 }

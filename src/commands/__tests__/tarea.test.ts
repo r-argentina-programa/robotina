@@ -1,5 +1,6 @@
 import { expect, jest, test } from '@jest/globals'
 import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
+
 import { WebClient } from '@slack/web-api'
 import { tareaCommandFunction, tareaSlashCommand } from '../tarea'
 import { uploadTarea } from '../../api/uploadTarea'
@@ -25,17 +26,13 @@ jest.mock('@slack/bolt', () => {
   }
 })
 
-jest.mock('../../api/uploadTarea', () => {
-  return {
-    uploadTarea: jest.fn(),
-  }
-})
+jest.mock('../../api/uploadTarea', () => ({
+  uploadTarea: jest.fn(),
+}))
 
-jest.mock('../../api/createThread', () => {
-  return {
-    createThread: jest.fn(),
-  }
-})
+jest.mock('../../api/createThread', () => ({
+  createThread: jest.fn(),
+}))
 
 const mockedUploadTarea = uploadTarea as jest.Mocked<typeof uploadTarea>
 const mockedCreateThread = createThread as jest.Mocked<typeof createThread>

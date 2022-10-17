@@ -1,7 +1,7 @@
-import { unknownCommandBlock } from '../blocks/unknownCommandBlock'
-import { wrongFormatBlock } from '../blocks/wrongFormatBlock'
 import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
+import { unknownCommandBlock } from '../blocks/unknownCommandBlock'
+import { wrongFormatBlock } from '../blocks/wrongFormatBlock'
 import { uploadTarea } from '../api/uploadTarea'
 import { createThread, ICreateThread } from '../api/createThread'
 import { validateSubmissionDeliveryFormat } from '../utils/validateSubmissionDeliveryFormat'
@@ -15,18 +15,13 @@ interface Command {
   client: WebClient
 }
 
-export const tareaSlashCommand = (app: App) => {
-  const TAREA_SLASH_COMMAND = '/tarea'
-  app.command(TAREA_SLASH_COMMAND, tareaCommandFunction)
-}
-
 export const tareaCommandFunction = async ({
   command,
   ack,
   say,
   respond,
   client,
-}: Command) => {
+}: Command): Promise<void> => {
   await ack()
   try {
     const { user } = await client.users.info({
@@ -37,10 +32,11 @@ export const tareaCommandFunction = async ({
     }
     const classNumber = validateChannelName(command.channel_name)
     if (!classNumber) {
-      return await respond({
+      await respond({
         text: 'Comando no disponible en este canal.',
         blocks: unknownCommandBlock,
       })
+      return
     }
 
     const validSubmissionFormat = validateSubmissionDeliveryFormat({
@@ -48,10 +44,11 @@ export const tareaCommandFunction = async ({
       delivery: command.text,
     })
     if (!validSubmissionFormat) {
-      return await respond({
+      await respond({
         text: 'Formato de la tarea inválido',
         blocks: wrongFormatBlock,
       })
+      return
     }
 
     if (command.text && validSubmissionFormat) {
@@ -78,4 +75,9 @@ export const tareaCommandFunction = async ({
   } catch (error) {
     throw new Error('hubo un error')
   }
+}
+
+export const tareaSlashCommand = (app: App) => {
+  const TAREA_SLASH_COMMAND = '/tarea'
+  app.command(TAREA_SLASH_COMMAND, tareaCommandFunction)
 }

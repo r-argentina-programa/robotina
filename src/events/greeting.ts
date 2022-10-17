@@ -8,11 +8,6 @@ interface IChannelJoinedEvent {
   event: TeamJoinEvent
 }
 
-export const greetUserEvent = (app: App) => {
-  const GREET_USER_EVENT = 'team_join'
-  app.event(GREET_USER_EVENT, greetUserFunction)
-}
-
 export const greetUserFunction = async ({
   client,
   logger,
@@ -36,4 +31,9 @@ export const greetUserFunction = async ({
   } catch (error) {
     logger.error(error)
   }
+}
+
+export const greetUserEvent = (app: App) => {
+  const GREET_USER_EVENT = 'team_join'
+  app.event(GREET_USER_EVENT, greetUserFunction)
 }

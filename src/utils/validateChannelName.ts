@@ -4,7 +4,6 @@ export const validateChannelName = (channelName: string) => {
   if (lessonRegEx.test(channelName)) {
     const splittedChannelName = channelName.split('-')[1]
     return splittedChannelName
-  } else {
-    return false
   }
+  return false
 }
