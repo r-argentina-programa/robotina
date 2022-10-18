@@ -1,9 +1,8 @@
 import { expect, jest } from '@jest/globals'
-import { TeamJoinEvent, Logger } from '@slack/bolt'
-import { greetUserEvent, greetUserFunction } from '../greeting'
+import { TeamJoinEvent, Logger, App } from '@slack/bolt'
 import { WebClient } from '@slack/web-api'
+import { greetUserEvent, greetUserFunction } from '../greeting'
 import { greetingsBlock } from '../../blocks/greetingsBlock'
-import { App } from '@slack/bolt'
 
 jest.mock('@slack/bolt', () => {
   const properties = {
@@ -64,7 +63,7 @@ describe('greetUserFunction', () => {
     mockedWebClient.conversations.open.mockImplementation(() =>
       Promise.reject(CHANNEL_NOT_FOUND_ERROR)
     )
-    await greetUserFunction({ client: mockedWebClient, event, logger })
+    await greetUserFunction({ client, event, logger })
     expect(mockedWebClient.conversations.open).toHaveBeenCalledTimes(1)
     expect(logger.error).toHaveBeenCalledTimes(1)
     expect(logger.error).toHaveBeenCalledWith(CHANNEL_NOT_FOUND_ERROR)
