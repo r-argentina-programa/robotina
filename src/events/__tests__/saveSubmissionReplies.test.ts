@@ -117,6 +117,19 @@ describe('saveSubmissionRepliesFunction', () => {
     expect(logger.info).toHaveBeenCalledTimes(0)
   })
 
+  it('should call logger.error if slack api returns an error', async () => {
+    const EXPECTED_ERROR = new Error('Unexpected api error')
+    mockedWebClient.conversations.history.mockRejectedValue(EXPECTED_ERROR)
+    process.env.BOT_ID = 'PARENT_USER_ID_TEST'
+    await saveSubmissionRepliesFunction({
+      client,
+      logger,
+      message,
+    })
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error).toHaveBeenCalledWith(EXPECTED_ERROR)
+  })
+
   it('should not call users.info if thread is not a submission', async () => {
     process.env.BOT_ID = 'PARENT_USER_ID_TEST'
 
