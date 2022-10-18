@@ -59,14 +59,15 @@ describe('greetUserFunction', () => {
     })
   })
   it('should throw if user is invalid', async () => {
+    const EXPECTED_ERROR = new Error('Channel not found')
     const CHANNEL_NOT_FOUND_ERROR = { ok: false, error: 'channel_not_found' }
     mockedWebClient.conversations.open.mockImplementation(() =>
-      Promise.reject(CHANNEL_NOT_FOUND_ERROR)
+      Promise.resolve(CHANNEL_NOT_FOUND_ERROR)
     )
     await greetUserFunction({ client, event, logger })
     expect(mockedWebClient.conversations.open).toHaveBeenCalledTimes(1)
     expect(logger.error).toHaveBeenCalledTimes(1)
-    expect(logger.error).toHaveBeenCalledWith(CHANNEL_NOT_FOUND_ERROR)
+    expect(logger.error).toHaveBeenCalledWith(EXPECTED_ERROR)
   })
 })
 
