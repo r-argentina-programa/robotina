@@ -49,14 +49,14 @@ export const saveSubmissionRepliesFunction = async ({
 
         const { user } = await client.users.info({ user: userId })
 
-        if (user && user.profile?.display_name) {
+        if (user) {
           const reply: IReply = {
             authorId: userId,
             // @ts-ignore message.text exist in the api
             text: message.text,
             threadTS: message.thread_ts,
             timestamp: message.ts,
-            username: user!.profile!.display_name,
+            username: user!.profile!.display_name as string,
           }
           const replyResponse = await submitReply(reply)
 
