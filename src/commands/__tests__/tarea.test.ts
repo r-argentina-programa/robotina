@@ -1,9 +1,8 @@
-import { expect, jest, test } from '@jest/globals'
+import { expect, jest } from '@jest/globals'
 import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
-
 import { WebClient } from '@slack/web-api'
-import { tareaCommandFunction, tareaSlashCommand } from '../tarea'
-import { uploadTarea } from '../../api/uploadTarea'
+import { tareaCommandFunction, tareaSlashCommand } from '../tarea/tarea'
+import { uploadTarea } from '../tarea/uploadTarea'
 import { createThread } from '../../api/createThread'
 import { unknownCommandBlock } from '../../blocks/unknownCommandBlock'
 import { wrongFormatBlock } from '../../blocks/wrongFormatBlock'
@@ -26,7 +25,7 @@ jest.mock('@slack/bolt', () => {
   }
 })
 
-jest.mock('../../api/uploadTarea', () => ({
+jest.mock('../tarea/uploadTarea', () => ({
   uploadTarea: jest.fn(),
 }))
 
@@ -59,6 +58,12 @@ beforeEach(() => {
 
 describe('tareaCommandFunctiontarea', () => {
   it('should send a submittion and send a message in slack chat', async () => {
+    command = {
+      ...command,
+      channel_name: 'clase-2',
+      text: '```mocktarea```',
+    }
+
     say.mockResolvedValueOnce({
       ok: true,
       fkTaskId: 3,
@@ -74,7 +79,14 @@ describe('tareaCommandFunctiontarea', () => {
     mockedCreateThread.mockResolvedValue({ test: 1 })
     webClientTest.users.info.mockResolvedValue({
       ok: true,
-      user: { id: 'user-id' },
+      user: {
+        id: 'user-id',
+        profile: {
+          first_name: 'aaaaa',
+          last_name: 'aaaaa',
+          email: 'aaaaa',
+        },
+      },
     })
     mockedUploadTarea.mockResolvedValue({
       fkTaskId: 1,
@@ -119,7 +131,14 @@ describe('tareaCommandFunctiontarea', () => {
     })
     webClientTest.users.info.mockResolvedValue({
       ok: true,
-      user: { id: '' },
+      user: {
+        id: '',
+        profile: {
+          first_name: 'aaaaa',
+          last_name: 'aaaaa',
+          email: 'aaaaa',
+        },
+      },
     })
     try {
       await tareaCommandFunction({ command, ack, say, respond, client })
@@ -136,7 +155,14 @@ describe('tareaCommandFunctiontarea', () => {
 
     webClientTest.users.info.mockResolvedValue({
       ok: true,
-      user: { id: 'user-id' },
+      user: {
+        id: 'user-id',
+        profile: {
+          first_name: 'aaaaa',
+          last_name: 'aaaaa',
+          email: 'aaaaa',
+        },
+      },
     })
 
     await tareaCommandFunction({
@@ -162,7 +188,14 @@ describe('tareaCommandFunctiontarea', () => {
 
     webClientTest.users.info.mockResolvedValue({
       ok: true,
-      user: { id: 'user-id' },
+      user: {
+        id: 'user-id',
+        profile: {
+          first_name: 'aaaaa',
+          last_name: 'aaaaa',
+          email: 'aaaaa',
+        },
+      },
     })
 
     await tareaCommandFunction({
