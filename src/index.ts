@@ -3,7 +3,7 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
 import { App } from '@slack/bolt'
-import { tareaSlashCommand } from './commands/tarea'
+import { tareaSlashCommand } from './commands/tarea/tarea'
 import { greetUserEvent } from './events/greeting'
 import { saveSubmissionRepliesEvent } from './events/saveSubmissionReplies'
 

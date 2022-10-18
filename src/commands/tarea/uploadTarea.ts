@@ -1,8 +1,8 @@
-import { IFullSubmission } from '../interfaces/IFullSubmission'
-import { createAuth0Id } from '../utils/createAuth0Id'
-import { sendSubmission } from './sendSubmission'
-import { sendSubmissionAndUserCreation } from './sendSubmissionAndUserCreation'
-import { verifyIfUserExists } from './verifyIfUserExists'
+import { IFullSubmission } from '../../interfaces/IFullSubmission'
+import { createAuth0Id } from '../../utils/createAuth0Id'
+import { sendSubmission } from '../../api/sendSubmission'
+import { sendSubmissionAndUserCreation } from '../../api/sendSubmissionAndUserCreation'
+import { verifyIfUserExists } from '../../api/verifyIfUserExists'
 
 export interface IUploadTarea {
   userId: string
