@@ -1,18 +1,18 @@
 import { expect, jest } from '@jest/globals'
-import { IUploadTarea, uploadTarea } from '../uploadTarea'
-import { sendSubmission } from '../sendSubmission'
-import { sendSubmissionAndUserCreation } from '../sendSubmissionAndUserCreation'
-import { verifyIfUserExists } from '../verifyIfUserExists'
+import { IUploadTarea, uploadTarea } from '../tarea/uploadTarea'
+import { sendSubmission } from '../../api/sendSubmission'
+import { sendSubmissionAndUserCreation } from '../../api/sendSubmissionAndUserCreation'
+import { verifyIfUserExists } from '../../api/verifyIfUserExists'
 
-jest.mock('../sendSubmission', () => ({
+jest.mock('../../api/sendSubmission', () => ({
   sendSubmission: jest.fn(),
 }))
 
-jest.mock('../sendSubmissionAndUserCreation', () => ({
+jest.mock('../../api/sendSubmissionAndUserCreation', () => ({
   sendSubmissionAndUserCreation: jest.fn(),
 }))
 
-jest.mock('../verifyIfUserExists', () => ({
+jest.mock('../../api/verifyIfUserExists', () => ({
   verifyIfUserExists: jest.fn(),
 }))
 

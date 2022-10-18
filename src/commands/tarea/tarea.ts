@@ -1,11 +1,11 @@
 import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
-import { unknownCommandBlock } from '../blocks/unknownCommandBlock'
-import { wrongFormatBlock } from '../blocks/wrongFormatBlock'
-import { uploadTarea } from '../api/uploadTarea'
-import { createThread, ICreateThread } from '../api/createThread'
-import { validateSubmissionDeliveryFormat } from '../utils/validateSubmissionDeliveryFormat'
-import { validateChannelName } from '../utils/validateChannelName'
+import { unknownCommandBlock } from '../../blocks/unknownCommandBlock'
+import { wrongFormatBlock } from '../../blocks/wrongFormatBlock'
+import { uploadTarea } from './uploadTarea'
+import { createThread, ICreateThread } from '../../api/createThread'
+import { validateSubmissionDeliveryFormat } from '../../utils/validateSubmissionDeliveryFormat'
+import { validateChannelName } from '../../utils/validateChannelName'
 
 interface Command {
   command: SlashCommand
@@ -56,9 +56,9 @@ export const tareaCommandFunction = async ({
         classNumber,
         userId: user.id as string,
         delivery: command.text,
-        firstName: user.profile?.first_name,
-        lastName: user.profile?.last_name,
-        email: user.profile?.email,
+        firstName: user.profile!.first_name,
+        lastName: user.profile!.last_name,
+        email: user.profile!.email,
       })
       const message = await say(
         `<@${user.id}> Tarea ${classNumber}: ${command.text}`
