@@ -1,7 +1,7 @@
 import { marketplaceApi } from '.'
-import { IReply } from '../interfaces/IReply'
+import { IModifyReply } from '../interfaces/IModifyReply'
 
-export const submitReply = async (reply: IReply) => {
-  const { data } = await marketplaceApi.put('/api/reply', reply)
+export const modifyReply = async (timestamp: string, reply: IModifyReply) => {
+  const { data } = await marketplaceApi.post(`/api/reply/${timestamp}`, reply)
   return data
 }

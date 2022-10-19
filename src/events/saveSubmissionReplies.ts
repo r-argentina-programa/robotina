@@ -14,7 +14,7 @@ interface ISaveSubmissionsReplies {
   logger: Logger
 }
 
-const isSubmissionTask = (text: string) => {
+export const isSubmissionTask = (text: string) => {
   const SUBMISSION_NAME = 'Tarea'
   const submission = text.slice(0, 40).split(' ')
   if (submission[1] === SUBMISSION_NAME) {
