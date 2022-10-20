@@ -3,12 +3,12 @@ import { Logger, App } from '@slack/bolt'
 import { WebClient } from '@slack/web-api'
 import {
   IMessageEvent,
-  saveSubmissionRepliesFunction,
-  saveSubmissionRepliesEvent,
-} from '../saveSubmissionReplies'
+  modifyReplyFunction,
+  modifyReplyEvent,
+} from '../modifyReply'
 
-jest.mock('../../api/submitReply', () => ({
-  submitReply: jest
+jest.mock('../../api/modifyReply', () => ({
+  modifyReply: jest
     .fn()
     .mockImplementation(() => Promise.resolve({ success: 'true' })),
 }))
@@ -38,9 +38,9 @@ const mockedWebClient = new WebClient() as jest.Mocked<WebClient>
 
 let logger: Logger
 let client: WebClient
-let message: IMessageEvent
+let event: IMessageEvent
 
-describe('saveSubmissionRepliesFunction', () => {
+describe('modifyReplyFunction', () => {
   const OLD_ENV = process.env
 
   beforeEach(() => {
@@ -50,10 +50,13 @@ describe('saveSubmissionRepliesFunction', () => {
       info: jest.fn(),
       error: jest.fn(),
     } as unknown as Logger
-    message = {
-      thread_ts: 'THREAD_TS_TEST',
+    event = {
+      subtype: 'message_changed',
+      message: {
+        thread_ts: 'THREAD_TS_TEST',
+        parent_user_id: 'PARENT_USER_ID_TEST',
+      },
       channel: 'CHANNEL_TEST',
-      parent_user_id: 'PARENT_USER_ID_TEST',
       // @ts-ignore message.user exists in the api
       user: 'USER_ID_TEST',
     } as unknown as IMessageEvent
@@ -66,7 +69,7 @@ describe('saveSubmissionRepliesFunction', () => {
     process.env = OLD_ENV // Restore old environment
   })
 
-  it('should save a submission reply if thread author is the same as the bot id and is valid a submission', async () => {
+  it('should update reply in marketplace api when message_changed triggers', async () => {
     process.env.BOT_ID = 'PARENT_USER_ID_TEST'
     const VALID_PARENT_MESSAGE_TEXT = '<@U043BDYF80H> Tarea 11: 123'
     const USER_DISPLAY_NAME_TEST = 'USER_DISPLAY_NAME_TEST'
@@ -84,37 +87,50 @@ describe('saveSubmissionRepliesFunction', () => {
         user: { profile: { display_name: USER_DISPLAY_NAME_TEST } },
       })
     )
-    await saveSubmissionRepliesFunction({
+    await modifyReplyFunction({
       client,
       logger,
-      message,
+      event,
     })
 
     expect(logger.info).toHaveBeenCalledTimes(1)
     expect(client.conversations.history).toHaveBeenCalledTimes(1)
     expect(client.conversations.history).toHaveBeenCalledWith({
-      latest: message.thread_ts,
-      channel: message.channel,
+      latest: event.message!.thread_ts,
+      channel: event.channel,
       limit: 1,
       inclusive: true,
     })
     expect(client.users.info).toHaveBeenCalledTimes(1)
     // @ts-ignore message.user exists in api
-    expect(client.users.info).toHaveBeenCalledWith({ user: message.user })
+    expect(client.users.info).toHaveBeenCalledWith({ user: event.message.user })
     expect(logger.error).toHaveBeenCalledTimes(0)
   })
 
-  it('should not save reply if thread author is not bot id', async () => {
-    message.parent_user_id = '123'
+  it('should not modify a reply if thread author is not bot id', async () => {
+    event.message!.parent_user_id = '123'
     process.env.BOT_ID = 'DIFFERENT_ID'
-    await saveSubmissionRepliesFunction({
+    await modifyReplyFunction({
       client,
       logger,
-      message,
+      event,
     })
     expect(client.conversations.history).toHaveBeenCalledTimes(0)
     expect(logger.error).toHaveBeenCalledTimes(0)
     expect(logger.info).toHaveBeenCalledTimes(0)
+  })
+
+  it('should call error logger if slack api returns an error', async () => {
+    const EXPECTED_ERROR = new Error('Unexpected api error')
+    mockedWebClient.conversations.history.mockRejectedValue(EXPECTED_ERROR)
+    process.env.BOT_ID = 'PARENT_USER_ID_TEST'
+    await modifyReplyFunction({
+      client,
+      logger,
+      event,
+    })
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error).toHaveBeenCalledWith(EXPECTED_ERROR)
   })
 
   it('should throw if user is not found in slack api', async () => {
@@ -128,23 +144,10 @@ describe('saveSubmissionRepliesFunction', () => {
       })
     )
     process.env.BOT_ID = 'PARENT_USER_ID_TEST'
-    await saveSubmissionRepliesFunction({
+    await modifyReplyFunction({
       client,
       logger,
-      message,
-    })
-    expect(logger.error).toHaveBeenCalledTimes(1)
-    expect(logger.error).toHaveBeenCalledWith(EXPECTED_ERROR)
-  })
-
-  it('should call logger.error if slack api returns an error', async () => {
-    const EXPECTED_ERROR = new Error('Unexpected api error')
-    mockedWebClient.conversations.history.mockRejectedValue(EXPECTED_ERROR)
-    process.env.BOT_ID = 'PARENT_USER_ID_TEST'
-    await saveSubmissionRepliesFunction({
-      client,
-      logger,
-      message,
+      event,
     })
     expect(logger.error).toHaveBeenCalledTimes(1)
     expect(logger.error).toHaveBeenCalledWith(EXPECTED_ERROR)
@@ -162,10 +165,10 @@ describe('saveSubmissionRepliesFunction', () => {
       })
     )
 
-    await saveSubmissionRepliesFunction({
+    await modifyReplyFunction({
       client,
       logger,
-      message,
+      event,
     })
 
     expect(client.conversations.history).toHaveBeenCalledTimes(1)
@@ -180,11 +183,11 @@ describe('saveSubmissionRepliesEvent', () => {
   const MESSAGE_EVENT = 'message'
 
   it('should configure app correctly', async () => {
-    saveSubmissionRepliesEvent(mockedApp)
+    modifyReplyEvent(mockedApp)
     expect(mockedApp.event).toHaveBeenCalledTimes(1)
     expect(mockedApp.event).toHaveBeenCalledWith(
       MESSAGE_EVENT,
-      saveSubmissionRepliesFunction
+      modifyReplyFunction
     )
   })
 })

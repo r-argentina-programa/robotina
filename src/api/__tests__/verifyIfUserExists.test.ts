@@ -13,7 +13,7 @@ const mockedMarketplaceApi = marketplaceApi as jest.MockedFunction<
 >
 
 describe('verifyIfUserExists', () => {
-  it('should check in marketplace api if user exists', async () => {
+  it('should check if user exists in marketplace api ', async () => {
     const USER_ID = 'USER_ID'
     const API_URL = `/api/bot/profile/`
     mockedMarketplaceApi.get.mockResolvedValue({ data: { success: true } })

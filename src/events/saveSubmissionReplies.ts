@@ -45,20 +45,20 @@ export const saveSubmissionRepliesFunction = async ({
         const userId = message.user
 
         const { user } = await client.users.info({ user: userId })
-
-        if (user) {
-          const reply: IReply = {
-            authorId: userId,
-            // @ts-ignore message.text exist in the api
-            text: message.text,
-            threadTS: message.thread_ts,
-            timestamp: message.ts,
-            username: user!.profile!.display_name as string,
-          }
-          const replyResponse = await submitReply(reply)
-
-          logger.info('Reply submitted: ', replyResponse)
+        if (!user) {
+          throw new Error('Slack-api Error: User not found')
         }
+        const reply: IReply = {
+          authorId: userId,
+          // @ts-ignore message.text exist in the api
+          text: message.text,
+          threadTS: message.thread_ts,
+          timestamp: message.ts,
+          username: user!.profile!.display_name as string,
+        }
+        const replyResponse = await submitReply(reply)
+
+        logger.info('Reply submitted: ', replyResponse)
       }
     }
   } catch (error) {

@@ -12,7 +12,7 @@ export type IMessageEvent = KnownEventFromType<'message'> & {
   }
 }
 
-interface ISaveSubmissionsReplies {
+export interface IModifyReplyFunction {
   event: IMessageEvent
   client: WebClient
   logger: Logger
@@ -22,15 +22,13 @@ export const modifyReplyFunction = async ({
   client,
   logger,
   event,
-}: ISaveSubmissionsReplies) => {
+}: IModifyReplyFunction) => {
   try {
     if (
       event.subtype === 'message_changed' &&
       event.message.thread_ts &&
       event.message.parent_user_id === process.env.BOT_ID
     ) {
-      logger.info(event)
-
       // slack uses timestamps (ts) as id for messages
       const thread = await client.conversations.history({
         latest: event.message.thread_ts,
@@ -47,7 +45,7 @@ export const modifyReplyFunction = async ({
 
         const { user } = await client.users.info({ user: userId })
         if (!user) {
-          throw new Error('slack-api error: User not found')
+          throw new Error('Slack-api Error: User not found')
         }
         const reply: IModifyReply = {
           text: event.message.text as string,

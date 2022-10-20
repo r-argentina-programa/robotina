@@ -9,6 +9,6 @@ const mockedApp = new App() as jest.Mocked<App>
 describe('configureAppEvents', () => {
   it('should configure app events correctly', () => {
     configureAppEvents(mockedApp)
-    expect(mockedApp.event).toBeCalledTimes(2)
+    expect(mockedApp.event).toBeCalledTimes(3)
   })
 })
