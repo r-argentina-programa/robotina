@@ -16,7 +16,7 @@ const mockedMarketplaceApi = marketplaceApi as jest.MockedFunction<
 describe('modifyReply', () => {
   it('should modify a reply in marketplace api', async () => {
     const TIMESTAMP = '2343254.345345'
-    const API_URL = '/api/reply/'
+    const API_URL = '/api/bot/reply/'
     const EXPECTED_URL = API_URL + TIMESTAMP
     const newReply: IReply = {
       authorId: 'author-id',
