@@ -2,7 +2,7 @@ import { App, KnownEventFromType, Logger, MessageEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 import { modifyReply } from '../api/modifyReply'
 import { IModifyReply } from '../interfaces/IModifyReply'
-import { isSubmissionTask } from './saveSubmissionReplies'
+import { isTaskSubmission } from '../utils/validateTaskSubmission'
 
 export type IMessageEvent = KnownEventFromType<'message'> & {
   message?: MessageEvent & {
@@ -37,7 +37,7 @@ export const modifyReplyFunction = async ({
         inclusive: true,
       })
 
-      const isSubmission = isSubmissionTask(thread.messages![0].text!)
+      const isSubmission = isTaskSubmission(thread.messages![0].text!)
 
       if (isSubmission) {
         // @ts-ignore event.message.user exists in MessageChangedEvent

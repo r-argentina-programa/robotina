@@ -1,7 +1,7 @@
 import { App, KnownEventFromType, Logger, MessageEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 import { deleteReply } from '../api/deleteReply'
-import { isSubmissionTask } from './saveSubmissionReplies'
+import { isTaskSubmission } from '../utils/validateTaskSubmission'
 
 export type IMessageEvent = KnownEventFromType<'message'> & {
   previous_message?: MessageEvent & {
@@ -34,7 +34,7 @@ export const deleteReplyFunction = async ({
         inclusive: true,
       })
 
-      const isSubmission = isSubmissionTask(thread.messages![0].text!)
+      const isSubmission = isTaskSubmission(thread.messages![0].text!)
 
       if (isSubmission) {
         const deleteReplyResponse = await deleteReply(event.previous_message.ts)

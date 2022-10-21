@@ -2,6 +2,7 @@ import { App, Logger, MessageEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 import { submitReply } from '../api/submitReply'
 import { IReply } from '../interfaces/IReply'
+import { isTaskSubmission } from '../utils/validateTaskSubmission'
 
 export type IMessageEvent = MessageEvent & {
   thread_ts?: string
@@ -12,15 +13,6 @@ interface ISaveSubmissionsReplies {
   message: IMessageEvent
   client: WebClient
   logger: Logger
-}
-
-export const isSubmissionTask = (text: string) => {
-  const SUBMISSION_NAME = 'Tarea'
-  const submission = text.slice(0, 40).split(' ')
-  if (submission[1] === SUBMISSION_NAME) {
-    return true
-  }
-  return false
 }
 
 export const saveSubmissionRepliesFunction = async ({
@@ -38,7 +30,7 @@ export const saveSubmissionRepliesFunction = async ({
         inclusive: true,
       })
 
-      const isSubmission = isSubmissionTask(thread.messages![0].text!)
+      const isSubmission = isTaskSubmission(thread.messages![0].text!)
 
       if (isSubmission) {
         // @ts-ignore message.user exists in the api
