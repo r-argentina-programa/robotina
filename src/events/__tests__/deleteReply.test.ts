@@ -1,14 +1,15 @@
 import { expect, jest } from '@jest/globals'
 import { Logger, App } from '@slack/bolt'
 import { WebClient } from '@slack/web-api'
+import { deleteReply } from '../../api/deleteReply'
 import {
   IMessageEvent,
-  modifyReplyFunction,
-  modifyReplyEvent,
-} from '../modifyReply'
+  deleteReplyFunction,
+  deleteReplyEvent,
+} from '../deleteReply'
 
-jest.mock('../../api/modifyReply', () => ({
-  modifyReply: jest
+jest.mock('../../api/deleteReply', () => ({
+  deleteReply: jest
     .fn()
     .mockImplementation(() => Promise.resolve({ success: 'true' })),
 }))
@@ -27,9 +28,6 @@ jest.mock('@slack/web-api', () => {
     conversations: {
       history: jest.fn(),
     },
-    users: {
-      info: jest.fn(),
-    },
   }
   return { WebClient: jest.fn(() => properties) }
 })
@@ -40,7 +38,7 @@ let logger: Logger
 let client: WebClient
 let event: IMessageEvent
 
-describe('modifyReplyFunction', () => {
+describe('deleteReplyFunction', () => {
   const OLD_ENV = process.env
 
   beforeEach(() => {
@@ -51,14 +49,11 @@ describe('modifyReplyFunction', () => {
       error: jest.fn(),
     } as unknown as Logger
     event = {
-      subtype: 'message_changed',
-      message: {
+      subtype: 'message_deleted',
+      previous_message: {
         thread_ts: 'THREAD_TS_TEST',
         parent_user_id: 'PARENT_USER_ID_TEST',
       },
-      channel: 'CHANNEL_TEST',
-      // @ts-ignore message.user exists in the api
-      user: 'USER_ID_TEST',
     } as unknown as IMessageEvent
 
     jest.resetModules() // it clears the cache
@@ -69,10 +64,9 @@ describe('modifyReplyFunction', () => {
     process.env = OLD_ENV // Restore old environment
   })
 
-  it('should update reply in marketplace api when message_changed triggers', async () => {
+  it('should delete a reply in marketplace api when message_deleted triggers', async () => {
     process.env.BOT_ID = 'PARENT_USER_ID_TEST'
     const VALID_PARENT_MESSAGE_TEXT = '<@U043BDYF80H> Tarea 11: 123'
-    const USER_DISPLAY_NAME_TEST = 'USER_DISPLAY_NAME_TEST'
 
     mockedWebClient.conversations.history.mockImplementationOnce(() =>
       Promise.resolve({
@@ -81,13 +75,7 @@ describe('modifyReplyFunction', () => {
       })
     )
 
-    mockedWebClient.users.info.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        user: { profile: { display_name: USER_DISPLAY_NAME_TEST } },
-      })
-    )
-    await modifyReplyFunction({
+    await deleteReplyFunction({
       client,
       logger,
       event,
@@ -96,21 +84,19 @@ describe('modifyReplyFunction', () => {
     expect(logger.info).toHaveBeenCalledTimes(1)
     expect(client.conversations.history).toHaveBeenCalledTimes(1)
     expect(client.conversations.history).toHaveBeenCalledWith({
-      latest: event.message!.thread_ts,
+      latest: event.previous_message!.thread_ts,
       channel: event.channel,
       limit: 1,
       inclusive: true,
     })
-    expect(client.users.info).toHaveBeenCalledTimes(1)
-    // @ts-ignore message.user exists in api
-    expect(client.users.info).toHaveBeenCalledWith({ user: event.message.user })
+    expect(deleteReply).toHaveBeenCalledTimes(1)
     expect(logger.error).toHaveBeenCalledTimes(0)
   })
 
-  it('should not update a reply if thread author is not bot id', async () => {
-    event.message!.parent_user_id = '123'
+  it('should not delete a reply if thread author is not bot id', async () => {
+    event.previous_message!.parent_user_id = '123'
     process.env.BOT_ID = 'DIFFERENT_ID'
-    await modifyReplyFunction({
+    await deleteReplyFunction({
       client,
       logger,
       event,
@@ -124,70 +110,26 @@ describe('modifyReplyFunction', () => {
     const EXPECTED_ERROR = new Error('Unexpected api error')
     mockedWebClient.conversations.history.mockRejectedValue(EXPECTED_ERROR)
     process.env.BOT_ID = 'PARENT_USER_ID_TEST'
-    await modifyReplyFunction({
+    await deleteReplyFunction({
       client,
       logger,
       event,
     })
     expect(logger.error).toHaveBeenCalledTimes(1)
     expect(logger.error).toHaveBeenCalledWith(EXPECTED_ERROR)
-  })
-
-  it('should throw if user is not found in slack api', async () => {
-    const EXPECTED_ERROR = new Error('Slack-api Error: User not found')
-    const VALID_PARENT_MESSAGE_TEXT = '<@U043BDYF80H> Tarea 11: 123'
-    mockedWebClient.users.info.mockResolvedValue({ ok: false })
-    mockedWebClient.conversations.history.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        messages: [{ text: VALID_PARENT_MESSAGE_TEXT }],
-      })
-    )
-    process.env.BOT_ID = 'PARENT_USER_ID_TEST'
-    await modifyReplyFunction({
-      client,
-      logger,
-      event,
-    })
-    expect(logger.error).toHaveBeenCalledTimes(1)
-    expect(logger.error).toHaveBeenCalledWith(EXPECTED_ERROR)
-  })
-
-  it('should not call users.info if thread is not a submission', async () => {
-    process.env.BOT_ID = 'PARENT_USER_ID_TEST'
-
-    const INVALID_PARENT_MESSAGE_TEXT = '111111111111111111111111111111'
-
-    mockedWebClient.conversations.history.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        messages: [{ text: INVALID_PARENT_MESSAGE_TEXT }],
-      })
-    )
-
-    await modifyReplyFunction({
-      client,
-      logger,
-      event,
-    })
-
-    expect(client.conversations.history).toHaveBeenCalledTimes(1)
-    expect(client.users.info).toBeCalledTimes(0)
-    expect(logger.error).toHaveBeenCalledTimes(0)
-    expect(logger.info).toHaveBeenCalledTimes(0)
   })
 })
 
-describe('modifySubmissionRepliesEvent', () => {
+describe('deleteSubmissionRepliesEvent', () => {
   const mockedApp = new App() as jest.Mocked<App>
   const MESSAGE_EVENT = 'message'
 
   it('should configure app correctly', async () => {
-    modifyReplyEvent(mockedApp)
+    deleteReplyEvent(mockedApp)
     expect(mockedApp.event).toHaveBeenCalledTimes(1)
     expect(mockedApp.event).toHaveBeenCalledWith(
       MESSAGE_EVENT,
-      modifyReplyFunction
+      deleteReplyFunction
     )
   })
 })

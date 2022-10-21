@@ -42,7 +42,7 @@ export const deleteReplyFunction = async ({
         logger.info('Reply deleted: ', deleteReplyResponse)
       }
     } catch (error) {
-      logger.info(error)
+      logger.error(error)
     }
   }
 }
