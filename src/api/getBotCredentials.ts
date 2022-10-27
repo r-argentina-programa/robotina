@@ -1,10 +1,11 @@
 import axios, { AxiosResponse } from 'axios'
 
-interface IGetCredential {
+export interface IGetCredential {
   access_token: string
   expires_in: number
   token_type: string
 }
+
 export const getBotCredentials = async () => {
   console.log('Getting Auth0 credentials')
   try {
