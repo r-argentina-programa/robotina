@@ -1,15 +1,14 @@
 import { App, ReactionAddedEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
-import { createThread, ICreateThread } from '../api/createThread'
 import { uploadTarea } from '../commands/tarea/uploadTarea'
 import { validateChannelName } from '../utils/validateChannelName'
 
-interface IReactionAddedEvent {
+export interface IReactionAddedEvent {
   event: ReactionAddedEvent | any
   client: WebClient
 }
 
-const submitWithMessageReactionFunction = async ({
+export const submitWithMessageReactionFunction = async ({
   client,
   event,
 }: IReactionAddedEvent) => {
@@ -18,13 +17,13 @@ const submitWithMessageReactionFunction = async ({
       user: event.item_user,
     })
     if (!user) {
-      throw new Error('User not found')
+      throw new Error('Slack-api Error: User not found')
     }
     const { channel } = await client.conversations.info({
       channel: event.item.channel,
     })
     if (!channel) {
-      throw new Error('Channel not found')
+      throw new Error('Slack-api Error: Channel not found')
     }
 
     const message = await client.conversations.history({
@@ -34,16 +33,16 @@ const submitWithMessageReactionFunction = async ({
       inclusive: true,
     })
     if (!message) {
-      throw new Error('Message not found')
+      throw new Error('Slack-api Error: Message not found')
     }
 
-    const classNumber = validateChannelName(channel?.name as string)
+    const classNumber = validateChannelName(channel!.name as string)
     if (typeof classNumber !== 'string') {
       throw new Error('Wrong channel name')
     }
     const messageText = message.messages![0]!.text as string
 
-    const tarea = await uploadTarea({
+    await uploadTarea({
       classNumber,
       userId: user.id as string,
       delivery: messageText,
@@ -51,15 +50,6 @@ const submitWithMessageReactionFunction = async ({
       lastName: user.profile!.last_name,
       email: user.profile!.email,
     })
-
-    const thread: ICreateThread = {
-      authorId: <string>process.env.BOT_ID,
-      studentId: tarea.fkStudentId,
-      text: messageText,
-      timestamp: message.messages![0]!.ts as string,
-      taskId: tarea.fkTaskId,
-    }
-    await createThread(thread)
   }
 }
 
