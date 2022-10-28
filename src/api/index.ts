@@ -6,7 +6,7 @@ import axios, {
 } from 'axios'
 import { getBotCredentials } from './getBotCredentials'
 
-type IAxiosError = AxiosError & {
+export type IAxiosError = AxiosError & {
   config: {
     retry?: boolean
   }
@@ -16,7 +16,7 @@ export const marketplaceApi = axios.create({
   baseURL: process.env.API_URL,
 })
 
-const setMarketplaceApiAuthorization = (
+export const setMarketplaceApiAuthorization = (
   api: AxiosInstance,
   bearerToken: string
 ) => {
@@ -26,16 +26,16 @@ const setMarketplaceApiAuthorization = (
   }
 }
 
-const setRequestConfigAuthorization = (
+export const setRequestConfigAuthorization = (
   req: AxiosRequestConfig,
   bearerToken: string
 ) => {
   req.headers!.Authorization = `Bearer ${bearerToken}`
 }
 
-const interceptorRequestOnSuccess = (response: AxiosResponse) => response
+export const interceptorRequestOnSuccess = (response: AxiosResponse) => response
 
-const interceptorRequestOnFail = async (error: IAxiosError) => {
+export const interceptorRequestOnFail = async (error: IAxiosError) => {
   const originalRequest = error.config
   if (error.response?.status === 401 && !originalRequest.retry) {
     originalRequest.retry = true
