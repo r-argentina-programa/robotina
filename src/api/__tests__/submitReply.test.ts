@@ -3,15 +3,9 @@ import { submitReply } from '../submitReply'
 import { marketplaceApi } from '../index'
 import { IReply } from '../../interfaces/IReply'
 
-jest.mock('../index', () => ({
-  marketplaceApi: {
-    post: jest.fn(),
-  },
-}))
+jest.mock('../index')
 
-const mockedMarketplaceApi = marketplaceApi as jest.MockedFunction<
-  typeof marketplaceApi
->
+const mockedMarketplaceApi = jest.mocked(marketplaceApi)
 
 describe('submitReply', () => {
   it('should submit a new reply to marketplace api', async () => {

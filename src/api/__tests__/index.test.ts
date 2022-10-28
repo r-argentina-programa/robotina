@@ -8,18 +8,14 @@ import {
 import { getBotCredentials, IGetCredential } from '../getBotCredentials'
 import * as index from '..'
 
-jest.mock('../getBotCredentials', () => ({
-  getBotCredentials: jest.fn(),
-}))
+jest.mock('../getBotCredentials')
 
 jest.mock('../index', () => ({
   ...(jest.requireActual('../index') as typeof index),
   setMarketplaceApiAuthorization: jest.fn(),
 }))
 
-const mockedGetBotCredentials = getBotCredentials as jest.MockedFunction<
-  typeof getBotCredentials
->
+const mockedGetBotCredentials = jest.mocked(getBotCredentials)
 
 describe('interceptorRequestOnSuccess', () => {
   it('should not modify axios response', async () => {

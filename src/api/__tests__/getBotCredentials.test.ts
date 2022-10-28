@@ -7,11 +7,9 @@ const credentials: IGetCredential = {
   expires_in: 34325435,
   token_type: 'Bearer',
 }
-jest.mock('axios', () => ({
-  post: jest.fn(),
-}))
+jest.mock('axios')
 
-const mockedAxios = axios as jest.MockedFunction<typeof axios>
+const mockedAxios = jest.mocked(axios)
 
 describe('getBotCredentials', () => {
   const ENVIROMENT_VARIABLES = {
