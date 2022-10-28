@@ -16,7 +16,7 @@ const socketModeAppConfig: AppOptions = {
 const httpModeAppConfig: AppOptions = {
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  port: Number(<string>process.env.PORT || <string>process.env.HTTP_PORT ),
+  port: Number(<string>process.env.PORT || <string>process.env.HTTP_PORT),
 }
 
 const config = () => {
@@ -29,7 +29,8 @@ const config = () => {
 }
 
 export const initializeApp = async () => {
-  const app = new App(config())
+  const appConfig = config()
+  const app = new App(appConfig)
   configureAppCommands(app)
   configureAppEvents(app)
   await app.start()
