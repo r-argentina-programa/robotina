@@ -20,8 +20,10 @@ const httpModeAppConfig: AppOptions = {
 
 const config = () => {
   if (process.env.NODE_ENV === 'prod') {
+    console.log('HTTP MODE')
     return httpModeAppConfig
   }
+  console.log('SOCKET MODE')
   return socketModeAppConfig
 }
 
