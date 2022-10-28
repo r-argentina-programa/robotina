@@ -2,19 +2,33 @@
 // eslint-disable-next-line import/newline-after-import
 import * as dotenv from 'dotenv'
 dotenv.config()
-import { App } from '@slack/bolt'
+import { App, AppOptions } from '@slack/bolt'
 import { configureAppCommands } from './commands'
 import { configureAppEvents } from './events'
 
+const socketModeAppConfig: AppOptions = {
+  token: process.env.SLACK_BOT_TOKEN,
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  socketMode: true,
+  appToken: process.env.APP_TOKEN,
+}
+
+const httpModeAppConfig: AppOptions = {
+  token: process.env.SLACK_BOT_TOKEN,
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+}
+
+const config = () => {
+  if (process.env.NODE_ENV === 'prod') {
+    return httpModeAppConfig
+  }
+  return socketModeAppConfig
+}
+
 export const initializeApp = async () => {
-  const app = new App({
-    token: process.env.SLACK_BOT_TOKEN,
-    signingSecret: process.env.SLACK_SIGNING_SECRET,
-    socketMode: true,
-    appToken: process.env.APP_TOKEN,
-  })
+  const app = new App(config())
   configureAppCommands(app)
   configureAppEvents(app)
   await app.start()
-  console.log('🤖 Robotina app is running!')
+  console.log(`🤖 Robotina app is running!`)
 }
