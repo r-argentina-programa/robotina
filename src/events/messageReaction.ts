@@ -37,7 +37,7 @@ export const submitWithMessageReactionFunction = async ({
     }
 
     const classNumber = validateChannelName(channel!.name as string)
-    if (typeof classNumber !== 'string') {
+    if (!classNumber) {
       throw new Error('Wrong channel name')
     }
     const messageText = message.messages![0]!.text as string
