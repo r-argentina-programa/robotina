@@ -2,15 +2,9 @@ import { expect, jest } from '@jest/globals'
 import { createThread, ICreateThread } from '../createThread'
 import { marketplaceApi } from '../index'
 
-jest.mock('../index', () => ({
-  marketplaceApi: {
-    post: jest.fn(),
-  },
-}))
+jest.mock('../index')
 
-const mockedMarketplaceApi = marketplaceApi as jest.MockedFunction<
-  typeof marketplaceApi
->
+const mockedMarketplaceApi = jest.mocked(marketplaceApi)
 
 describe('createThread', () => {
   it('should submit a new thread to marketplace api', async () => {

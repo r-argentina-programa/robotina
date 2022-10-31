@@ -1,15 +1,17 @@
 import { expect, jest } from '@jest/globals'
-import { submitReply } from '../submitReply'
 import { marketplaceApi } from '../index'
 import { IReply } from '../../interfaces/IReply'
+import { modifyReply } from '../modifyReply'
 
 jest.mock('../index')
 
 const mockedMarketplaceApi = jest.mocked(marketplaceApi)
 
-describe('submitReply', () => {
-  it('should submit a new reply to marketplace api', async () => {
-    const API_URL = '/api/reply'
+describe('modifyReply', () => {
+  it('should modify a reply in marketplace api', async () => {
+    const TIMESTAMP = '2343254.345345'
+    const API_URL = '/api/bot/reply/'
+    const EXPECTED_URL = API_URL + TIMESTAMP
     const newReply: IReply = {
       authorId: 'author-id',
       text: 'reply-text',
@@ -18,8 +20,8 @@ describe('submitReply', () => {
       username: 'slack-username',
     }
     mockedMarketplaceApi.post.mockResolvedValue({ data: { success: true } })
-    await submitReply(newReply)
+    await modifyReply(TIMESTAMP, newReply)
     expect(marketplaceApi.post).toHaveBeenCalledTimes(1)
-    expect(marketplaceApi.post).toHaveBeenCalledWith(API_URL, newReply)
+    expect(marketplaceApi.post).toHaveBeenCalledWith(EXPECTED_URL, newReply)
   })
 })

@@ -8,9 +8,10 @@
     "axios": "^0.27.2"
   },
   "scripts": {
-    "start": "tsc-watch --onSuccess \"node ./dist/index.js\"",
+    "start:dev": "tsc-watch --onSuccess \"cross-env NODE_ENV=dev node ./dist/index.js\"",
+    "start:prod": "tsc-watch --onSuccess \"cross-env NODE_ENV=prod node ./dist/index.js\"",
     "build": "tsc --build",
-    "test": "jest",
+    "test": "jest --unhandled-rejections=strict",
     "test:dev": "jest --watch",
     "test:coverage": "jest --coverage"
   },
@@ -18,6 +19,7 @@
     "@types/jest": "^29.0.3",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.0.2",
     "eslint": "^8.24.0",
     "eslint-config-airbnb": "^19.0.4",

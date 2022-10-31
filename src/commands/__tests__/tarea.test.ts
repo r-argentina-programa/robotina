@@ -25,13 +25,9 @@ jest.mock('@slack/bolt', () => {
   }
 })
 
-jest.mock('../tarea/uploadTarea', () => ({
-  uploadTarea: jest.fn(),
-}))
+jest.mock('../tarea/uploadTarea')
 
-jest.mock('../../api/createThread', () => ({
-  createThread: jest.fn(),
-}))
+jest.mock('../../api/createThread')
 
 const mockedUploadTarea = uploadTarea as jest.Mocked<typeof uploadTarea>
 const mockedCreateThread = createThread as jest.Mocked<typeof createThread>

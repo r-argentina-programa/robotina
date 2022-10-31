@@ -3,15 +3,9 @@ import { sendSubmission } from '../sendSubmission'
 import { marketplaceApi } from '../index'
 import { ISubmission } from '../../interfaces/ISubmission'
 
-jest.mock('../index', () => ({
-  marketplaceApi: {
-    post: jest.fn(),
-  },
-}))
+jest.mock('../index')
 
-const mockedMarketplaceApi = marketplaceApi as jest.MockedFunction<
-  typeof marketplaceApi
->
+const mockedMarketplaceApi = jest.mocked(marketplaceApi)
 
 describe('sendSubmission', () => {
   it('should send a submission to marketplace api', async () => {
