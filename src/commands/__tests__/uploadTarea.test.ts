@@ -81,7 +81,7 @@ describe('uploadTarea test', () => {
     try {
       await uploadTarea(MOCKED_TAREA)
     } catch (err) {
-      expect(err).toEqual(Error())
+      expect(err).toEqual(ERROR)
     }
   })
 })
