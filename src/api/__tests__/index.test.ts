@@ -1,14 +1,12 @@
 import { expect, jest } from '@jest/globals'
 import { AxiosResponse } from 'axios'
-import {
-  interceptorRequestOnSuccess,
-  interceptorRequestOnFail,
-  IAxiosError,
-} from '..'
+import { IAxiosError, interceptorRequestOnFail } from '..'
 import { getBotCredentials, IGetCredential } from '../getBotCredentials'
-import * as index from '..'
+import * as index from '../index'
+import { retryHttpRequest } from '../retryHttpRequest'
 
 jest.mock('../getBotCredentials')
+jest.mock('../retryHttpRequest')
 
 jest.mock('../index', () => ({
   ...(jest.requireActual('../index') as typeof index),
@@ -16,14 +14,7 @@ jest.mock('../index', () => ({
 }))
 
 const mockedGetBotCredentials = jest.mocked(getBotCredentials)
-
-describe('interceptorRequestOnSuccess', () => {
-  it('should not modify axios response', async () => {
-    const AXIOS_RESPONSE = { data: { test: true } } as unknown as AxiosResponse
-    const response = interceptorRequestOnSuccess(AXIOS_RESPONSE)
-    expect(response).toBe(AXIOS_RESPONSE)
-  })
-})
+const mockedRetryHttpRequest = jest.mocked(retryHttpRequest)
 
 describe('interceptorRequestOnFail', () => {
   it('should try to get new bot credentials', async () => {
@@ -44,8 +35,12 @@ describe('interceptorRequestOnFail', () => {
       expires_in: 123123,
       token_type: 'Bearer',
     }
+    expect.assertions(1)
     mockedGetBotCredentials.mockResolvedValueOnce(botCredentials)
-    interceptorRequestOnFail(AXIOS_RESPONSE)
+    mockedRetryHttpRequest.mockImplementationOnce(() =>
+      Promise.resolve({} as AxiosResponse)
+    )
+    await interceptorRequestOnFail(AXIOS_RESPONSE)
     expect(mockedGetBotCredentials).toHaveBeenCalledTimes(1)
   })
 

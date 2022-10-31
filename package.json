@@ -11,7 +11,7 @@
     "start:dev": "tsc-watch --onSuccess \"cross-env NODE_ENV=dev node ./dist/index.js\"",
     "start:prod": "tsc-watch --onSuccess \"cross-env NODE_ENV=prod node ./dist/index.js\"",
     "build": "tsc --build",
-    "test": "jest",
+    "test": "jest --unhandled-rejections=strict",
     "test:dev": "jest --watch",
     "test:coverage": "jest --coverage"
   },

@@ -1,10 +1,6 @@
-import axios, {
-  AxiosResponse,
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestConfig,
-} from 'axios'
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
 import { getBotCredentials } from './getBotCredentials'
+import { retryHttpRequest } from './retryHttpRequest'
 
 export type IAxiosError = AxiosError & {
   config: {
@@ -33,21 +29,16 @@ export const setRequestConfigAuthorization = (
   req.headers!.Authorization = `Bearer ${bearerToken}`
 }
 
-export const interceptorRequestOnSuccess = (response: AxiosResponse) => response
-
 export const interceptorRequestOnFail = async (error: IAxiosError) => {
   const originalRequest = error.config
   if (error.response?.status === 401 && !originalRequest.retry) {
     originalRequest.retry = true
-    const newToken = await getBotCredentials()
-    setMarketplaceApiAuthorization(marketplaceApi, newToken.access_token)
-    setRequestConfigAuthorization(originalRequest, newToken.access_token)
-    return axios(originalRequest)
+    const { access_token: AccessToken } = await getBotCredentials()
+    setMarketplaceApiAuthorization(marketplaceApi, AccessToken)
+    setRequestConfigAuthorization(originalRequest, AccessToken)
+    return retryHttpRequest(originalRequest)
   }
   return Promise.reject(error)
 }
 
-marketplaceApi.interceptors.response.use(
-  interceptorRequestOnSuccess,
-  interceptorRequestOnFail
-)
+marketplaceApi.interceptors.response.use(undefined, interceptorRequestOnFail)
