@@ -31,7 +31,7 @@ export const setRequestConfigAuthorization = (
 
 export const interceptorRequestOnFail = async (error: IAxiosError) => {
   const originalRequest = error.config
-  if (error.response?.status === 401 && !originalRequest.retry) {
+  if (error.response!.status === 401 && !originalRequest.retry) {
     originalRequest.retry = true
     const { access_token: AccessToken } = await getBotCredentials()
     setMarketplaceApiAuthorization(marketplaceApi, AccessToken)

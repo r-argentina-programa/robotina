@@ -25,6 +25,7 @@ describe('getBotCredentials', () => {
     process.env = ENVIROMENT_VARIABLES
   })
   it('should make a http request with enviroment variables', async () => {
+    expect.assertions(3)
     const { AUTH0_DOMAIN } = ENVIROMENT_VARIABLES
     const DATA = {
       client_id: ENVIROMENT_VARIABLES.AUTH0_CLIENT_ID,
