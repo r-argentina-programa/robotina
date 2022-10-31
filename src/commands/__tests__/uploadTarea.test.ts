@@ -4,17 +4,11 @@ import { sendSubmission } from '../../api/sendSubmission'
 import { sendSubmissionAndUserCreation } from '../../api/sendSubmissionAndUserCreation'
 import { verifyIfUserExists } from '../../api/verifyIfUserExists'
 
-jest.mock('../../api/sendSubmission', () => ({
-  sendSubmission: jest.fn(),
-}))
+jest.mock('../../api/sendSubmission')
 
-jest.mock('../../api/sendSubmissionAndUserCreation', () => ({
-  sendSubmissionAndUserCreation: jest.fn(),
-}))
+jest.mock('../../api/sendSubmissionAndUserCreation')
 
-jest.mock('../../api/verifyIfUserExists', () => ({
-  verifyIfUserExists: jest.fn(),
-}))
+jest.mock('../../api/verifyIfUserExists')
 
 const mockedVerifyIfUserExists = verifyIfUserExists as jest.Mocked<
   typeof verifyIfUserExists

@@ -4,9 +4,7 @@ import { WebClient } from '@slack/web-api'
 import { uploadTarea } from '../../commands/tarea/uploadTarea'
 import { submitWithMessageReactionFunction } from '../messageReaction'
 
-jest.mock('../../commands/tarea/uploadTarea', () => ({
-  uploadTarea: jest.fn().mockImplementation(() => Promise.resolve(true)),
-}))
+jest.mock('../../commands/tarea/uploadTarea')
 
 jest.mock('@slack/bolt', () => {
   const properties = {
