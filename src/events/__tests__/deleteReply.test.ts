@@ -8,11 +8,7 @@ import {
   deleteReplyEvent,
 } from '../deleteReply'
 
-jest.mock('../../api/deleteReply', () => ({
-  deleteReply: jest
-    .fn()
-    .mockImplementation(() => Promise.resolve({ success: 'true' })),
-}))
+jest.mock('../../api/deleteReply')
 
 jest.mock('@slack/bolt', () => {
   const properties = {

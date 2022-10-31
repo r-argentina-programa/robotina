@@ -7,11 +7,7 @@ import {
   saveSubmissionRepliesEvent,
 } from '../saveSubmissionReplies'
 
-jest.mock('../../api/submitReply', () => ({
-  submitReply: jest
-    .fn()
-    .mockImplementation(() => Promise.resolve({ success: 'true' })),
-}))
+jest.mock('../../api/submitReply')
 
 jest.mock('@slack/bolt', () => {
   const properties = {

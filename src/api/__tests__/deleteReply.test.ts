@@ -2,15 +2,9 @@ import { expect, jest } from '@jest/globals'
 import { marketplaceApi } from '../index'
 import { deleteReply } from '../deleteReply'
 
-jest.mock('../index', () => ({
-  marketplaceApi: {
-    delete: jest.fn(),
-  },
-}))
+jest.mock('../index')
 
-const mockedMarketplaceApi = marketplaceApi as jest.MockedFunction<
-  typeof marketplaceApi
->
+const mockedMarketplaceApi = jest.mocked(marketplaceApi)
 
 describe('deleteReply', () => {
   it('should delete a reply in marketplace api', async () => {

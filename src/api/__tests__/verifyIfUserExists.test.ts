@@ -2,15 +2,9 @@ import { expect, jest } from '@jest/globals'
 import { marketplaceApi } from '../index'
 import { verifyIfUserExists } from '../verifyIfUserExists'
 
-jest.mock('../index', () => ({
-  marketplaceApi: {
-    get: jest.fn(),
-  },
-}))
+jest.mock('../index')
 
-const mockedMarketplaceApi = marketplaceApi as jest.MockedFunction<
-  typeof marketplaceApi
->
+const mockedMarketplaceApi = jest.mocked(marketplaceApi)
 
 describe('verifyIfUserExists', () => {
   it('should check if user exists in marketplace api ', async () => {
