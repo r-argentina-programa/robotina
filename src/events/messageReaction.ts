@@ -1,5 +1,6 @@
 import { App, ReactionAddedEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
+import { createThread, ICreateThread } from '../api/createThread'
 import { uploadTarea } from '../commands/tarea/uploadTarea'
 import { validateChannelName } from '../utils/validateChannelName'
 
@@ -42,7 +43,7 @@ export const submitWithMessageReactionFunction = async ({
     }
     const messageText = message.messages![0]!.text as string
 
-    await uploadTarea({
+    const tarea = await uploadTarea({
       classNumber,
       userId: user.id as string,
       delivery: messageText,
@@ -50,6 +51,21 @@ export const submitWithMessageReactionFunction = async ({
       lastName: user.profile!.last_name,
       email: user.profile!.email,
     })
+
+    const botMessage = await client.chat.postMessage({
+      channel: event.item.channel,
+      text: `<@${user.id}> Tarea ${classNumber}: ${messageText}`
+    })
+
+    const thread: ICreateThread = {
+      authorId: <string>process.env.BOT_ID,
+      studentId: tarea.fkStudentId,
+      text: botMessage.message!.text as string,
+      timestamp: botMessage.ts as string,
+      taskId: tarea.fkTaskId,
+    }
+
+    await createThread(thread)
   }
 }
 

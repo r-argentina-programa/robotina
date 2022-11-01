@@ -6,6 +6,8 @@ import { submitWithMessageReactionFunction } from '../messageReaction'
 
 jest.mock('../../commands/tarea/uploadTarea')
 
+jest.mock('../../api/createThread')
+
 jest.mock('@slack/bolt', () => {
   const properties = {
     event: jest.fn(),
@@ -24,11 +26,15 @@ jest.mock('@slack/web-api', () => {
     users: {
       info: jest.fn(),
     },
+    chat: {
+      postMessage: jest.fn()
+    }
   }
   return { WebClient: jest.fn(() => properties) }
 })
 
 const mockedWebClient = new WebClient() as jest.Mocked<WebClient>
+const mockedUploadTarea = uploadTarea as jest.Mocked<typeof uploadTarea>
 
 let event: ReactionAddedEvent | any
 let client: WebClient
@@ -72,6 +78,26 @@ describe('messageReaction', () => {
     mockedWebClient.conversations.history.mockResolvedValueOnce({
       messages: [{ text: 'message text example' }],
       ok: true,
+    })
+    
+    mockedUploadTarea.mockResolvedValue({
+      fkTaskId: 1,
+      fkStudentId: 7,
+      completed: false,
+      viewer: null,
+      delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
+      deletedAt: null,
+      id: 22,
+      createdAt: '2022-10-14T14:51:20.218Z',
+      updatedAt: '2022-10-14T14:51:20.218Z',
+    })
+
+    mockedWebClient.chat.postMessage.mockResolvedValueOnce({
+      message: {
+        text: 'valid text'
+      },
+      ts: '1666879163.121179',
+      ok: true
     })
 
     await submitWithMessageReactionFunction({ client, event })
