@@ -44,11 +44,11 @@ export const submitWithMessageReactionFunction = async ({
 
     await uploadTarea({
       classNumber,
-      userId: user.id as string,
+      slackId: user.id as string,
       delivery: messageText,
       firstName: user.profile!.first_name,
       lastName: user.profile!.last_name,
-      email: user.profile!.email,
+      email: user.profile!.email as string,
     })
   }
 }

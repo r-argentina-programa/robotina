@@ -1,27 +1,20 @@
 import { expect, jest } from '@jest/globals'
 import { IUploadTarea, uploadTarea } from '../tarea/uploadTarea'
 import { sendSubmission } from '../../api/sendSubmission'
-import { sendSubmissionAndUserCreation } from '../../api/sendSubmissionAndUserCreation'
-import { verifyIfUserExists } from '../../api/verifyIfUserExists'
+import { getUser } from '../../api/getUser'
+import { User } from '../../interfaces/marketplaceApi/user'
 
 jest.mock('../../api/sendSubmission')
 
 jest.mock('../../api/sendSubmissionAndUserCreation')
 
-jest.mock('../../api/verifyIfUserExists')
+jest.mock('../../api/getUser')
 
-const mockedVerifyIfUserExists = verifyIfUserExists as jest.Mocked<
-  typeof verifyIfUserExists
->
+const mockedGetUser = getUser as jest.Mocked<typeof getUser>
 
 const mockedSendSubmission = sendSubmission as jest.Mocked<
   typeof sendSubmission
 >
-
-const mockedSendSubmissionAndUserCreation =
-  sendSubmissionAndUserCreation as jest.Mocked<
-    typeof sendSubmissionAndUserCreation
-  >
 
 const EXPECTED_AXIOS_DATA = {
   taskId: 11,
@@ -40,7 +33,7 @@ describe('uploadTarea test', () => {
     jest.resetAllMocks()
   })
   const MOCKED_TAREA: IUploadTarea = {
-    userId: 'mockId',
+    slackId: 'mockId',
     delivery: 'mockTarea',
     classNumber: '12',
     firstName: 'john',
@@ -48,35 +41,51 @@ describe('uploadTarea test', () => {
     email: 'fake@email.com',
   }
 
+  const MOCKED_USER: User = {
+    externalId: 'external-id-test',
+    id: 1,
+    roles: 'Student',
+    username: 'username-test',
+    student: {
+      email: 'mail@mail.com',
+      firstName: 'firstname',
+      id: 1,
+      lastName: 'lastname',
+    },
+  }
+
   it('should just send submission + user id ', async () => {
-    mockedVerifyIfUserExists.mockResolvedValueOnce(true)
+    expect.assertions(1)
+    mockedGetUser.mockResolvedValueOnce([MOCKED_USER])
     await uploadTarea(MOCKED_TAREA)
     expect(mockedSendSubmission).toHaveBeenCalledTimes(1)
   })
 
   it("should send submission and create user if it doesn't exist ", async () => {
-    mockedVerifyIfUserExists.mockResolvedValueOnce(false)
-    mockedSendSubmissionAndUserCreation.mockResolvedValueOnce({
-      taskId: 11,
-      studentId: 11,
-      completed: false,
-      viewer: null,
-      delivery: 'https://github.com/r-argentina-programa/robotina',
-      deletedAt: null,
-      id: 20,
-      createdAt: '2022-10-06T11:33:58.000Z',
-      updatedAt: '2022-10-06T11:33:58.000Z',
-    })
+    expect.assertions(2)
+    mockedGetUser.mockResolvedValueOnce([])
+    // mockedSendSubmissionAndUserCreation.mockResolvedValueOnce({
+    //   taskId: 11,
+    //   studentId: 11,
+    //   completed: false,
+    //   viewer: null,
+    //   delivery: 'https://github.com/r-argentina-programa/robotina',
+    //   deletedAt: null,
+    //   id: 20,
+    //   createdAt: '2022-10-06T11:33:58.000Z',
+    //   updatedAt: '2022-10-06T11:33:58.000Z',
+    // })
 
     const returnedValues = await uploadTarea(MOCKED_TAREA)
-    expect(mockedSendSubmissionAndUserCreation).toHaveBeenCalledTimes(1)
+    // expect(mockedSendSubmissionAndUserCreation).toHaveBeenCalledTimes(1)
     expect(returnedValues).toEqual(EXPECTED_AXIOS_DATA)
   })
 
   it('should throw error when gets bad response', async () => {
-    const ERROR = new Error('test error')
-    mockedVerifyIfUserExists.mockResolvedValue({ data: true })
-    mockedSendSubmissionAndUserCreation.mockRejectedValueOnce(ERROR)
+    expect.assertions(1)
+    const ERROR = new Error()
+    mockedGetUser.mockResolvedValue([])
+    // mockedSendSubmissionAndUserCreation.mockRejectedValueOnce(ERROR)
 
     try {
       await uploadTarea(MOCKED_TAREA)

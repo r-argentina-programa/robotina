@@ -7,7 +7,6 @@ export interface IGetCredential {
 }
 
 export const getBotCredentials = async () => {
-  console.log('Getting Auth0 credentials')
   try {
     const { data } = (await axios.post(
       `${<string>process.env.AUTH0_DOMAIN}/oauth/token`,
