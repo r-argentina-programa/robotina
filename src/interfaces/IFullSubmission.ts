@@ -1,5 +1,5 @@
 export interface IFullSubmission {
-  lessonId: number
+  taskId: number
   userExternalId: string
   firstName?: string
   lastName?: string

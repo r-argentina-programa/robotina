@@ -1,11 +1,22 @@
 import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
+import {
+  User,
+  UsersInfoResponse,
+  Profile,
+} from '@slack/web-api/dist/response/UsersInfoResponse'
 import { unknownCommandBlock } from '../../blocks/unknownCommandBlock'
 import { wrongFormatBlock } from '../../blocks/wrongFormatBlock'
 import { uploadTarea } from './uploadTarea'
 import { createThread, ICreateThread } from '../../api/createThread'
 import { validateSubmissionDeliveryFormat } from '../../utils/validateSubmissionDeliveryFormat'
 import { validateChannelName } from '../../utils/validateChannelName'
+
+type IUserClient = UsersInfoResponse & {
+  user: User & {
+    profile: Profile
+  }
+}
 
 interface Command {
   command: SlashCommand
@@ -24,9 +35,9 @@ export const tareaCommandFunction = async ({
 }: Command): Promise<void> => {
   await ack()
   try {
-    const { user } = await client.users.info({
+    const { user } = (await client.users.info({
       user: command.user_id,
-    })
+    })) as IUserClient
     if (!user) {
       throw new Error('User not found')
     }
@@ -54,20 +65,20 @@ export const tareaCommandFunction = async ({
     if (command.text && validSubmissionFormat) {
       const tarea = await uploadTarea({
         classNumber,
-        userId: user.id as string,
+        slackId: user.id as string,
         delivery: command.text,
-        firstName: user.profile!.first_name,
-        lastName: user.profile!.last_name,
-        email: user.profile!.email,
+        firstName: user.profile.first_name,
+        lastName: user.profile.last_name,
+        email: user.profile.email as string,
       })
-      const message = await say(
+      const messageResponse = await say(
         `<@${user.id}> Tarea ${classNumber}: ${command.text}`
       )
       const thread: ICreateThread = {
         authorId: <string>process.env.BOT_ID,
         studentId: tarea.fkStudentId,
-        text: message.message?.text as string,
-        timestamp: message.ts as string,
+        text: messageResponse.message?.text as string,
+        timestamp: messageResponse.ts as string,
         taskId: tarea.fkTaskId,
       }
       await createThread(thread)

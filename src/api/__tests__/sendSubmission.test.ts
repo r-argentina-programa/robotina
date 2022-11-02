@@ -9,11 +9,11 @@ const mockedMarketplaceApi = jest.mocked(marketplaceApi)
 
 describe('sendSubmission', () => {
   it('should send a submission to marketplace api', async () => {
-    const API_URL = '/api/bot/submission'
+    const API_URL = '/api/submission'
     const newSubmission: ISubmission = {
       delivery: 'new-submission-delivery',
-      lessonId: 1,
-      userExternalId: 'user-external-id',
+      taskId: 1,
+      studentId: 1,
     }
     mockedMarketplaceApi.post.mockResolvedValue({ data: { success: true } })
     await sendSubmission(newSubmission)

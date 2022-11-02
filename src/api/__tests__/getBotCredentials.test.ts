@@ -1,8 +1,9 @@
 import { expect, jest } from '@jest/globals'
 import axios from 'axios'
-import { getBotCredentials, IGetCredential } from '../getBotCredentials'
+import { ICredential } from '../../interfaces/marketplaceApi/credential'
+import { getBotCredentials } from '../getBotCredentials'
 
-const credentials: IGetCredential = {
+const credentials: ICredential = {
   access_token: 'new-token',
   expires_in: 34325435,
   token_type: 'Bearer',

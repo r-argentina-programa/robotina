@@ -1,7 +1,8 @@
 import { expect, jest } from '@jest/globals'
 import { AxiosResponse } from 'axios'
 import { IAxiosError, interceptorRequestOnFail } from '..'
-import { getBotCredentials, IGetCredential } from '../getBotCredentials'
+import { ICredential } from '../../interfaces/marketplaceApi/credential'
+import { getBotCredentials } from '../getBotCredentials'
 import * as index from '../index'
 import { retryHttpRequest } from '../retryHttpRequest'
 
@@ -30,7 +31,7 @@ describe('interceptorRequestOnFail', () => {
         },
       },
     } as unknown as IAxiosError
-    const botCredentials: IGetCredential = {
+    const botCredentials: ICredential = {
       access_token: 'test-access-token',
       expires_in: 123123,
       token_type: 'Bearer',
