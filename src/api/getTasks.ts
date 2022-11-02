@@ -1,11 +1,6 @@
 import { AxiosResponse } from 'axios'
 import { marketplaceApi } from '.'
-
-interface ITask {
-  id: number
-  title: string
-  resolutionType: 'Link' | 'Code'
-}
+import { ITask } from '../interfaces/marketplaceApi/task'
 
 export const getTasks = async (classNumber: string) => {
   const { data } = (await marketplaceApi(

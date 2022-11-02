@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios'
 import { marketplaceApi } from '.'
-import { Student, User } from '../interfaces/marketplaceApi/user'
+import { IStudent } from '../interfaces/marketplaceApi/student'
+import { IUser } from '../interfaces/marketplaceApi/user'
 
 interface ICreateUser {
   username?: string
@@ -12,7 +13,7 @@ const createUser = async (user: ICreateUser) => {
   const { data } = (await marketplaceApi.post(
     '/api/user',
     user
-  )) as AxiosResponse<User>
+  )) as AxiosResponse<IUser>
   return data
 }
 
@@ -27,7 +28,7 @@ export const createStudent = async (student: ICreateStudent) => {
   const { data } = (await marketplaceApi.post(
     '/api/student',
     student
-  )) as AxiosResponse<Student>
+  )) as AxiosResponse<IStudent>
   return data
 }
 

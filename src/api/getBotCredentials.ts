@@ -1,10 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-
-export interface IGetCredential {
-  access_token: string
-  expires_in: number
-  token_type: string
-}
+import { ICredential } from '../interfaces/marketplaceApi/credential'
 
 export const getBotCredentials = async () => {
   try {
@@ -19,7 +14,7 @@ export const getBotCredentials = async () => {
         username: process.env.AUTH0_USERNAME,
         password: process.env.AUTH0_PASSWORD,
       }
-    )) as AxiosResponse<IGetCredential>
+    )) as AxiosResponse<ICredential>
     return data
   } catch (err) {
     throw new Error('Bot authentication failed')

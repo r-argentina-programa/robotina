@@ -2,7 +2,7 @@ import { expect, jest } from '@jest/globals'
 import { IUploadTarea, uploadTarea } from '../tarea/uploadTarea'
 import { sendSubmission } from '../../api/sendSubmission'
 import { getUser } from '../../api/getUser'
-import { User } from '../../interfaces/marketplaceApi/user'
+import { IUser } from '../../interfaces/marketplaceApi/user'
 
 jest.mock('../../api/sendSubmission')
 
@@ -41,7 +41,7 @@ describe('uploadTarea test', () => {
     email: 'fake@email.com',
   }
 
-  const MOCKED_USER: User = {
+  const MOCKED_USER: IUser = {
     externalId: 'external-id-test',
     id: 1,
     roles: 'Student',
