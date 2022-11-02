@@ -3,15 +3,21 @@ import { IUploadTarea, uploadTarea } from '../tarea/uploadTarea'
 import { sendSubmission } from '../../api/sendSubmission'
 import { getUser } from '../../api/getUser'
 import { IUser } from '../../interfaces/marketplaceApi/user'
+import { createUserStudent, ICreateUserStudent } from '../../api/createStudent'
+import { getTasks } from '../../api/getTasks'
+import { ITask } from '../../interfaces/marketplaceApi/task'
+import { IStudent } from '../../interfaces/marketplaceApi/student'
 
 jest.mock('../../api/sendSubmission')
-
-jest.mock('../../api/sendSubmissionAndUserCreation')
-
 jest.mock('../../api/getUser')
+jest.mock('../../api/createStudent')
+jest.mock('../../api/getTasks')
 
 const mockedGetUser = getUser as jest.Mocked<typeof getUser>
-
+const mockedCreateUserStudent = createUserStudent as jest.Mocked<
+  typeof createUserStudent
+>
+const mockedGetTasks = getTasks as jest.Mocked<typeof getTasks>
 const mockedSendSubmission = sendSubmission as jest.Mocked<
   typeof sendSubmission
 >
@@ -29,9 +35,17 @@ const EXPECTED_AXIOS_DATA = {
 }
 
 describe('uploadTarea test', () => {
+  const OLD_ENV = process.env
+
   beforeEach(() => {
     jest.resetAllMocks()
+    process.env = { ...OLD_ENV } // Make a copy
   })
+
+  afterAll(() => {
+    process.env = OLD_ENV // Restore old environment
+  })
+
   const MOCKED_TAREA: IUploadTarea = {
     slackId: 'mockId',
     delivery: 'mockTarea',
@@ -54,43 +68,101 @@ describe('uploadTarea test', () => {
     },
   }
 
+  const MOCKED_TASK: ITask = {
+    id: 3,
+    resolutionType: 'Code',
+    title: 'test-title',
+  }
+
+  const MOCKED_STUDENT: IStudent = {
+    email: 'test-email',
+    firstName: 'firstName-test',
+    id: 1,
+    lastName: 'lastName-test',
+  }
+
   it('should just send submission + user id ', async () => {
-    expect.assertions(1)
+    expect.assertions(3)
     mockedGetUser.mockResolvedValueOnce([MOCKED_USER])
+
+    mockedGetTasks.mockResolvedValueOnce([MOCKED_TASK])
     await uploadTarea(MOCKED_TAREA)
+    expect(mockedGetTasks).toHaveBeenCalledTimes(1)
+    expect(mockedGetUser).toHaveBeenCalledTimes(1)
     expect(mockedSendSubmission).toHaveBeenCalledTimes(1)
   })
 
   it("should send submission and create user if it doesn't exist ", async () => {
-    expect.assertions(2)
+    expect.assertions(4)
     mockedGetUser.mockResolvedValueOnce([])
-    // mockedSendSubmissionAndUserCreation.mockResolvedValueOnce({
-    //   taskId: 11,
-    //   studentId: 11,
-    //   completed: false,
-    //   viewer: null,
-    //   delivery: 'https://github.com/r-argentina-programa/robotina',
-    //   deletedAt: null,
-    //   id: 20,
-    //   createdAt: '2022-10-06T11:33:58.000Z',
-    //   updatedAt: '2022-10-06T11:33:58.000Z',
-    // })
+    mockedCreateUserStudent.mockResolvedValue(MOCKED_STUDENT)
+    mockedGetTasks.mockResolvedValueOnce([MOCKED_TASK])
 
-    const returnedValues = await uploadTarea(MOCKED_TAREA)
-    // expect(mockedSendSubmissionAndUserCreation).toHaveBeenCalledTimes(1)
-    expect(returnedValues).toEqual(EXPECTED_AXIOS_DATA)
+    mockedSendSubmission.mockResolvedValueOnce({
+      taskId: 11,
+      studentId: 11,
+      completed: false,
+      viewer: null,
+      delivery: 'https://github.com/r-argentina-programa/robotina',
+      deletedAt: null,
+      id: 20,
+      createdAt: '2022-10-06T11:33:58.000Z',
+      updatedAt: '2022-10-06T11:33:58.000Z',
+    })
+
+    const submission = await uploadTarea(MOCKED_TAREA)
+    expect(mockedGetTasks).toHaveBeenCalledTimes(1)
+    expect(mockedGetUser).toHaveBeenCalledTimes(1)
+    expect(mockedCreateUserStudent).toHaveBeenCalledTimes(1)
+    expect(submission).toEqual(EXPECTED_AXIOS_DATA)
+  })
+
+  it('should create an user with email as username and lastname when username and lastname is undefined', async () => {
+    const MOCKED_SLACK_TEAM_ID = 'test-slack-id'
+    process.env.SLACK_TEAM_ID = MOCKED_SLACK_TEAM_ID
+    expect.assertions(1)
+    const MOCKED_TAREA_WITH_UNDEFINED_USERNAME_AND_LASTNAME: IUploadTarea = {
+      slackId: 'mockId',
+      delivery: 'mockTarea',
+      classNumber: '12',
+      firstName: undefined,
+      lastName: undefined,
+      email: 'fake@email.com',
+    }
+    mockedGetUser.mockResolvedValueOnce([])
+    mockedCreateUserStudent.mockResolvedValue(MOCKED_STUDENT)
+    mockedGetTasks.mockResolvedValueOnce([MOCKED_TASK])
+    await uploadTarea(MOCKED_TAREA_WITH_UNDEFINED_USERNAME_AND_LASTNAME)
+    const EXPECTED_PARAMS: ICreateUserStudent = {
+      email: 'fake@email.com',
+      firstName: 'fake@email.com',
+      lastName: 'fake@email.com',
+      roles: 'Student',
+      username: undefined,
+      externalId: `oauth2|slack|${MOCKED_SLACK_TEAM_ID}-mockId`,
+    }
+    expect(mockedCreateUserStudent).toHaveBeenCalledWith(EXPECTED_PARAMS)
   })
 
   it('should throw error when gets bad response', async () => {
     expect.assertions(1)
     const ERROR = new Error()
-    mockedGetUser.mockResolvedValue([])
-    // mockedSendSubmissionAndUserCreation.mockRejectedValueOnce(ERROR)
-
+    mockedGetUser.mockRejectedValueOnce(ERROR)
     try {
       await uploadTarea(MOCKED_TAREA)
     } catch (err) {
       expect(err).toEqual(ERROR)
+    }
+  })
+
+  it('should throw when task with given lesson id is not found', async () => {
+    const EXPECTED_ERROR = new Error('Task not found')
+    mockedGetUser.mockResolvedValueOnce([MOCKED_USER])
+    mockedGetTasks.mockResolvedValueOnce([])
+    try {
+      await uploadTarea(MOCKED_TAREA)
+    } catch (err) {
+      expect(err).toEqual(EXPECTED_ERROR)
     }
   })
 })

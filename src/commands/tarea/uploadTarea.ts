@@ -23,44 +23,39 @@ export const uploadTarea = async ({
   slackId,
 }: IUploadTarea) => {
   const auth0Id = createAuth0Id(slackId)
-  try {
-    let submission: ISubmission
-    const userResponse = await getUser(auth0Id)
-    const taskResponse = await getTasks(classNumber)
+  let submission: ISubmission
+  const userResponse = await getUser(auth0Id)
+  const taskResponse = await getTasks(classNumber)
 
-    if (!taskResponse.length) {
-      throw new Error('Task not found')
+  if (!taskResponse.length) {
+    throw new Error('Task not found')
+  }
+  const taskId = taskResponse[0]!.id
+  if (!userResponse.length) {
+    console.log('new user')
+    const user: ICreateUserStudent = {
+      firstName: firstName || email,
+      email,
+      externalId: auth0Id,
+      lastName: lastName || email,
+      roles: 'Student',
     }
-    const taskId = taskResponse[0]!.id
-    if (!userResponse.length) {
-      console.log('usuario nuevo')
-      const user: ICreateUserStudent = {
-        firstName: firstName || email,
-        email,
-        externalId: auth0Id,
-        lastName: lastName || email,
-        roles: 'Student',
-      }
-      const student = await createUserStudent(user)
+    const student = await createUserStudent(user)
 
-      submission = {
-        taskId,
-        studentId: student.id,
-        delivery,
-      }
-
-      return await sendSubmission(submission)
-    }
-    console.log('usuario ya existe')
-    const studentId = userResponse[0].student!.id
     submission = {
       taskId,
-      studentId,
+      studentId: student.id,
       delivery,
     }
-    return await sendSubmission(submission)
-  } catch (error) {
-    console.log(error)
-    throw error
+
+    return sendSubmission(submission)
   }
+  console.log('user already exists')
+  const studentId = userResponse[0].student!.id
+  submission = {
+    taskId,
+    studentId,
+    delivery,
+  }
+  return sendSubmission(submission)
 }
