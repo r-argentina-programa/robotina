@@ -1,5 +1,5 @@
 export interface ISubmission {
-  lessonId: number
-  userExternalId: string
+  taskId: number
+  studentId: number
   delivery: string
 }
