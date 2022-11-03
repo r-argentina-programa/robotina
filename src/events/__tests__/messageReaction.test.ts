@@ -76,7 +76,10 @@ describe('messageReaction', () => {
     })
 
     mockedWebClient.conversations.history.mockResolvedValueOnce({
-      messages: [{ text: 'message text example' }],
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
       ok: true,
     })
     
@@ -112,6 +115,14 @@ describe('messageReaction', () => {
     const EXPECTED_ERROR = new Error('Slack-api Error: User not found')
     mockedWebClient.users.info.mockResolvedValueOnce({ ok: false })
 
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
+      ok: true,
+    })
+
     try {
       await submitWithMessageReactionFunction({ client, event })
     } catch (err) {
@@ -130,6 +141,14 @@ describe('messageReaction', () => {
           email: 'john@doe.com',
         },
       },
+      ok: true,
+    })
+    
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
       ok: true,
     })
 
