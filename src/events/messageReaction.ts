@@ -19,16 +19,16 @@ export const submitWithMessageReactionFunction = async ({
   client,
   event,
 }: IReactionAddedEvent) => {
-  const message = await client.conversations.history({
+  const conversationResponse = await client.conversations.history({
     latest: event.item.ts,
     channel: event.item.channel,
     limit: 1,
     inclusive: true,
   })
-  if (!message) {
+  if (!conversationResponse) {
     throw new Error('Slack-api Error: Message not found')
   }
-  const isFirstReaction = checkIfFirstReaction(message.messages![0]!.reactions as Reaction[])
+  const isFirstReaction = checkIfFirstReaction(conversationResponse.messages![0]!.reactions as Reaction[])
   if (event.reaction === 'robot_face' && isFirstReaction) {
     const { user } = await client.users.info({
       user: event.item_user,
@@ -47,7 +47,7 @@ export const submitWithMessageReactionFunction = async ({
     if (!classNumber) {
       throw new Error('Wrong channel name')
     }
-    const messageText = message.messages![0]!.text as string
+    const messageText = conversationResponse.messages![0]!.text as string
 
     const tarea = await uploadTarea({
       classNumber,

@@ -3,6 +3,7 @@ import { ReactionAddedEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api'
 import { uploadTarea } from '../../commands/tarea/uploadTarea'
 import { submitWithMessageReactionFunction } from '../messageReaction'
+import { ConversationsHistoryResponse } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 
 jest.mock('../../commands/tarea/uploadTarea')
 
@@ -238,9 +239,7 @@ describe('messageReaction', () => {
       ok: true,
     })
 
-    mockedWebClient.conversations.history.mockResolvedValueOnce({
-      messages: [{reactions: []}],
-      ok: true})
+    mockedWebClient.conversations.history.mockResolvedValueOnce(null as unknown as ConversationsHistoryResponse)
 
     try {
       await submitWithMessageReactionFunction({ client, event })
