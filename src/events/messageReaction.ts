@@ -3,17 +3,39 @@ import { WebClient } from '@slack/web-api/dist/WebClient'
 import { createThread, ICreateThread } from '../api/createThread'
 import { uploadTarea } from '../commands/tarea/uploadTarea'
 import { validateChannelName } from '../utils/validateChannelName'
+import { Reaction } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 
 export interface IReactionAddedEvent {
   event: ReactionAddedEvent | any
   client: WebClient
 }
 
+const checkIfFirstReaction = (reactions: Reaction[]) => {
+  let firstReaction = false
+  reactions.forEach((reaction) => {
+    if(reaction.name === 'robot_face' && reaction.count === 1) {
+      firstReaction = true
+    }
+  })
+
+  return firstReaction
+}
+
 export const submitWithMessageReactionFunction = async ({
   client,
   event,
 }: IReactionAddedEvent) => {
-  if (event.reaction === 'robot_face') {
+  const message = await client.conversations.history({
+    latest: event.item.ts,
+    channel: event.item.channel,
+    limit: 1,
+    inclusive: true,
+  })
+  if (!message) {
+    throw new Error('Slack-api Error: Message not found')
+  }
+  const isFirstReaction = checkIfFirstReaction(message.messages![0]!.reactions as Reaction[])
+  if (event.reaction === 'robot_face' && isFirstReaction) {
     const { user } = await client.users.info({
       user: event.item_user,
     })
@@ -25,16 +47,6 @@ export const submitWithMessageReactionFunction = async ({
     })
     if (!channel) {
       throw new Error('Slack-api Error: Channel not found')
-    }
-
-    const message = await client.conversations.history({
-      latest: event.item.ts,
-      channel: event.item.channel,
-      limit: 1,
-      inclusive: true,
-    })
-    if (!message) {
-      throw new Error('Slack-api Error: Message not found')
     }
 
     const classNumber = validateChannelName(channel!.name as string)
