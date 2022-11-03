@@ -11,14 +11,8 @@ export interface IReactionAddedEvent {
 }
 
 const checkIfFirstReaction = (reactions: Reaction[]) => {
-  let firstReaction = false
-  reactions.forEach((reaction) => {
-    if(reaction.name === 'robot_face' && reaction.count === 1) {
-      firstReaction = true
-    }
-  })
-
-  return firstReaction
+  const firstReaction = reactions.filter((reaction) => reaction.name === 'robot_face' && reaction.count === 1)
+  return firstReaction.length
 }
 
 export const submitWithMessageReactionFunction = async ({

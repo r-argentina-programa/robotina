@@ -111,6 +111,62 @@ describe('messageReaction', () => {
     expect(uploadTarea).toBeCalledTimes(1)
   })
 
+  it('should make a submission when a message is reacted with the correct emoji', async () => {
+    const EXPECTED_ERROR = new Error('Wrong channel name')
+    mockedWebClient.users.info.mockResolvedValueOnce({
+      user: {
+        id: 'U043BDYF80H',
+        profile: {
+          first_name: 'john',
+          last_name: 'doe',
+          email: 'john@doe.com',
+        },
+      },
+      ok: true,
+    })
+
+    mockedWebClient.conversations.info.mockResolvedValueOnce({
+      channel: {
+        name: 'aaaaaa',
+      },
+      ok: true,
+    })
+
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
+      ok: true,
+    })
+    
+    mockedUploadTarea.mockResolvedValue({
+      fkTaskId: 1,
+      fkStudentId: 7,
+      completed: false,
+      viewer: null,
+      delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
+      deletedAt: null,
+      id: 22,
+      createdAt: '2022-10-14T14:51:20.218Z',
+      updatedAt: '2022-10-14T14:51:20.218Z',
+    })
+
+    mockedWebClient.chat.postMessage.mockResolvedValueOnce({
+      message: {
+        text: 'valid text'
+      },
+      ts: '1666879163.121179',
+      ok: true
+    })
+    try {
+      await submitWithMessageReactionFunction({ client, event })
+    } catch (err) {
+      expect(err).toEqual(EXPECTED_ERROR)
+    }
+
+  })
+
   it('should throw error when user is not found', async () => {
     const EXPECTED_ERROR = new Error('Slack-api Error: User not found')
     mockedWebClient.users.info.mockResolvedValueOnce({ ok: false })
@@ -182,7 +238,9 @@ describe('messageReaction', () => {
       ok: true,
     })
 
-    mockedWebClient.conversations.history.mockRejectedValueOnce(EXPECTED_ERROR)
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+      messages: [{reactions: []}],
+      ok: true})
 
     try {
       await submitWithMessageReactionFunction({ client, event })
