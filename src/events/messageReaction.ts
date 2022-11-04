@@ -29,16 +29,21 @@ export const submitWithMessageReactionFunction = async ({
     throw new Error('Slack-api Error: Message not found')
   }
   const isFirstReaction = checkIfFirstReaction(conversationResponse.messages![0]!.reactions as Reaction[])
-  if (event.reaction === 'robot_face' && isFirstReaction) {
+  
+  if (event.reaction === 'robot_face' && isFirstReaction && event.item_user !== process.env.BOT_ID) {
+
     const { user } = await client.users.info({
       user: event.item_user,
     })
+
     if (!user) {
       throw new Error('Slack-api Error: User not found')
     }
+
     const { channel } = await client.conversations.info({
       channel: event.item.channel,
     })
+
     if (!channel) {
       throw new Error('Slack-api Error: Channel not found')
     }
