@@ -41,6 +41,8 @@ let event: ReactionAddedEvent | any
 let client: WebClient
 
 describe('messageReaction', () => {
+  const OLD_ENV = process.env
+
   beforeEach(() => {
     jest.clearAllMocks()
     client = mockedWebClient
@@ -54,6 +56,13 @@ describe('messageReaction', () => {
         ts: '1666879163.121179',
       },
     } as unknown as ReactionAddedEvent
+
+    jest.resetModules()
+    process.env = { ...OLD_ENV }
+  })
+
+  afterAll(() => {
+    process.env = OLD_ENV // Restore old environment
   })
 
   it('should make a submission when a message is reacted with the correct emoji', async () => {
@@ -110,6 +119,23 @@ describe('messageReaction', () => {
     expect(client.conversations.info).toBeCalledTimes(1)
     expect(client.conversations.history).toBeCalledTimes(1)
     expect(uploadTarea).toBeCalledTimes(1)
+  })
+
+  it('should not run if the message that received the reaction is from the bot', async () => {
+    process.env.BOT_ID = 'U043BDYF80H'
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
+      ok: true,
+    })
+
+    await submitWithMessageReactionFunction({ client, event })
+
+    expect(client.users.info).toBeCalledTimes(0)
+    expect(client.conversations.info).toBeCalledTimes(0)
+    expect(uploadTarea).toBeCalledTimes(0)
   })
 
   it('should make a submission when a message is reacted with the correct emoji', async () => {
