@@ -3,6 +3,7 @@ import { ReactionAddedEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api'
 import { uploadTarea } from '../../commands/tarea/uploadTarea'
 import { submitWithMessageReactionFunction } from '../messageReaction'
+import { ConversationsHistoryResponse } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 
 jest.mock('../../commands/tarea/uploadTarea')
 
@@ -40,6 +41,8 @@ let event: ReactionAddedEvent | any
 let client: WebClient
 
 describe('messageReaction', () => {
+  const OLD_ENV = process.env
+
   beforeEach(() => {
     jest.clearAllMocks()
     client = mockedWebClient
@@ -53,6 +56,13 @@ describe('messageReaction', () => {
         ts: '1666879163.121179',
       },
     } as unknown as ReactionAddedEvent
+
+    jest.resetModules()
+    process.env = { ...OLD_ENV }
+  })
+
+  afterAll(() => {
+    process.env = OLD_ENV // Restore old environment
   })
 
   it('should make a submission when a message is reacted with the correct emoji', async () => {
@@ -76,7 +86,10 @@ describe('messageReaction', () => {
     })
 
     mockedWebClient.conversations.history.mockResolvedValueOnce({
-      messages: [{ text: 'message text example' }],
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
       ok: true,
     })
     
@@ -108,9 +121,90 @@ describe('messageReaction', () => {
     expect(uploadTarea).toBeCalledTimes(1)
   })
 
+  it('should not run if the message that received the reaction is from the bot', async () => {
+    process.env.BOT_ID = 'U043BDYF80H'
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
+      ok: true,
+    })
+
+    await submitWithMessageReactionFunction({ client, event })
+
+    expect(client.users.info).toBeCalledTimes(0)
+    expect(client.conversations.info).toBeCalledTimes(0)
+    expect(uploadTarea).toBeCalledTimes(0)
+  })
+
+  it('should make a submission when a message is reacted with the correct emoji', async () => {
+    const EXPECTED_ERROR = new Error('Wrong channel name')
+    mockedWebClient.users.info.mockResolvedValueOnce({
+      user: {
+        id: 'U043BDYF80H',
+        profile: {
+          first_name: 'john',
+          last_name: 'doe',
+          email: 'john@doe.com',
+        },
+      },
+      ok: true,
+    })
+
+    mockedWebClient.conversations.info.mockResolvedValueOnce({
+      channel: {
+        name: 'aaaaaa',
+      },
+      ok: true,
+    })
+
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
+      ok: true,
+    })
+    
+    mockedUploadTarea.mockResolvedValue({
+      fkTaskId: 1,
+      fkStudentId: 7,
+      completed: false,
+      viewer: null,
+      delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
+      deletedAt: null,
+      id: 22,
+      createdAt: '2022-10-14T14:51:20.218Z',
+      updatedAt: '2022-10-14T14:51:20.218Z',
+    })
+
+    mockedWebClient.chat.postMessage.mockResolvedValueOnce({
+      message: {
+        text: 'valid text'
+      },
+      ts: '1666879163.121179',
+      ok: true
+    })
+    try {
+      await submitWithMessageReactionFunction({ client, event })
+    } catch (err) {
+      expect(err).toEqual(EXPECTED_ERROR)
+    }
+
+  })
+
   it('should throw error when user is not found', async () => {
     const EXPECTED_ERROR = new Error('Slack-api Error: User not found')
     mockedWebClient.users.info.mockResolvedValueOnce({ ok: false })
+
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
+      ok: true,
+    })
 
     try {
       await submitWithMessageReactionFunction({ client, event })
@@ -130,6 +224,14 @@ describe('messageReaction', () => {
           email: 'john@doe.com',
         },
       },
+      ok: true,
+    })
+    
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
       ok: true,
     })
 
@@ -163,7 +265,7 @@ describe('messageReaction', () => {
       ok: true,
     })
 
-    mockedWebClient.conversations.history.mockRejectedValueOnce(EXPECTED_ERROR)
+    mockedWebClient.conversations.history.mockResolvedValueOnce(null as unknown as ConversationsHistoryResponse)
 
     try {
       await submitWithMessageReactionFunction({ client, event })
