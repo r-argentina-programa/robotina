@@ -1,5 +1,6 @@
 import { App, ReactionAddedEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
+import { Reaction } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 import { createThread, ICreateThread } from '../api/createThread'
 import { uploadTarea } from '../commands/tarea/uploadTarea'
 import { createAuth0Id } from '../utils/createAuth0Id'
@@ -86,7 +87,7 @@ export const submitWithMessageReactionFunction = async ({
 
     const botMessage = await client.chat.postMessage({
       channel: event.item.channel,
-      text: `<@${user.id}> Tarea ${classNumber}: ${messageText}`
+      text: `<@${user.id}> Tarea ${classNumber}: ${messageText}`,
     })
 
     const thread: ICreateThread = {

@@ -1,7 +1,6 @@
 import { App, KnownEventFromType, Logger, MessageEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
-import { modifyReply } from '../api/modifyReply'
-import { IModifyReply } from '../interfaces/IModifyReply'
+import { IModifyReply, modifyReply } from '../api/modifyReply'
 import { isTaskSubmission } from '../utils/validateTaskSubmission'
 
 export type IMessageEvent = KnownEventFromType<'message'> & {

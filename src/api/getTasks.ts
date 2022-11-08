@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios'
 import { marketplaceApi } from '.'
-import { ITask } from '../interfaces/marketplaceApi/task'
+import { ITask } from '../interfaces/ITask'
 
 export const getTasks = async (classNumber: string) => {
   const { data } = (await marketplaceApi.get(

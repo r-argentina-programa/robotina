@@ -6,6 +6,7 @@ import { uploadTarea } from '../tarea/uploadTarea'
 import { createThread } from '../../api/createThread'
 import { unknownCommandBlock } from '../../blocks/unknownCommandBlock'
 import { wrongFormatBlock } from '../../blocks/wrongFormatBlock'
+import { IThread } from '../../interfaces/IThread'
 
 jest.mock('@slack/web-api', () => {
   const properties = {
@@ -72,7 +73,7 @@ describe('tareaCommandFunctiontarea', () => {
       createdAt: '2022-10-13T19:58:25.751Z',
       updatedAt: '2022-10-13T19:58:25.751Z',
     })
-    mockedCreateThread.mockResolvedValue({ test: 1 })
+    mockedCreateThread.mockResolvedValue({} as unknown as IThread)
     webClientTest.users.info.mockResolvedValue({
       ok: true,
       user: {
@@ -90,10 +91,8 @@ describe('tareaCommandFunctiontarea', () => {
       completed: false,
       viewer: null,
       delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
-      deletedAt: null,
       id: 22,
-      createdAt: '2022-10-14T14:51:20.218Z',
-      updatedAt: '2022-10-14T14:51:20.218Z',
+      isActive: true,
     })
     await tareaCommandFunction({ command, ack, say, respond, client })
 
@@ -120,10 +119,8 @@ describe('tareaCommandFunctiontarea', () => {
       completed: false,
       viewer: null,
       delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
-      deletedAt: null,
       id: 22,
-      createdAt: '2022-10-14T14:51:20.218Z',
-      updatedAt: '2022-10-14T14:51:20.218Z',
+      isActive: true,
     })
     webClientTest.users.info.mockResolvedValue({
       ok: true,
@@ -222,22 +219,9 @@ describe('tareaCommandFunctiontarea', () => {
       createdAt: '2022-10-13T19:58:25.751Z',
       updatedAt: '2022-10-13T19:58:25.751Z',
     })
-    mockedCreateThread.mockResolvedValue({ test: 1 })
     webClientTest.users.info.mockResolvedValue({
       ok: false,
     })
-    mockedUploadTarea.mockResolvedValue({
-      fkTaskId: 1,
-      fkStudentId: 7,
-      completed: false,
-      viewer: null,
-      delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
-      deletedAt: null,
-      id: 22,
-      createdAt: '2022-10-14T14:51:20.218Z',
-      updatedAt: '2022-10-14T14:51:20.218Z',
-    })
-
     try {
       await tareaCommandFunction({ command, ack, say, respond, client })
     } catch (err) {
