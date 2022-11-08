@@ -3,10 +3,13 @@ import { ReactionAddedEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api'
 import { ConversationsHistoryResponse } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 import { uploadTarea } from '../../commands/tarea/uploadTarea'
+import { getMentor } from '../../api/getMentor'
 import { submitWithMessageReactionFunction } from '../messageReaction'
+import { IUser } from '../../interfaces/IUser'
+
 
 jest.mock('../../commands/tarea/uploadTarea')
-
+jest.mock('../../api/getMentor')
 jest.mock('../../api/createThread')
 
 jest.mock('@slack/bolt', () => {
@@ -36,9 +39,21 @@ jest.mock('@slack/web-api', () => {
 
 const mockedWebClient = new WebClient() as jest.Mocked<WebClient>
 const mockedUploadTarea = uploadTarea as jest.Mocked<typeof uploadTarea>
+const mockedGetMentor = getMentor as jest.Mocked<typeof getMentor>
 
 let event: ReactionAddedEvent | any
 let client: WebClient
+
+const MOCKED_USER: IUser[] = [
+  {
+      "id": 1,
+      "username": "test-username",
+      "externalId": "external-id-test",
+      "roles": [
+          "Mentor"
+      ]
+  }
+]
 
 describe('messageReaction', () => {
   const OLD_ENV = process.env
@@ -55,6 +70,7 @@ describe('messageReaction', () => {
         },
         ts: '1666879163.121179',
       },
+      user: 'U043BDYF80G'
     } as unknown as ReactionAddedEvent
 
     jest.resetModules()
@@ -66,6 +82,7 @@ describe('messageReaction', () => {
   })
 
   it('should make a submission when a message is reacted with the correct emoji', async () => {
+    process.env.BOT_ID = 'test-bot-id'
     mockedWebClient.users.info.mockResolvedValueOnce({
       user: {
         id: 'U043BDYF80H',
@@ -77,6 +94,8 @@ describe('messageReaction', () => {
       },
       ok: true,
     })
+
+    mockedGetMentor.mockResolvedValue(MOCKED_USER)
 
     mockedWebClient.conversations.info.mockResolvedValueOnce({
       channel: {
@@ -123,6 +142,36 @@ describe('messageReaction', () => {
 
   it('should not run if the message that received the reaction is from the bot', async () => {
     process.env.BOT_ID = 'U043BDYF80H'
+
+    mockedGetMentor.mockResolvedValue(MOCKED_USER)
+
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+      messages: [{
+        text: 'message text example',
+        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
+      }],
+      ok: true,
+    })
+
+    await submitWithMessageReactionFunction({ client, event })
+
+    expect(client.users.info).toBeCalledTimes(0)
+    expect(client.conversations.info).toBeCalledTimes(0)
+    expect(uploadTarea).toBeCalledTimes(0)
+  }) 
+  
+  it('should not run if the reaction is not from a mentor', async () => {
+    mockedGetMentor.mockResolvedValue([
+      {
+          "id": 1,
+          "username": "test-username",
+          "externalId": "external-id-test",
+          "roles": [
+              "Student"
+          ]
+      }
+    ])
+
     mockedWebClient.conversations.history.mockResolvedValueOnce({
       messages: [
         {
@@ -140,7 +189,8 @@ describe('messageReaction', () => {
     expect(uploadTarea).toBeCalledTimes(0)
   })
 
-  it('should make a submission when a message is reacted with the correct emoji', async () => {
+  it('should throw error when the channel name is wrong', async () => {
+    mockedGetMentor.mockResolvedValue(MOCKED_USER)
     const EXPECTED_ERROR = new Error('Wrong channel name')
     mockedWebClient.users.info.mockResolvedValueOnce({
       user: {
@@ -198,6 +248,7 @@ describe('messageReaction', () => {
   it('should throw error when user is not found', async () => {
     const EXPECTED_ERROR = new Error('Slack-api Error: User not found')
     mockedWebClient.users.info.mockResolvedValueOnce({ ok: false })
+    mockedGetMentor.mockResolvedValue(MOCKED_USER)
 
     mockedWebClient.conversations.history.mockResolvedValueOnce({
       messages: [
@@ -218,6 +269,8 @@ describe('messageReaction', () => {
 
   it('should throw error when user is not found', async () => {
     const EXPECTED_ERROR = new Error('Slack-api Error: Channel not found')
+    mockedGetMentor.mockResolvedValue(MOCKED_USER)
+
     mockedWebClient.users.info.mockResolvedValueOnce({
       user: {
         id: 'U043BDYF80H',
@@ -251,6 +304,8 @@ describe('messageReaction', () => {
 
   it('should throw error when user is not found', async () => {
     const EXPECTED_ERROR = new Error('Slack-api Error: Message not found')
+    mockedGetMentor.mockResolvedValue(MOCKED_USER)
+
     mockedWebClient.users.info.mockResolvedValueOnce({
       user: {
         id: 'U043BDYF80H',
