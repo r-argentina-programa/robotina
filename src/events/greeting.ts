@@ -23,11 +23,7 @@ export const greetUserFunction = async ({
       throw new Error('Channel not found')
     }
     const channelId = openUserChat.channel!.id as string
-    await client.chat.postMessage({
-      channel: channelId,
-      text: 'alt-text: Bienvenido a r-argentina-programa',
-      blocks: greetingsBlock,
-    })
+    await client.chat.postMessage(greetingsBlock(channelId))
   } catch (error) {
     logger.error(error)
   }

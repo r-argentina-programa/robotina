@@ -39,14 +39,11 @@ export const tareaCommandFunction = async ({
       user: command.user_id,
     })) as IUserClient
     if (!user) {
-      throw new Error('User not found')
+      throw new Error('Slack-api Error: User not found')
     }
     const classNumber = validateChannelName(command.channel_name)
     if (!classNumber) {
-      await respond({
-        text: 'Comando no disponible en este canal.',
-        blocks: unknownCommandBlock,
-      })
+      await respond(unknownCommandBlock())
       return
     }
 
@@ -55,10 +52,7 @@ export const tareaCommandFunction = async ({
       delivery: command.text,
     })
     if (!validSubmissionFormat) {
-      await respond({
-        text: 'Formato de la tarea inválido',
-        blocks: wrongFormatBlock,
-      })
+      await respond(wrongFormatBlock())
       return
     }
 

@@ -5,7 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "@slack/bolt": "^3.12.1",
-    "axios": "^0.27.2"
+    "axios": "^0.27.2",
+    "slack-block-builder": "^2.7.0"
   },
   "scripts": {
     "start:dev": "tsc-watch --onSuccess \"cross-env NODE_ENV=dev node ./dist/index.js\"",
