@@ -4,6 +4,6 @@ export interface IUser {
   id: number
   username: string
   externalId: string
-  roles: 'Student' | 'Company'
+  roles: 'Student' | 'Company' | string[]
   student?: IStudent
 }

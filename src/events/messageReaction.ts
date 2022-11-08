@@ -2,7 +2,9 @@ import { App, ReactionAddedEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
 import { createThread, ICreateThread } from '../api/createThread'
 import { uploadTarea } from '../commands/tarea/uploadTarea'
+import { createAuth0Id } from '../utils/createAuth0Id'
 import { validateChannelName } from '../utils/validateChannelName'
+import { getMentor } from '../api/getMentor'
 import { Reaction } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 
 export interface IReactionAddedEvent {
@@ -12,7 +14,21 @@ export interface IReactionAddedEvent {
 
 const checkIfFirstReaction = (reactions: Reaction[]) => {
   const firstReaction = reactions.filter((reaction) => reaction.name === 'robot_face' && reaction.count === 1)
-  return firstReaction.length
+  
+  return firstReaction.length === 1
+}
+
+const checkIfIsMentorReaction = (usersArray: any) => {
+
+  let isMentor = false
+
+  const user = usersArray[0]
+
+  user.roles[0] === 'Mentor' ?
+    isMentor = true :
+    isMentor = false
+
+  return isMentor
 }
 
 export const submitWithMessageReactionFunction = async ({
@@ -29,8 +45,13 @@ export const submitWithMessageReactionFunction = async ({
     throw new Error('Slack-api Error: Message not found')
   }
   const isFirstReaction = checkIfFirstReaction(conversationResponse.messages![0]!.reactions as Reaction[])
-  
-  if (event.reaction === 'robot_face' && isFirstReaction && event.item_user !== process.env.BOT_ID) {
+  const auth0Id = createAuth0Id(event.user)
+  const userResponse = await getMentor(auth0Id)
+  const isMentor = checkIfIsMentorReaction(userResponse)
+
+  if (event.reaction === 'robot_face'  && isFirstReaction &&
+  event.item_user !== process.env.BOT_ID &&  (isMentor ||
+    event.item_user === event.user)) {
 
     const { user } = await client.users.info({
       user: event.item_user,
