@@ -33,6 +33,9 @@ jest.mock('@slack/web-api', () => {
     chat: {
       postMessage: jest.fn(),
     },
+    reactions: {
+      add: jest.fn()
+    }
   }
   return { WebClient: jest.fn(() => properties) }
 })

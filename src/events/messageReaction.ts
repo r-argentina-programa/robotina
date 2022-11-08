@@ -6,7 +6,7 @@ import { uploadTarea } from '../commands/tarea/uploadTarea'
 import { createAuth0Id } from '../utils/createAuth0Id'
 import { validateChannelName } from '../utils/validateChannelName'
 import { getMentor } from '../api/getMentor'
-import { checkIfFirstReaction } from '../utils/checkIfFirstReaction'
+import { checkIfBotAlreadyReacted } from '../utils/checkIfBotAlreadyReacted'
 import { checkIfUserIsMentor } from '../utils/checkIfUserIsMentor'
 
 export interface IReactionAddedEvent {
@@ -27,15 +27,14 @@ export const submitWithMessageReactionFunction = async ({
   if (!conversationResponse) {
     throw new Error('Slack-api Error: Message not found')
   }
-  const isFirstReaction = checkIfFirstReaction(conversationResponse.messages![0]!.reactions as Reaction[])
+  const isFirstReaction = checkIfBotAlreadyReacted(conversationResponse.messages![0]!.reactions as Reaction[])
   const auth0Id = createAuth0Id(event.user)
   const userResponse = await getMentor(auth0Id)
   const isMentor = checkIfUserIsMentor(userResponse[0])
 
-  if (event.reaction === 'robot_face'  && isFirstReaction &&
+  if (event.reaction === 'robot_face'  && !isFirstReaction &&
   event.item_user !== process.env.BOT_ID &&  (isMentor ||
     event.item_user === event.user)) {
-
     const { user } = await client.users.info({
       user: event.item_user,
     })
@@ -81,6 +80,12 @@ export const submitWithMessageReactionFunction = async ({
     }
 
     await createThread(thread)
+    
+    client.reactions.add({
+      channel: event.item.channel,
+      name: 'white_check_mark',
+      timestamp: event.item.ts
+    })
   }
 }
 
