@@ -52,11 +52,9 @@ describe('greetUserFunction', () => {
     expect(mockedWebClient.conversations.open).toHaveBeenCalledTimes(1)
     expect(logger.error).toHaveBeenCalledTimes(0)
     expect(mockedWebClient.chat.postMessage).toHaveBeenCalledTimes(1)
-    expect(mockedWebClient.chat.postMessage).toHaveBeenCalledWith({
-      channel: USER_CHANNEL_ID,
-      text: 'alt-text: Bienvenido a r-argentina-programa',
-      blocks: greetingsBlock,
-    })
+    expect(mockedWebClient.chat.postMessage).toHaveBeenCalledWith(
+      greetingsBlock(USER_CHANNEL_ID)
+    )
   })
   it('should throw if user is invalid', async () => {
     const EXPECTED_ERROR = new Error('Channel not found')
