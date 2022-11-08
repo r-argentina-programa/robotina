@@ -197,10 +197,7 @@ describe('tareaCommandFunctiontarea', () => {
     })
 
     expect(respond).toBeCalledTimes(1)
-    expect(respond).toBeCalledWith({
-      text: 'Formato de la tarea inválido',
-      blocks: wrongFormatBlock,
-    })
+    expect(respond).toBeCalledWith(wrongFormatBlock())
   })
 
   it('should throw error when there is a problem', async () => {
