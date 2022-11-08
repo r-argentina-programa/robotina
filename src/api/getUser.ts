@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios'
 import { marketplaceApi } from '.'
-import { IUser } from '../interfaces/marketplaceApi/user'
+import { IUser } from '../interfaces/IUser'
 
 export const getUser = async (externalId: string) => {
   const { data } = (await marketplaceApi.get(

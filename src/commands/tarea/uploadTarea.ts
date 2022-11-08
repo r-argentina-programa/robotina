@@ -1,7 +1,6 @@
 import { createAuth0Id } from '../../utils/createAuth0Id'
-import { sendSubmission } from '../../api/sendSubmission'
+import { ISubmissionCreate, sendSubmission } from '../../api/sendSubmission'
 import { getUser } from '../../api/getUser'
-import { ISubmission } from '../../interfaces/ISubmission'
 import { getTasks } from '../../api/getTasks'
 import { createUserStudent, ICreateUserStudent } from '../../api/createStudent'
 
@@ -23,7 +22,7 @@ export const uploadTarea = async ({
   slackId,
 }: IUploadTarea) => {
   const auth0Id = createAuth0Id(slackId)
-  let submission: ISubmission
+  let submission: ISubmissionCreate
   const userResponse = await getUser(auth0Id)
   const taskResponse = await getTasks(classNumber)
 
@@ -32,7 +31,6 @@ export const uploadTarea = async ({
   }
   const taskId = taskResponse[0]!.id
   if (!userResponse.length) {
-    console.log('new user')
     const user: ICreateUserStudent = {
       firstName: firstName || email,
       email,
@@ -50,7 +48,6 @@ export const uploadTarea = async ({
 
     return sendSubmission(submission)
   }
-  console.log('user already exists')
   const studentId = userResponse[0].student!.id
   submission = {
     taskId,

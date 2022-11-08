@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios'
 import { marketplaceApi } from '.'
-import { IStudent } from '../interfaces/marketplaceApi/student'
-import { IUser } from '../interfaces/marketplaceApi/user'
+import { IStudent } from '../interfaces/IStudent'
+import { IUser } from '../interfaces/IUser'
 
 interface ICreateUser {
   username?: string

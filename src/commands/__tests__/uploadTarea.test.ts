@@ -2,11 +2,12 @@ import { expect, jest } from '@jest/globals'
 import { IUploadTarea, uploadTarea } from '../tarea/uploadTarea'
 import { sendSubmission } from '../../api/sendSubmission'
 import { getUser } from '../../api/getUser'
-import { IUser } from '../../interfaces/marketplaceApi/user'
+import { IUser } from '../../interfaces/IUser'
 import { createUserStudent, ICreateUserStudent } from '../../api/createStudent'
 import { getTasks } from '../../api/getTasks'
-import { ITask } from '../../interfaces/marketplaceApi/task'
-import { IStudent } from '../../interfaces/marketplaceApi/student'
+import { ITask } from '../../interfaces/ITask'
+import { IStudent } from '../../interfaces/IStudent'
+import { ISubmission } from '../../interfaces/ISubmission'
 
 jest.mock('../../api/sendSubmission')
 jest.mock('../../api/getUser')
@@ -22,16 +23,14 @@ const mockedSendSubmission = sendSubmission as jest.Mocked<
   typeof sendSubmission
 >
 
-const EXPECTED_AXIOS_DATA = {
-  taskId: 11,
-  studentId: 11,
+const EXPECTED_AXIOS_DATA: ISubmission = {
+  fkTaskId: 11,
+  fkStudentId: 11,
   completed: false,
   viewer: null,
   delivery: 'https://github.com/r-argentina-programa/robotina',
-  deletedAt: null,
   id: 20,
-  createdAt: '2022-10-06T11:33:58.000Z',
-  updatedAt: '2022-10-06T11:33:58.000Z',
+  isActive: true,
 }
 
 describe('uploadTarea test', () => {
@@ -72,6 +71,10 @@ describe('uploadTarea test', () => {
     id: 3,
     resolutionType: 'Code',
     title: 'test-title',
+    description: 'test-description',
+    lessonId: 1,
+    spoilerVideo: 'test-spoiler-video',
+    statement: 'test-statement',
   }
 
   const MOCKED_STUDENT: IStudent = {
@@ -99,15 +102,13 @@ describe('uploadTarea test', () => {
     mockedGetTasks.mockResolvedValueOnce([MOCKED_TASK])
 
     mockedSendSubmission.mockResolvedValueOnce({
-      taskId: 11,
-      studentId: 11,
+      fkTaskId: 11,
+      fkStudentId: 11,
       completed: false,
       viewer: null,
       delivery: 'https://github.com/r-argentina-programa/robotina',
-      deletedAt: null,
       id: 20,
-      createdAt: '2022-10-06T11:33:58.000Z',
-      updatedAt: '2022-10-06T11:33:58.000Z',
+      isActive: true,
     })
 
     const submission = await uploadTarea(MOCKED_TAREA)

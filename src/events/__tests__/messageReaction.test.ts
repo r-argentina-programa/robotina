@@ -1,9 +1,9 @@
 import { expect, jest } from '@jest/globals'
 import { ReactionAddedEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api'
+import { ConversationsHistoryResponse } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 import { uploadTarea } from '../../commands/tarea/uploadTarea'
 import { submitWithMessageReactionFunction } from '../messageReaction'
-import { ConversationsHistoryResponse } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 
 jest.mock('../../commands/tarea/uploadTarea')
 
@@ -28,8 +28,8 @@ jest.mock('@slack/web-api', () => {
       info: jest.fn(),
     },
     chat: {
-      postMessage: jest.fn()
-    }
+      postMessage: jest.fn(),
+    },
   }
   return { WebClient: jest.fn(() => properties) }
 })
@@ -86,31 +86,31 @@ describe('messageReaction', () => {
     })
 
     mockedWebClient.conversations.history.mockResolvedValueOnce({
-      messages: [{
-        text: 'message text example',
-        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
-      }],
+      messages: [
+        {
+          text: 'message text example',
+          reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }],
+        },
+      ],
       ok: true,
     })
-    
+
     mockedUploadTarea.mockResolvedValue({
       fkTaskId: 1,
       fkStudentId: 7,
       completed: false,
       viewer: null,
       delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
-      deletedAt: null,
       id: 22,
-      createdAt: '2022-10-14T14:51:20.218Z',
-      updatedAt: '2022-10-14T14:51:20.218Z',
+      isActive: true,
     })
 
     mockedWebClient.chat.postMessage.mockResolvedValueOnce({
       message: {
-        text: 'valid text'
+        text: 'valid text',
       },
       ts: '1666879163.121179',
-      ok: true
+      ok: true,
     })
 
     await submitWithMessageReactionFunction({ client, event })
@@ -124,10 +124,12 @@ describe('messageReaction', () => {
   it('should not run if the message that received the reaction is from the bot', async () => {
     process.env.BOT_ID = 'U043BDYF80H'
     mockedWebClient.conversations.history.mockResolvedValueOnce({
-      messages: [{
-        text: 'message text example',
-        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
-      }],
+      messages: [
+        {
+          text: 'message text example',
+          reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }],
+        },
+      ],
       ok: true,
     })
 
@@ -160,38 +162,37 @@ describe('messageReaction', () => {
     })
 
     mockedWebClient.conversations.history.mockResolvedValueOnce({
-      messages: [{
-        text: 'message text example',
-        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
-      }],
+      messages: [
+        {
+          text: 'message text example',
+          reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }],
+        },
+      ],
       ok: true,
     })
-    
+
     mockedUploadTarea.mockResolvedValue({
       fkTaskId: 1,
       fkStudentId: 7,
       completed: false,
       viewer: null,
       delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
-      deletedAt: null,
       id: 22,
-      createdAt: '2022-10-14T14:51:20.218Z',
-      updatedAt: '2022-10-14T14:51:20.218Z',
+      isActive: true,
     })
 
     mockedWebClient.chat.postMessage.mockResolvedValueOnce({
       message: {
-        text: 'valid text'
+        text: 'valid text',
       },
       ts: '1666879163.121179',
-      ok: true
+      ok: true,
     })
     try {
       await submitWithMessageReactionFunction({ client, event })
     } catch (err) {
       expect(err).toEqual(EXPECTED_ERROR)
     }
-
   })
 
   it('should throw error when user is not found', async () => {
@@ -199,10 +200,12 @@ describe('messageReaction', () => {
     mockedWebClient.users.info.mockResolvedValueOnce({ ok: false })
 
     mockedWebClient.conversations.history.mockResolvedValueOnce({
-      messages: [{
-        text: 'message text example',
-        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
-      }],
+      messages: [
+        {
+          text: 'message text example',
+          reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }],
+        },
+      ],
       ok: true,
     })
 
@@ -226,12 +229,14 @@ describe('messageReaction', () => {
       },
       ok: true,
     })
-    
+
     mockedWebClient.conversations.history.mockResolvedValueOnce({
-      messages: [{
-        text: 'message text example',
-        reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }]
-      }],
+      messages: [
+        {
+          text: 'message text example',
+          reactions: [{ name: 'robot_face', users: ['U043JJ1RA75'], count: 1 }],
+        },
+      ],
       ok: true,
     })
 
@@ -265,7 +270,9 @@ describe('messageReaction', () => {
       ok: true,
     })
 
-    mockedWebClient.conversations.history.mockResolvedValueOnce(null as unknown as ConversationsHistoryResponse)
+    mockedWebClient.conversations.history.mockResolvedValueOnce(
+      null as unknown as ConversationsHistoryResponse
+    )
 
     try {
       await submitWithMessageReactionFunction({ client, event })

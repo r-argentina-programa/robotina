@@ -1,6 +1,6 @@
 import { expect, jest } from '@jest/globals'
 import axios from 'axios'
-import { ICredential } from '../../interfaces/marketplaceApi/credential'
+import { ICredential } from '../../interfaces/ICredential'
 import { getBotCredentials } from '../getBotCredentials'
 
 const credentials: ICredential = {

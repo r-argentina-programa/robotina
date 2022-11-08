@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import { ICredential } from '../interfaces/marketplaceApi/credential'
+import { ICredential } from '../interfaces/ICredential'
 
 export const getBotCredentials = async () => {
   try {
