@@ -6,7 +6,6 @@ import { uploadTarea } from '../commands/tarea/uploadTarea'
 import { createAuth0Id } from '../utils/createAuth0Id'
 import { validateChannelName } from '../utils/validateChannelName'
 import { getMentor } from '../api/getMentor'
-import { Reaction } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 
 export interface IReactionAddedEvent {
   event: ReactionAddedEvent | any
