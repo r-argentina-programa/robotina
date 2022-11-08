@@ -1,7 +1,7 @@
 import { expect, jest } from '@jest/globals'
 import { AxiosResponse } from 'axios'
 import { IAxiosError, interceptorRequestOnFail } from '..'
-import { ICredential } from '../../interfaces/marketplaceApi/credential'
+import { ICredential } from '../../interfaces/ICredential'
 import { getBotCredentials } from '../getBotCredentials'
 import * as index from '../index'
 import { retryHttpRequest } from '../retryHttpRequest'

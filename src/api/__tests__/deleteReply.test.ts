@@ -11,10 +11,10 @@ describe('deleteReply', () => {
     const TIMESTAMP = '2343254.345345'
     const API_URL = '/api/bot/reply/'
     const EXPECTED_URL = API_URL + TIMESTAMP
-    mockedMarketplaceApi.delete.mockResolvedValue({ data: { success: true } })
+    mockedMarketplaceApi.delete.mockResolvedValue({ data: true })
     const response = await deleteReply(TIMESTAMP)
     expect(marketplaceApi.delete).toHaveBeenCalledTimes(1)
     expect(marketplaceApi.delete).toHaveBeenCalledWith(EXPECTED_URL)
-    expect(response.success).toBe(true)
+    expect(response).toBe(true)
   })
 })

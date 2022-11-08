@@ -1,9 +1,9 @@
 import { App, ReactionAddedEvent } from '@slack/bolt'
 import { WebClient } from '@slack/web-api/dist/WebClient'
+import { Reaction } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 import { createThread, ICreateThread } from '../api/createThread'
 import { uploadTarea } from '../commands/tarea/uploadTarea'
 import { validateChannelName } from '../utils/validateChannelName'
-import { Reaction } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
 
 export interface IReactionAddedEvent {
   event: ReactionAddedEvent | any
@@ -11,7 +11,9 @@ export interface IReactionAddedEvent {
 }
 
 const checkIfFirstReaction = (reactions: Reaction[]) => {
-  const firstReaction = reactions.filter((reaction) => reaction.name === 'robot_face' && reaction.count === 1)
+  const firstReaction = reactions.filter(
+    (reaction) => reaction.name === 'robot_face' && reaction.count === 1
+  )
   return firstReaction.length
 }
 
@@ -28,10 +30,15 @@ export const submitWithMessageReactionFunction = async ({
   if (!conversationResponse) {
     throw new Error('Slack-api Error: Message not found')
   }
-  const isFirstReaction = checkIfFirstReaction(conversationResponse.messages![0]!.reactions as Reaction[])
-  
-  if (event.reaction === 'robot_face' && isFirstReaction && event.item_user !== process.env.BOT_ID) {
+  const isFirstReaction = checkIfFirstReaction(
+    conversationResponse.messages![0]!.reactions as Reaction[]
+  )
 
+  if (
+    event.reaction === 'robot_face' &&
+    isFirstReaction &&
+    event.item_user !== process.env.BOT_ID
+  ) {
     const { user } = await client.users.info({
       user: event.item_user,
     })
@@ -65,7 +72,7 @@ export const submitWithMessageReactionFunction = async ({
 
     const botMessage = await client.chat.postMessage({
       channel: event.item.channel,
-      text: `<@${user.id}> Tarea ${classNumber}: ${messageText}`
+      text: `<@${user.id}> Tarea ${classNumber}: ${messageText}`,
     })
 
     const thread: ICreateThread = {
