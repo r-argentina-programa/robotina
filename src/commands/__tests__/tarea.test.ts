@@ -167,10 +167,7 @@ describe('tareaCommandFunctiontarea', () => {
     })
 
     expect(respond).toBeCalledTimes(1)
-    expect(respond).toBeCalledWith({
-      text: 'Comando no disponible en este canal.',
-      blocks: unknownCommandBlock,
-    })
+    expect(respond).toBeCalledWith(unknownCommandBlock())
   })
 
   it('should respond with correct values when class name is not valid', async () => {

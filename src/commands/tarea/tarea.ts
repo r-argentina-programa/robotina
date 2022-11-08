@@ -43,10 +43,7 @@ export const tareaCommandFunction = async ({
     }
     const classNumber = validateChannelName(command.channel_name)
     if (!classNumber) {
-      await respond({
-        text: 'Comando no disponible en este canal.',
-        blocks: unknownCommandBlock,
-      })
+      await respond(unknownCommandBlock())
       return
     }
 
