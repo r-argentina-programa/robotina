@@ -7,8 +7,9 @@
 3. Run `npm install` to install project's dependencies.
 4. Run the project:
 
-- `npm run start:dev` to run the project in development mode (socket-mode).
-- `npm run start:prod` to run the project in production mode (http-mode).
+ `npm run start:dev` to run the project in development mode (socket-mode).
+ 
+ `npm run start:prod` to run the project in production mode (http-mode).
 
 ## Bot Scopes
 
@@ -41,15 +42,20 @@ In the **Event subscription** tab subscribe to the following events:
 ## Commands:
 
 You also have to add the "tarea" command
+
 Command: `/tarea`
+
 Request URL: `https://{your_slack_bot_domain}/slack/events` (no need in socket-mode)
+
 Short description: "Sube tarea a r-argentina"
 
 ## Run in development (Socket-mode)
 
 The slack bolt documentation recommends using socket-mode for development since you don't have to give it a URL, but you do have to add an APP_TOKEN
+
 You can generate one here:
 Basic information => App-Level Tokens => Generate Token and Scopes
+
 Scopes:
 
 - `connections:write`
@@ -64,6 +70,7 @@ The Slack bolt documentation recommends running Http-mode when hosting apps:
 > HTTP is more useful for apps being deployed to hosting environments (like AWS or Heroku), or apps intended for distribution via the Slack App Directory.
 
 **Event Subscriptions**
+
 You have to set an URL in as follows:
 `https://{your_slack_bot_domain}/slack/events`
 
