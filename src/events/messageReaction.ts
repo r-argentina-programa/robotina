@@ -27,14 +27,19 @@ export const submitWithMessageReactionFunction = async ({
   if (!conversationResponse) {
     throw new Error('Slack-api Error: Message not found')
   }
-  const isFirstReaction = checkIfBotAlreadyReacted(conversationResponse.messages![0]!.reactions as Reaction[])
+  const botAlreadyReacted = checkIfBotAlreadyReacted(
+    conversationResponse.messages![0]!.reactions as Reaction[]
+  )
   const auth0Id = createAuth0Id(event.user)
   const userResponse = await getMentor(auth0Id)
   const isMentor = checkIfUserIsMentor(userResponse[0])
 
-  if (event.reaction === 'robot_face'  && !isFirstReaction &&
-  event.item_user !== process.env.BOT_ID &&  (isMentor ||
-    event.item_user === event.user)) {
+  if (
+    event.reaction === 'robot_face' &&
+    !botAlreadyReacted &&
+    event.item_user !== process.env.BOT_ID &&
+    (isMentor || event.item_user === event.user)
+  ) {
     const { user } = await client.users.info({
       user: event.item_user,
     })
@@ -66,9 +71,21 @@ export const submitWithMessageReactionFunction = async ({
       email: user.profile!.email as string,
     })
 
+    const { permalink } = await client.chat.getPermalink({
+      channel: event.item.channel,
+      message_ts: event.item.ts,
+    })
+
     const botMessage = await client.chat.postMessage({
       channel: event.item.channel,
-      text: `<@${user.id}> Tarea ${classNumber}: ${messageText}`,
+      text: `Tare subida con éxito <@${user.id}>! \nAcá está el <${permalink}|Link> al mensaje original. \nTarea: 
+${messageText} \n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
+    })
+
+    await client.chat.postMessage({
+      channel: event.item.channel,
+      text: 'Si querés agregar una corrección a esta tarea hacelo como una respuesta al mensaje que mandó el bot.',
+      thread_ts: event.item.ts,
     })
 
     const thread: ICreateThread = {
@@ -80,11 +97,11 @@ export const submitWithMessageReactionFunction = async ({
     }
 
     await createThread(thread)
-    
+
     client.reactions.add({
       channel: event.item.channel,
       name: 'white_check_mark',
-      timestamp: event.item.ts
+      timestamp: event.item.ts,
     })
   }
 }
