@@ -78,8 +78,8 @@ export const submitWithMessageReactionFunction = async ({
 
     const botMessage = await client.chat.postMessage({
       channel: event.item.channel,
-      text: `Tare subida con éxito <@${user.id}>! \nAcá está el <${permalink}|Link> al mensaje original. \nTarea: 
-${messageText} \n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
+      text: `Tarea subida con éxito <@${user.id}>! \n\nAcá está el <${permalink}|Link> al mensaje original.\n\nTarea: 
+${messageText}\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
     })
 
     await client.chat.postMessage({
