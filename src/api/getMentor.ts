@@ -1,10 +1,10 @@
 import { AxiosResponse } from 'axios'
 import { marketplaceApi } from '.'
-import { IUser } from '../interfaces/IUser'
+import { IGetUserResponse } from './getUser'
 
 export const getMentor = async (externalId: string) => {
   const { data } = (await marketplaceApi.get(
     `/api/user?filter[externalId]=${externalId}`
-  )) as AxiosResponse<IUser[]>
-  return data
+  )) as AxiosResponse<IGetUserResponse>
+  return data.results
 }
