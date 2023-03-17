@@ -41,4 +41,8 @@ export const interceptorRequestOnFail = async (error: IAxiosError) => {
   return Promise.reject(error)
 }
 
-marketplaceApi.interceptors.response.use(undefined, interceptorRequestOnFail)
+function interceptOnSuccess(res: any) {
+  return res
+}
+
+marketplaceApi.interceptors.response.use(interceptOnSuccess, interceptorRequestOnFail)
