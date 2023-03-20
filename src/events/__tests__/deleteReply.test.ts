@@ -62,7 +62,7 @@ describe('deleteReplyFunction', () => {
 
   it('should delete a reply in marketplace api when message_deleted triggers', async () => {
     process.env.BOT_ID = 'PARENT_USER_ID_TEST'
-    const VALID_PARENT_MESSAGE_TEXT = '<@U043BDYF80H> Tarea 11: 123'
+    const VALID_PARENT_MESSAGE_TEXT = 'Tarea 11: 123'
 
     mockedWebClient.conversations.history.mockImplementationOnce(() =>
       Promise.resolve({

@@ -64,7 +64,7 @@ describe('saveSubmissionRepliesFunction', () => {
 
   it('should save a submission reply if thread author is the same as the bot id and is valid a submission', async () => {
     process.env.BOT_ID = 'PARENT_USER_ID_TEST'
-    const VALID_PARENT_MESSAGE_TEXT = '<@U043BDYF80H> Tarea 11: 123'
+    const VALID_PARENT_MESSAGE_TEXT = 'Tarea 11: 123'
     const USER_DISPLAY_NAME_TEST = 'USER_DISPLAY_NAME_TEST'
 
     mockedWebClient.conversations.history.mockImplementationOnce(() =>
@@ -115,7 +115,7 @@ describe('saveSubmissionRepliesFunction', () => {
 
   it('should throw if user is not found in slack api', async () => {
     const EXPECTED_ERROR = new Error('Slack-api Error: User not found')
-    const VALID_PARENT_MESSAGE_TEXT = '<@U043BDYF80H> Tarea 11: 123'
+    const VALID_PARENT_MESSAGE_TEXT = 'Tarea 11: 123'
     mockedWebClient.users.info.mockResolvedValue({ ok: false })
     mockedWebClient.conversations.history.mockImplementationOnce(() =>
       Promise.resolve({
