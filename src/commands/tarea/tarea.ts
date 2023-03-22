@@ -66,7 +66,7 @@ export const tareaCommandFunction = async ({
         email: user.profile.email as string,
       })
       const messageResponse = await say(
-        `<@${user.id}> Tarea ${classNumber}: ${command.text}`
+        `Tarea subida con éxito <@${user.id}>! \n\nTarea:\n${command.text}\n\n*Para agregar correcciones responder en este hilo.*`
       )
       const thread: ICreateThread = {
         authorId: <string>process.env.BOT_ID,

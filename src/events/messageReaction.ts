@@ -8,6 +8,7 @@ import { validateChannelName } from '../utils/validateChannelName'
 import { getMentor } from '../api/getMentor'
 import { checkIfBotAlreadyReacted } from '../utils/checkIfBotAlreadyReacted'
 import { checkIfUserIsMentor } from '../utils/checkIfUserIsMentor'
+import { validateSubmissionDeliveryFormat } from '../utils/validateSubmissionDeliveryFormat';
 
 export interface IReactionAddedEvent {
   event: ReactionAddedEvent | any
@@ -61,6 +62,19 @@ export const submitWithMessageReactionFunction = async ({
       throw new Error('Wrong channel name')
     }
     const messageText = conversationResponse.messages![0]!.text as string
+
+    const validSubmissionFormat = validateSubmissionDeliveryFormat({
+      classNumber:Number(classNumber),
+      delivery: messageText}
+    )
+    if (!validSubmissionFormat) {
+      await client.chat.postMessage({
+        channel: event.item.channel,
+        thread_ts: event.item.ts,
+        text: `<@${user.id}> el formato de la entrega no es válido, si estás en la clase 4 o menos tenés que enviar la tarea como bloque de código y a partir de la clase 5 tenés que enviar el link de github..`,
+      })
+      return
+    }
 
     const tarea = await uploadTarea({
       classNumber,

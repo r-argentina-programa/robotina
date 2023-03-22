@@ -126,8 +126,17 @@ describe('messageReaction', () => {
       ok: true,
     })
 
-    mockedWebClient.conversations.history.mockResolvedValueOnce(
-      MOCKED_CONVERSATIONS_HISTORY
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+        messages: [
+          {
+            text: 'https://github.com/test/test',
+            reactions: [
+              { name: 'white_check_mark', users: ['U043JJ1RA75'], count: 1 },
+            ],
+          },
+        ],
+        ok: true,
+      }
     )
 
     mockedUploadTarea.mockResolvedValue({
@@ -316,4 +325,46 @@ describe('messageReaction', () => {
       expect(err).toEqual(EXPECTED_ERROR)
     }
   })
+
+  it('should respond with an error if the submission format is wrong', async () => {
+    process.env.BOT_ID = 'test-bot-id'
+    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO)
+
+    mockedGetMentor.mockResolvedValue(MOCKED_USER)
+
+    mockedWebClient.conversations.info.mockResolvedValueOnce({
+      channel: {
+        name: 'clase-react-1',
+      },
+      ok: true,
+    })
+
+    mockedWebClient.conversations.history.mockResolvedValueOnce({
+        messages: [
+          {
+            text: 'invalid format',
+            reactions: [
+              { name: 'white_check_mark', users: ['U043JJ1RA75'], count: 1 },
+            ],
+          },
+        ],
+        ok: true,
+      })
+
+    mockedWebClient.chat.postMessage.mockResolvedValueOnce({
+      message: {
+        text: 'valid text',
+      },
+      ts: '1666879163.121179',
+      ok: true,
+    })
+
+    await submitWithMessageReactionFunction({ client, event })
+
+    expect(client.users.info).toBeCalledTimes(1)
+    expect(client.conversations.info).toBeCalledTimes(1)
+    expect(client.conversations.history).toBeCalledTimes(1)
+    expect(uploadTarea).toBeCalledTimes(0)
+    expect(client.chat.postMessage).toBeCalledTimes(1)
+  });
 })
