@@ -46,7 +46,7 @@ export const saveSubmissionRepliesFunction = async ({
           text: message.text,
           threadTS: message.thread_ts,
           timestamp: message.ts,
-          username: user!.profile!.display_name as string,
+          username: user!.profile!.display_name as string || user!.profile!.real_name as string,
         }
         const replyResponse = await submitReply(reply)
 
