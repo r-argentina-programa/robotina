@@ -140,7 +140,7 @@ describe('uploadTarea test', () => {
       lastName: 'fake@email.com',
       roles: 'Student',
       username: undefined,
-      externalId: `oauth2|slack|${MOCKED_SLACK_TEAM_ID}-mockId`,
+      externalId: `oauth2|sign-in-with-slack|${MOCKED_SLACK_TEAM_ID}-mockId`,
     }
     expect(mockedCreateUserStudent).toHaveBeenCalledWith(EXPECTED_PARAMS)
   })
