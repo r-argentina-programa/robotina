@@ -1,0 +1,75 @@
+name: CI workflow
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['*']
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: NPM or Yarn install with caching
+        uses: bahmutov/npm-install@v1.6.0
+
+      - name: Build and test
+        run: |
+          npm run lint
+          npm run format
+          npm run build
+          npm run test:coverage
+
+      - name: Report code coverage
+        uses: zgosalvez/github-actions-report-lcov@v1
+        with:
+          coverage-files: ./coverage/lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Store coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: coverage
+
+  scan:
+    needs: build_and_test
+
+    runs-on: ubuntu-latest
+
+    env:
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Retrieve coverage
+        uses: actions/download-artifact@v3.0.0
+        with:
+          name: coverage
+          path: coverage
+
+      - name: Scan with Sonarqube
+        uses: sonarsource/sonarqube-scan-action@master
+
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
