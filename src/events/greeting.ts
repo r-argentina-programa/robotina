@@ -1,11 +1,11 @@
-import { App, Logger, TeamJoinEvent } from '@slack/bolt'
-import { WebClient } from '@slack/web-api/dist/WebClient'
-import { greetingsBlock } from '../blocks/greetingsBlock'
+import { App, Logger, TeamJoinEvent } from '@slack/bolt';
+import { WebClient } from '@slack/web-api/dist/WebClient';
+import { greetingsBlock } from '../blocks/greetingsBlock';
 
 interface IChannelJoinedEvent {
-  client: WebClient
-  logger: Logger
-  event: TeamJoinEvent
+  client: WebClient;
+  logger: Logger;
+  event: TeamJoinEvent;
 }
 
 export const greetUserFunction = async ({
@@ -13,23 +13,23 @@ export const greetUserFunction = async ({
   logger,
   event,
 }: IChannelJoinedEvent): Promise<void> => {
-  const user = event.user.id
+  const user = event.user.id;
   try {
     const openUserChat = await client.conversations.open({
       users: user,
       return_im: true,
-    })
+    });
     if (!openUserChat.ok) {
-      throw new Error('Channel not found')
+      throw new Error('Channel not found');
     }
-    const channelId = openUserChat.channel!.id as string
-    await client.chat.postMessage(greetingsBlock(channelId))
+    const channelId = openUserChat.channel!.id as string;
+    await client.chat.postMessage(greetingsBlock(channelId));
   } catch (error) {
-    logger.error(error)
+    logger.error(error);
   }
-}
+};
 
 export const greetUserEvent = (app: App) => {
-  const GREET_USER_EVENT = 'team_join'
-  app.event(GREET_USER_EVENT, greetUserFunction)
-}
+  const GREET_USER_EVENT = 'team_join';
+  app.event(GREET_USER_EVENT, greetUserFunction);
+};

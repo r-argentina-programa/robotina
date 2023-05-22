@@ -21,7 +21,7 @@
     "test:dev": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "format": "prettier --write \"src/**/*.ts\" \"**/*.config.ts\""
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
     "@slack/bolt": "^3.12.1",

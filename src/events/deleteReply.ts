@@ -1,19 +1,19 @@
-import { App, KnownEventFromType, Logger, MessageEvent } from '@slack/bolt'
-import { WebClient } from '@slack/web-api/dist/WebClient'
-import { deleteReply } from '../api/deleteReply'
-import { isTaskSubmission } from '../utils/validateTaskSubmission'
+import { App, KnownEventFromType, Logger, MessageEvent } from '@slack/bolt';
+import { WebClient } from '@slack/web-api/dist/WebClient';
+import { deleteReply } from '../api/deleteReply';
+import { isTaskSubmission } from '../utils/validateTaskSubmission';
 
 export type IMessageEvent = KnownEventFromType<'message'> & {
   previous_message?: MessageEvent & {
-    thread_ts?: string
-    parent_user_id?: string
-  }
-}
+    thread_ts?: string;
+    parent_user_id?: string;
+  };
+};
 
 export interface IDeleteReplyFunction {
-  event: IMessageEvent
-  client: WebClient
-  logger: Logger
+  event: IMessageEvent;
+  client: WebClient;
+  logger: Logger;
 }
 
 export const deleteReplyFunction = async ({
@@ -32,22 +32,24 @@ export const deleteReplyFunction = async ({
         channel: event.channel,
         limit: 1,
         inclusive: true,
-      })
+      });
 
-      const isSubmission = isTaskSubmission(thread.messages![0].text!)
+      const isSubmission = isTaskSubmission(thread.messages![0].text!);
 
       if (isSubmission) {
-        const deleteReplyResponse = await deleteReply(event.previous_message.ts)
+        const deleteReplyResponse = await deleteReply(
+          event.previous_message.ts
+        );
 
-        logger.info('Reply deleted: ', deleteReplyResponse)
+        logger.info('Reply deleted: ', deleteReplyResponse);
       }
     } catch (error) {
-      logger.error(error)
+      logger.error(error);
     }
   }
-}
+};
 
 export const deleteReplyEvent = (app: App) => {
-  const MESSAGE_EVENT = 'message'
-  app.event(MESSAGE_EVENT, deleteReplyFunction)
-}
+  const MESSAGE_EVENT = 'message';
+  app.event(MESSAGE_EVENT, deleteReplyFunction);
+};
