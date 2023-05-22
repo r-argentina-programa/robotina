@@ -1,18 +1,18 @@
-import { App, Logger, MessageEvent } from '@slack/bolt'
-import { WebClient } from '@slack/web-api/dist/WebClient'
-import { submitReply } from '../api/submitReply'
-import { IReply } from '../interfaces/IReply'
-import { isTaskSubmission } from '../utils/validateTaskSubmission'
+import { App, Logger, MessageEvent } from '@slack/bolt';
+import { WebClient } from '@slack/web-api/dist/WebClient';
+import { submitReply } from '../api/submitReply';
+import { IReply } from '../interfaces/IReply';
+import { isTaskSubmission } from '../utils/validateTaskSubmission';
 
 export type IMessageEvent = MessageEvent & {
-  thread_ts?: string
-  parent_user_id?: string
-}
+  thread_ts?: string;
+  parent_user_id?: string;
+};
 
 interface ISaveSubmissionsReplies {
-  message: IMessageEvent
-  client: WebClient
-  logger: Logger
+  message: IMessageEvent;
+  client: WebClient;
+  logger: Logger;
 }
 
 export const saveSubmissionRepliesFunction = async ({
@@ -28,17 +28,17 @@ export const saveSubmissionRepliesFunction = async ({
         channel: message.channel,
         limit: 1,
         inclusive: true,
-      })
+      });
 
-      const isSubmission = isTaskSubmission(thread.messages![0].text!)
+      const isSubmission = isTaskSubmission(thread.messages![0].text!);
 
       if (isSubmission) {
         // @ts-ignore message.user exists in the api
-        const userId = message.user
+        const userId = message.user;
 
-        const { user } = await client.users.info({ user: userId })
+        const { user } = await client.users.info({ user: userId });
         if (!user) {
-          throw new Error('Slack-api Error: User not found')
+          throw new Error('Slack-api Error: User not found');
         }
         const reply: IReply = {
           authorId: userId,
@@ -46,19 +46,21 @@ export const saveSubmissionRepliesFunction = async ({
           text: message.text,
           threadTS: message.thread_ts,
           timestamp: message.ts,
-          username: user!.profile!.display_name as string || user!.profile!.real_name as string,
-        }
-        const replyResponse = await submitReply(reply)
+          username:
+            (user!.profile!.display_name as string) ||
+            (user!.profile!.real_name as string),
+        };
+        const replyResponse = await submitReply(reply);
 
-        logger.info('Reply submitted: ', replyResponse)
+        logger.info('Reply submitted: ', replyResponse);
       }
     }
   } catch (error) {
-    logger.error(error)
+    logger.error(error);
   }
-}
+};
 
 export const saveSubmissionRepliesEvent = (app: App) => {
-  const MESSAGE_EVENT = 'message'
-  app.event(MESSAGE_EVENT, saveSubmissionRepliesFunction)
-}
+  const MESSAGE_EVENT = 'message';
+  app.event(MESSAGE_EVENT, saveSubmissionRepliesFunction);
+};

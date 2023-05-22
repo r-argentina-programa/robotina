@@ -1,3 +1,3 @@
-import axios, { AxiosRequestConfig } from 'axios'
+import axios, { AxiosRequestConfig } from 'axios';
 
-export const retryHttpRequest = (config: AxiosRequestConfig) => axios(config)
+export const retryHttpRequest = (config: AxiosRequestConfig) => axios(config);

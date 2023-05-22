@@ -1,24 +1,24 @@
-import { expect, jest } from '@jest/globals'
-import { ReactionAddedEvent } from '@slack/bolt'
-import { WebClient } from '@slack/web-api'
-import { ConversationsHistoryResponse } from '@slack/web-api/dist/response/ConversationsHistoryResponse'
-import { uploadTarea } from '../../commands/tarea/uploadTarea'
-import { getMentor } from '../../api/getMentor'
-import { submitWithMessageReactionFunction } from '../messageReaction'
-import { IUser } from '../../interfaces/IUser'
+import { expect, jest } from '@jest/globals';
+import { ReactionAddedEvent } from '@slack/bolt';
+import { WebClient } from '@slack/web-api';
+import { ConversationsHistoryResponse } from '@slack/web-api/dist/response/ConversationsHistoryResponse';
+import { uploadTarea } from '../../commands/tarea/uploadTarea';
+import { getMentor } from '../../api/getMentor';
+import { submitWithMessageReactionFunction } from '../messageReaction';
+import { IUser } from '../../interfaces/IUser';
 
-jest.mock('../../commands/tarea/uploadTarea')
-jest.mock('../../api/getMentor')
-jest.mock('../../api/createThread')
+jest.mock('../../commands/tarea/uploadTarea');
+jest.mock('../../api/getMentor');
+jest.mock('../../api/createThread');
 
 jest.mock('@slack/bolt', () => {
   const properties = {
     event: jest.fn(),
-  }
+  };
   return {
     App: jest.fn(() => properties),
-  }
-})
+  };
+});
 
 jest.mock('@slack/web-api', () => {
   const properties = {
@@ -36,16 +36,16 @@ jest.mock('@slack/web-api', () => {
     reactions: {
       add: jest.fn(),
     },
-  }
-  return { WebClient: jest.fn(() => properties) }
-})
+  };
+  return { WebClient: jest.fn(() => properties) };
+});
 
-const mockedWebClient = new WebClient() as jest.Mocked<WebClient>
-const mockedUploadTarea = uploadTarea as jest.Mocked<typeof uploadTarea>
-const mockedGetMentor = getMentor as jest.Mocked<typeof getMentor>
+const mockedWebClient = new WebClient() as jest.Mocked<WebClient>;
+const mockedUploadTarea = uploadTarea as jest.Mocked<typeof uploadTarea>;
+const mockedGetMentor = getMentor as jest.Mocked<typeof getMentor>;
 
-let event: ReactionAddedEvent | any
-let client: WebClient
+let event: ReactionAddedEvent | any;
+let client: WebClient;
 
 const MOCKED_USER: IUser[] = [
   {
@@ -54,7 +54,7 @@ const MOCKED_USER: IUser[] = [
     externalId: 'external-id-test',
     roles: ['Mentor'],
   },
-]
+];
 
 const MOCKED_USER_INFO = {
   user: {
@@ -66,14 +66,14 @@ const MOCKED_USER_INFO = {
     },
   },
   ok: true,
-}
+};
 
 const MOCKED_CONVERSATIONS_INFO = {
   channel: {
     name: 'clase-12',
   },
   ok: true,
-}
+};
 
 const MOCKED_CONVERSATIONS_HISTORY = {
   messages: [
@@ -85,14 +85,14 @@ const MOCKED_CONVERSATIONS_HISTORY = {
     },
   ],
   ok: true,
-}
+};
 
 describe('messageReaction', () => {
-  const OLD_ENV = process.env
+  const OLD_ENV = process.env;
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    client = mockedWebClient
+    jest.clearAllMocks();
+    client = mockedWebClient;
     event = {
       reaction: 'robot_face',
       item_user: 'U043BDYF80H',
@@ -103,41 +103,40 @@ describe('messageReaction', () => {
         ts: '1666879163.121179',
       },
       user: 'U043BDYF80G',
-    } as unknown as ReactionAddedEvent
+    } as unknown as ReactionAddedEvent;
 
-    jest.resetModules()
-    process.env = { ...OLD_ENV }
-  })
+    jest.resetModules();
+    process.env = { ...OLD_ENV };
+  });
 
   afterAll(() => {
-    process.env = OLD_ENV // Restore old environment
-  })
+    process.env = OLD_ENV; // Restore old environment
+  });
 
   it('should make a submission when a message is reacted with the correct emoji', async () => {
-    process.env.BOT_ID = 'test-bot-id'
-    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO)
+    process.env.BOT_ID = 'test-bot-id';
+    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO);
 
-    mockedGetMentor.mockResolvedValue(MOCKED_USER)
+    mockedGetMentor.mockResolvedValue(MOCKED_USER);
 
     mockedWebClient.conversations.info.mockResolvedValueOnce({
       channel: {
         name: 'clase-react-1',
       },
       ok: true,
-    })
+    });
 
     mockedWebClient.conversations.history.mockResolvedValueOnce({
-        messages: [
-          {
-            text: 'https://github.com/test/test',
-            reactions: [
-              { name: 'white_check_mark', users: ['U043JJ1RA75'], count: 1 },
-            ],
-          },
-        ],
-        ok: true,
-      }
-    )
+      messages: [
+        {
+          text: 'https://github.com/test/test',
+          reactions: [
+            { name: 'white_check_mark', users: ['U043JJ1RA75'], count: 1 },
+          ],
+        },
+      ],
+      ok: true,
+    });
 
     mockedUploadTarea.mockResolvedValue({
       fkTaskId: 1,
@@ -147,7 +146,7 @@ describe('messageReaction', () => {
       delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
       id: 22,
       isActive: true,
-    })
+    });
 
     mockedWebClient.chat.postMessage.mockResolvedValueOnce({
       message: {
@@ -155,37 +154,37 @@ describe('messageReaction', () => {
       },
       ts: '1666879163.121179',
       ok: true,
-    })
+    });
 
     mockedWebClient.chat.getPermalink.mockResolvedValueOnce({
       permalink: 'link.chatslack/00000000/11111',
       ok: true,
-    })
+    });
 
-    await submitWithMessageReactionFunction({ client, event })
+    await submitWithMessageReactionFunction({ client, event });
 
-    expect(client.users.info).toBeCalledTimes(1)
-    expect(client.conversations.info).toBeCalledTimes(1)
-    expect(client.conversations.history).toBeCalledTimes(1)
-    expect(uploadTarea).toBeCalledTimes(1)
-    expect(client.chat.postMessage).toBeCalledTimes(2)
-  })
+    expect(client.users.info).toBeCalledTimes(1);
+    expect(client.conversations.info).toBeCalledTimes(1);
+    expect(client.conversations.history).toBeCalledTimes(1);
+    expect(uploadTarea).toBeCalledTimes(1);
+    expect(client.chat.postMessage).toBeCalledTimes(2);
+  });
 
   it('should not run if the message that received the reaction is from the bot', async () => {
-    process.env.BOT_ID = 'U043BDYF80H'
+    process.env.BOT_ID = 'U043BDYF80H';
 
-    mockedGetMentor.mockResolvedValue(MOCKED_USER)
+    mockedGetMentor.mockResolvedValue(MOCKED_USER);
 
     mockedWebClient.conversations.history.mockResolvedValueOnce(
       MOCKED_CONVERSATIONS_HISTORY
-    )
+    );
 
-    await submitWithMessageReactionFunction({ client, event })
+    await submitWithMessageReactionFunction({ client, event });
 
-    expect(client.users.info).toBeCalledTimes(0)
-    expect(client.conversations.info).toBeCalledTimes(0)
-    expect(uploadTarea).toBeCalledTimes(0)
-  })
+    expect(client.users.info).toBeCalledTimes(0);
+    expect(client.conversations.info).toBeCalledTimes(0);
+    expect(uploadTarea).toBeCalledTimes(0);
+  });
 
   it('should not run if the reaction is not from a mentor', async () => {
     mockedGetMentor.mockResolvedValue([
@@ -195,24 +194,24 @@ describe('messageReaction', () => {
         externalId: 'external-id-test',
         roles: ['Student'],
       },
-    ])
+    ]);
 
     mockedWebClient.conversations.history.mockResolvedValueOnce(
       MOCKED_CONVERSATIONS_HISTORY
-    )
+    );
 
-    await submitWithMessageReactionFunction({ client, event })
+    await submitWithMessageReactionFunction({ client, event });
 
-    expect(client.users.info).toBeCalledTimes(0)
-    expect(client.conversations.info).toBeCalledTimes(0)
-    expect(uploadTarea).toBeCalledTimes(0)
-  })
+    expect(client.users.info).toBeCalledTimes(0);
+    expect(client.conversations.info).toBeCalledTimes(0);
+    expect(uploadTarea).toBeCalledTimes(0);
+  });
 
   it('should not run if the message was already submitted', async () => {
-    process.env.BOT_ID = 'U043JJ1RA75'
+    process.env.BOT_ID = 'U043JJ1RA75';
     mockedWebClient.conversations.history.mockResolvedValueOnce(
       MOCKED_CONVERSATIONS_HISTORY
-    )
+    );
 
     mockedGetMentor.mockResolvedValue([
       {
@@ -221,30 +220,30 @@ describe('messageReaction', () => {
         externalId: 'external-id-test',
         roles: ['Mentor'],
       },
-    ])
+    ]);
 
-    await submitWithMessageReactionFunction({ client, event })
+    await submitWithMessageReactionFunction({ client, event });
 
-    expect(client.users.info).toBeCalledTimes(0)
-    expect(client.conversations.info).toBeCalledTimes(0)
-    expect(uploadTarea).toBeCalledTimes(0)
-  })
+    expect(client.users.info).toBeCalledTimes(0);
+    expect(client.conversations.info).toBeCalledTimes(0);
+    expect(uploadTarea).toBeCalledTimes(0);
+  });
 
   it('should throw error when the channel name is wrong', async () => {
-    mockedGetMentor.mockResolvedValue(MOCKED_USER)
-    const EXPECTED_ERROR = new Error('Wrong channel name')
-    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO)
+    mockedGetMentor.mockResolvedValue(MOCKED_USER);
+    const EXPECTED_ERROR = new Error('Wrong channel name');
+    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO);
 
     mockedWebClient.conversations.info.mockResolvedValueOnce({
       channel: {
         name: 'aaaaaa',
       },
       ok: true,
-    })
+    });
 
     mockedWebClient.conversations.history.mockResolvedValueOnce(
       MOCKED_CONVERSATIONS_HISTORY
-    )
+    );
 
     mockedUploadTarea.mockResolvedValue({
       fkTaskId: 1,
@@ -254,7 +253,7 @@ describe('messageReaction', () => {
       delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
       id: 22,
       isActive: true,
-    })
+    });
 
     mockedWebClient.chat.postMessage.mockResolvedValueOnce({
       message: {
@@ -262,94 +261,94 @@ describe('messageReaction', () => {
       },
       ts: '1666879163.121179',
       ok: true,
-    })
+    });
     try {
-      await submitWithMessageReactionFunction({ client, event })
+      await submitWithMessageReactionFunction({ client, event });
     } catch (err) {
-      expect(err).toEqual(EXPECTED_ERROR)
+      expect(err).toEqual(EXPECTED_ERROR);
     }
-  })
+  });
 
   it('should throw error when user is not found', async () => {
-    const EXPECTED_ERROR = new Error('Slack-api Error: User not found')
-    mockedWebClient.users.info.mockResolvedValueOnce({ ok: false })
-    mockedGetMentor.mockResolvedValue(MOCKED_USER)
+    const EXPECTED_ERROR = new Error('Slack-api Error: User not found');
+    mockedWebClient.users.info.mockResolvedValueOnce({ ok: false });
+    mockedGetMentor.mockResolvedValue(MOCKED_USER);
 
     mockedWebClient.conversations.history.mockResolvedValueOnce(
       MOCKED_CONVERSATIONS_HISTORY
-    )
+    );
 
     try {
-      await submitWithMessageReactionFunction({ client, event })
+      await submitWithMessageReactionFunction({ client, event });
     } catch (err) {
-      expect(err).toEqual(EXPECTED_ERROR)
+      expect(err).toEqual(EXPECTED_ERROR);
     }
-  })
+  });
 
   it('should throw error when user is not found', async () => {
-    const EXPECTED_ERROR = new Error('Slack-api Error: Channel not found')
-    mockedGetMentor.mockResolvedValue(MOCKED_USER)
+    const EXPECTED_ERROR = new Error('Slack-api Error: Channel not found');
+    mockedGetMentor.mockResolvedValue(MOCKED_USER);
 
-    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO)
+    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO);
 
     mockedWebClient.conversations.history.mockResolvedValueOnce(
       MOCKED_CONVERSATIONS_HISTORY
-    )
+    );
 
-    mockedWebClient.conversations.info.mockResolvedValueOnce({ ok: false })
+    mockedWebClient.conversations.info.mockResolvedValueOnce({ ok: false });
 
     try {
-      await submitWithMessageReactionFunction({ client, event })
+      await submitWithMessageReactionFunction({ client, event });
     } catch (err) {
-      expect(err).toEqual(EXPECTED_ERROR)
+      expect(err).toEqual(EXPECTED_ERROR);
     }
-  })
+  });
 
   it('should throw error when user is not found', async () => {
-    const EXPECTED_ERROR = new Error('Slack-api Error: Message not found')
-    mockedGetMentor.mockResolvedValue(MOCKED_USER)
+    const EXPECTED_ERROR = new Error('Slack-api Error: Message not found');
+    mockedGetMentor.mockResolvedValue(MOCKED_USER);
 
-    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO)
+    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO);
 
     mockedWebClient.conversations.info.mockResolvedValueOnce(
       MOCKED_CONVERSATIONS_INFO
-    )
+    );
 
     mockedWebClient.conversations.history.mockResolvedValueOnce(
       null as unknown as ConversationsHistoryResponse
-    )
+    );
 
     try {
-      await submitWithMessageReactionFunction({ client, event })
+      await submitWithMessageReactionFunction({ client, event });
     } catch (err) {
-      expect(err).toEqual(EXPECTED_ERROR)
+      expect(err).toEqual(EXPECTED_ERROR);
     }
-  })
+  });
 
   it('should respond with an error if the submission format is wrong', async () => {
-    process.env.BOT_ID = 'test-bot-id'
-    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO)
+    process.env.BOT_ID = 'test-bot-id';
+    mockedWebClient.users.info.mockResolvedValueOnce(MOCKED_USER_INFO);
 
-    mockedGetMentor.mockResolvedValue(MOCKED_USER)
+    mockedGetMentor.mockResolvedValue(MOCKED_USER);
 
     mockedWebClient.conversations.info.mockResolvedValueOnce({
       channel: {
         name: 'clase-react-1',
       },
       ok: true,
-    })
+    });
 
     mockedWebClient.conversations.history.mockResolvedValueOnce({
-        messages: [
-          {
-            text: 'invalid format',
-            reactions: [
-              { name: 'white_check_mark', users: ['U043JJ1RA75'], count: 1 },
-            ],
-          },
-        ],
-        ok: true,
-      })
+      messages: [
+        {
+          text: 'invalid format',
+          reactions: [
+            { name: 'white_check_mark', users: ['U043JJ1RA75'], count: 1 },
+          ],
+        },
+      ],
+      ok: true,
+    });
 
     mockedWebClient.chat.postMessage.mockResolvedValueOnce({
       message: {
@@ -357,14 +356,14 @@ describe('messageReaction', () => {
       },
       ts: '1666879163.121179',
       ok: true,
-    })
+    });
 
-    await submitWithMessageReactionFunction({ client, event })
+    await submitWithMessageReactionFunction({ client, event });
 
-    expect(client.users.info).toBeCalledTimes(1)
-    expect(client.conversations.info).toBeCalledTimes(1)
-    expect(client.conversations.history).toBeCalledTimes(1)
-    expect(uploadTarea).toBeCalledTimes(0)
-    expect(client.chat.postMessage).toBeCalledTimes(1)
+    expect(client.users.info).toBeCalledTimes(1);
+    expect(client.conversations.info).toBeCalledTimes(1);
+    expect(client.conversations.history).toBeCalledTimes(1);
+    expect(uploadTarea).toBeCalledTimes(0);
+    expect(client.chat.postMessage).toBeCalledTimes(1);
   });
-})
+});

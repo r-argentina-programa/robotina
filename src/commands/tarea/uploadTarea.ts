@@ -1,16 +1,16 @@
-import { createAuth0Id } from '../../utils/createAuth0Id'
-import { ISubmissionCreate, sendSubmission } from '../../api/sendSubmission'
-import { getUser } from '../../api/getUser'
-import { getTasks } from '../../api/getTasks'
-import { createUserStudent, ICreateUserStudent } from '../../api/createStudent'
+import { createAuth0Id } from '../../utils/createAuth0Id';
+import { ISubmissionCreate, sendSubmission } from '../../api/sendSubmission';
+import { getUser } from '../../api/getUser';
+import { getTasks } from '../../api/getTasks';
+import { createUserStudent, ICreateUserStudent } from '../../api/createStudent';
 
 export interface IUploadTarea {
-  slackId: string
-  delivery: string
-  classNumber: string
-  firstName: string | undefined
-  lastName: string | undefined
-  email: string
+  slackId: string;
+  delivery: string;
+  classNumber: string;
+  firstName: string | undefined;
+  lastName: string | undefined;
+  email: string;
 }
 
 export const uploadTarea = async ({
@@ -21,15 +21,17 @@ export const uploadTarea = async ({
   lastName,
   slackId,
 }: IUploadTarea) => {
-  const auth0Id = createAuth0Id(slackId)
-  let submission: ISubmissionCreate
-  const userResponse = await getUser(auth0Id)
-  const taskResponse = await getTasks(classNumber)
+  const auth0Id = createAuth0Id(slackId);
+  let submission: ISubmissionCreate;
+  const userResponse = await getUser(auth0Id);
+  const taskResponse = await getTasks(classNumber);
 
   if (!taskResponse.length) {
-    throw new Error('Task not found')
+    throw new Error('Task not found');
   }
-  const taskId = taskResponse[0]!.id
+
+  const taskId = taskResponse[0]!.id;
+
   if (!userResponse.length) {
     const user: ICreateUserStudent = {
       firstName: firstName || email,
@@ -37,22 +39,25 @@ export const uploadTarea = async ({
       externalId: auth0Id,
       lastName: lastName || email,
       roles: 'Student',
-    }
-    const student = await createUserStudent(user)
+    };
+
+    const student = await createUserStudent(user);
 
     submission = {
       taskId,
       studentId: student.id,
       delivery,
-    }
+    };
 
-    return sendSubmission(submission)
+    return sendSubmission(submission);
   }
-  const studentId = userResponse[0].student!.id
+
+  const studentId = userResponse[0].student!.id;
   submission = {
     taskId,
     studentId,
     delivery,
-  }
-  return sendSubmission(submission)
-}
+  };
+
+  return sendSubmission(submission);
+};

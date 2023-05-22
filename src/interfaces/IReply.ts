@@ -1,6 +1,6 @@
-import { IMessage } from './IMessage'
+import { IMessage } from './IMessage';
 
 export interface IReply extends IMessage {
-  threadTS: string
-  username: string
+  threadTS: string;
+  username: string;
 }

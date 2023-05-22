@@ -1,4 +1,4 @@
-import { Message, Blocks } from 'slack-block-builder'
+import { Message, Blocks } from 'slack-block-builder';
 
 export const greetingsBlock = (channel: string) =>
   Message({ channel, text: 'greeting-block-alter' })
@@ -20,4 +20,4 @@ export const greetingsBlock = (channel: string) =>
         text: 'Mirá las preguntas frecuentes <https://argentinaprograma.com/faq|*aca*> !',
       })
     )
-    .buildToObject()
+    .buildToObject();

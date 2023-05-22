@@ -1,3 +1,3 @@
-import { initializeApp } from './app'
+import { initializeApp } from './app';
 
-initializeApp()
+initializeApp();

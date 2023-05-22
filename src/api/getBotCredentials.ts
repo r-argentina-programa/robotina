@@ -1,5 +1,5 @@
-import axios, { AxiosResponse } from 'axios'
-import { ICredential } from '../interfaces/ICredential'
+import axios, { AxiosResponse } from 'axios';
+import { ICredential } from '../interfaces/ICredential';
 
 export const getBotCredentials = async () => {
   try {
@@ -14,9 +14,9 @@ export const getBotCredentials = async () => {
         username: process.env.AUTH0_USERNAME,
         password: process.env.AUTH0_PASSWORD,
       }
-    )) as AxiosResponse<ICredential>
-    return data
+    )) as AxiosResponse<ICredential>;
+    return data;
   } catch (err) {
-    throw new Error('Bot authentication failed')
+    throw new Error('Bot authentication failed');
   }
-}
+};
