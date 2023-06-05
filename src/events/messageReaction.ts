@@ -41,12 +41,26 @@ export const submitWithMessageReactionFunction = async ({
 
   const isMentor = checkIfUserIsMentor(userResponse[0]);
 
+  console.log('event.reaction', event.reaction);
+  console.log('event.item_user', event.item_user);
+  console.log('event.user', event.user);
+  console.log('emoji is robot?', event.reaction === 'robot_face');
+  console.log('bot already reacted?', !botAlreadyReacted && event.item_user);
+  console.log('IDK', event.item_user !== process.env.BOT_ID);
+  console.log(
+    'is owner or mentor reacting?',
+    isMentor || event.item_user === event.user
+  );
+  console.log('isMentor', isMentor);
+
   if (
     event.reaction === 'robot_face' &&
     !botAlreadyReacted &&
     event.item_user !== process.env.BOT_ID &&
     (isMentor || event.item_user === event.user)
   ) {
+    console.log('Initiating submission by reaction...');
+
     const { user } = await client.users.info({
       user: event.item_user,
     });
@@ -123,6 +137,8 @@ ${messageText}\n\n*Para agregar correcciones responder en este hilo (no en el me
       name: 'white_check_mark',
       timestamp: event.item.ts,
     });
+
+    console.log('Submission completed successfully!');
   }
 };
 
