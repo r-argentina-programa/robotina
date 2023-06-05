@@ -34,12 +34,15 @@ export const submitWithMessageReactionFunction = async ({
   );
   const auth0Id = createAuth0Id(event.user);
   const userResponse = await getMentor(auth0Id);
+  let isMentor;
+
+  if (userResponse && userResponse.length !== 0) {
+    isMentor = checkIfUserIsMentor(userResponse[0]);
+  }
 
   console.log('auth0Id', auth0Id);
   console.log('userResponse', userResponse);
   console.log('userResponse[0]', userResponse[0]);
-
-  const isMentor = checkIfUserIsMentor(userResponse[0]);
 
   console.log('event.reaction', event.reaction);
   console.log('event.item_user', event.item_user);
