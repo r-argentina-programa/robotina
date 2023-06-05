@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { App, ReactionAddedEvent } from '@slack/bolt';
 import { WebClient } from '@slack/web-api/dist/WebClient';
 import { Reaction } from '@slack/web-api/dist/response/ConversationsHistoryResponse';
@@ -33,6 +34,11 @@ export const submitWithMessageReactionFunction = async ({
   );
   const auth0Id = createAuth0Id(event.user);
   const userResponse = await getMentor(auth0Id);
+
+  console.log('auth0Id', auth0Id);
+  console.log('userResponse', userResponse);
+  console.log('userResponse[0]', userResponse[0]);
+
   const isMentor = checkIfUserIsMentor(userResponse[0]);
 
   if (
@@ -92,7 +98,7 @@ export const submitWithMessageReactionFunction = async ({
 
     const botMessage = await client.chat.postMessage({
       channel: event.item.channel,
-      text: `Tarea subida con éxito <@${user.id}>! \n\nAcá está el <${permalink}|Link> al mensaje original.\n\nTarea: 
+      text: `Tarea subida con éxito <@${user.id}>! \n\nAcá está el <${permalink}|Link> al mensaje original.\n\nTarea:
 ${messageText}\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
     });
 
