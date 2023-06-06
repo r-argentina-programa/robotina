@@ -1,3 +1,4 @@
+import * as dotenv from 'dotenv';
 import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt';
 import { WebClient } from '@slack/web-api/dist/WebClient';
 import {
@@ -11,6 +12,8 @@ import { uploadTarea } from './uploadTarea';
 import { createThread, ICreateThread } from '../../api/createThread';
 import { validateSubmissionDeliveryFormat } from '../../utils/validateSubmissionDeliveryFormat';
 import { validateChannelName } from '../../utils/validateChannelName';
+
+dotenv.config();
 
 type IUserClient = UsersInfoResponse & {
   user: User & {

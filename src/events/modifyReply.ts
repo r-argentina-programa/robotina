@@ -1,7 +1,10 @@
+import * as dotenv from 'dotenv';
 import { App, KnownEventFromType, Logger, MessageEvent } from '@slack/bolt';
 import { WebClient } from '@slack/web-api/dist/WebClient';
 import { IModifyReply, modifyReply } from '../api/modifyReply';
 import { isTaskSubmission } from '../utils/validateTaskSubmission';
+
+dotenv.config();
 
 export type IMessageEvent = KnownEventFromType<'message'> & {
   message?: MessageEvent & {

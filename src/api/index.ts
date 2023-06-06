@@ -1,6 +1,9 @@
+import * as dotenv from 'dotenv';
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 import { getBotCredentials } from './getBotCredentials';
 import { retryHttpRequest } from './retryHttpRequest';
+
+dotenv.config();
 
 export type IAxiosError = AxiosError & {
   config: {

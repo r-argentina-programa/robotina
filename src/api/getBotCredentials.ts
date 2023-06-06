@@ -1,5 +1,8 @@
+import * as dotenv from 'dotenv';
 import axios, { AxiosResponse } from 'axios';
 import { ICredential } from '../interfaces/ICredential';
+
+dotenv.config();
 
 export const getBotCredentials = async () => {
   try {

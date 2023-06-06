@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import * as dotenv from 'dotenv';
 import { App, ReactionAddedEvent } from '@slack/bolt';
 import { WebClient } from '@slack/web-api/dist/WebClient';
 import { Reaction } from '@slack/web-api/dist/response/ConversationsHistoryResponse';
@@ -10,6 +11,8 @@ import { getMentor } from '../api/getMentor';
 import { checkIfBotAlreadyReacted } from '../utils/checkIfBotAlreadyReacted';
 import { checkIfUserIsMentor } from '../utils/checkIfUserIsMentor';
 import { validateSubmissionDeliveryFormat } from '../utils/validateSubmissionDeliveryFormat';
+
+dotenv.config();
 
 export interface IReactionAddedEvent {
   event: ReactionAddedEvent | any;

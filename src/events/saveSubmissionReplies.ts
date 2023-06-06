@@ -1,8 +1,11 @@
+import * as dotenv from 'dotenv';
 import { App, Logger, MessageEvent } from '@slack/bolt';
 import { WebClient } from '@slack/web-api/dist/WebClient';
 import { submitReply } from '../api/submitReply';
 import { IReply } from '../interfaces/IReply';
 import { isTaskSubmission } from '../utils/validateTaskSubmission';
+
+dotenv.config();
 
 export type IMessageEvent = MessageEvent & {
   thread_ts?: string;
