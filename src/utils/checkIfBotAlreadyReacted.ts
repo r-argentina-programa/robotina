@@ -1,4 +1,7 @@
 import { Reaction } from '@slack/web-api/dist/response/ConversationsHistoryResponse';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export const checkIfBotAlreadyReacted = (reactions: Reaction[]) => {
   const isReactedByBot = reactions.filter(
