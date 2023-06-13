@@ -3,14 +3,15 @@ import * as dotenv from 'dotenv';
 import { App, ReactionAddedEvent } from '@slack/bolt';
 import { WebClient } from '@slack/web-api/dist/WebClient';
 import { Reaction } from '@slack/web-api/dist/response/ConversationsHistoryResponse';
-import { createThread, ICreateThread } from '../api/createThread';
 import { uploadTarea } from '../commands/tarea/uploadTarea';
 import { createAuth0Id } from '../utils/createAuth0Id';
 import { validateChannelName } from '../utils/validateChannelName';
-import { getMentor } from '../api/getMentor';
 import { checkIfBotAlreadyReacted } from '../utils/checkIfBotAlreadyReacted';
 import { checkIfUserIsMentor } from '../utils/checkIfUserIsMentor';
 import { validateSubmissionDeliveryFormat } from '../utils/validateSubmissionDeliveryFormat';
+import userApi from '../api/marketplace/user/userApi';
+import { CreateThreadDto } from '../api/marketplace/thread/dto/CreateThreadDto';
+import threadApi from '../api/marketplace/thread/threadApi';
 
 dotenv.config();
 
@@ -36,16 +37,16 @@ export const submitWithMessageReactionFunction = async ({
     conversationResponse.messages![0]!.reactions as Reaction[]
   );
   const auth0Id = createAuth0Id(event.user);
-  const userResponse = await getMentor(auth0Id);
+  const users = await userApi.getAll({ filter: { externalId: auth0Id } });
   let isMentor;
 
-  if (userResponse && userResponse.length !== 0) {
-    isMentor = checkIfUserIsMentor(userResponse[0]);
+  if (users && users.length !== 0) {
+    isMentor = checkIfUserIsMentor(users[0]);
   }
 
   console.log('auth0Id', auth0Id);
-  console.log('userResponse', userResponse);
-  console.log('userResponse[0]', userResponse[0]);
+  console.log('userResponse', users);
+  console.log('userResponse[0]', users[0]);
 
   console.log('event.reaction', event.reaction);
   console.log('event.item_user', event.item_user);
@@ -128,15 +129,15 @@ ${messageText}\n\n*Para agregar correcciones responder en este hilo (no en el me
       thread_ts: event.item.ts,
     });
 
-    const thread: ICreateThread = {
-      authorId: <string>process.env.BOT_ID,
+    const createThreadDto: CreateThreadDto = {
+      authorId: process.env.BOT_ID!,
       studentId: tarea.fkStudentId,
       text: botMessage.message!.text as string,
       timestamp: botMessage.ts as string,
       taskId: tarea.fkTaskId,
     };
 
-    await createThread(thread);
+    await threadApi.create(createThreadDto);
 
     client.reactions.add({
       channel: event.item.channel,

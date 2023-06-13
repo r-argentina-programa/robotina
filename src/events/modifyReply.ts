@@ -1,8 +1,9 @@
 import * as dotenv from 'dotenv';
 import { App, KnownEventFromType, Logger, MessageEvent } from '@slack/bolt';
 import { WebClient } from '@slack/web-api/dist/WebClient';
-import { IModifyReply, modifyReply } from '../api/modifyReply';
+import { IModifyReply } from '../api/modifyReply';
 import { isTaskSubmission } from '../utils/validateTaskSubmission';
+import replyApi from '../api/marketplace/reply/replyApi';
 
 dotenv.config();
 
@@ -54,7 +55,7 @@ export const modifyReplyFunction = async ({
           timestamp: event.message.ts,
           username: user!.profile!.display_name as string,
         };
-        const replyResponse = await modifyReply(event.message.ts, reply);
+        const replyResponse = await replyApi.update(event.message.ts, reply);
 
         logger.info('Reply modified: ', replyResponse);
       }

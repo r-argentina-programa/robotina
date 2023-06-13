@@ -1,14 +1,14 @@
 import { expect, jest } from '@jest/globals';
 import { Logger, App } from '@slack/bolt';
 import { WebClient } from '@slack/web-api';
-import { deleteReply } from '../../api/deleteReply';
 import {
   IMessageEvent,
   deleteReplyFunction,
   deleteReplyEvent,
 } from '../deleteReply';
+import replyApi from '../../api/marketplace/reply/replyApi';
 
-jest.mock('../../api/deleteReply');
+jest.mock('../../api/marketplace/reply/replyApi');
 
 jest.mock('@slack/bolt', () => {
   const properties = {
@@ -85,7 +85,7 @@ describe('deleteReplyFunction', () => {
       limit: 1,
       inclusive: true,
     });
-    expect(deleteReply).toHaveBeenCalledTimes(1);
+    expect(replyApi.remove).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledTimes(0);
   });
 

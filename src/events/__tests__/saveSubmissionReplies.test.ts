@@ -7,7 +7,7 @@ import {
   saveSubmissionRepliesEvent,
 } from '../saveSubmissionReplies';
 
-jest.mock('../../api/submitReply');
+jest.mock('../../api/marketplace/reply/replyApi');
 
 jest.mock('@slack/bolt', () => {
   const properties = {
