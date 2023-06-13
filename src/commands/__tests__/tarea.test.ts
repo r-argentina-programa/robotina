@@ -3,10 +3,10 @@ import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt';
 import { WebClient } from '@slack/web-api';
 import { tareaCommandFunction, tareaSlashCommand } from '../tarea/tarea';
 import { uploadTarea } from '../tarea/uploadTarea';
-import { createThread } from '../../api/createThread';
 import { unknownCommandBlock } from '../../blocks/unknownCommandBlock';
 import { wrongFormatBlock } from '../../blocks/wrongFormatBlock';
-import { IThread } from '../../interfaces/IThread';
+import threadApi from '../../api/marketplace/thread/threadApi';
+import { Thread } from '../../api/marketplace/thread/entity/Thread';
 
 jest.mock('@slack/web-api', () => {
   const properties = {
@@ -28,10 +28,12 @@ jest.mock('@slack/bolt', () => {
 
 jest.mock('../tarea/uploadTarea');
 
-jest.mock('../../api/createThread');
+jest.mock('../../api/marketplace/thread/threadApi');
 
 const mockedUploadTarea = uploadTarea as jest.Mocked<typeof uploadTarea>;
-const mockedCreateThread = createThread as jest.Mocked<typeof createThread>;
+const mockedThreadApiCreate = threadApi.create as jest.Mocked<
+  typeof threadApi.create
+>;
 const webClientTest = new WebClient() as jest.Mocked<WebClient>;
 
 let command: SlashCommand;
@@ -73,7 +75,7 @@ describe('tareaCommandFunctiontarea', () => {
       createdAt: '2022-10-13T19:58:25.751Z',
       updatedAt: '2022-10-13T19:58:25.751Z',
     });
-    mockedCreateThread.mockResolvedValue({} as unknown as IThread);
+    mockedThreadApiCreate.mockResolvedValue({} as unknown as Thread);
     webClientTest.users.info.mockResolvedValue({
       ok: true,
       user: {

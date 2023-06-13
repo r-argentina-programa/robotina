@@ -1,8 +1,8 @@
 import * as dotenv from 'dotenv';
 import { App, KnownEventFromType, Logger, MessageEvent } from '@slack/bolt';
 import { WebClient } from '@slack/web-api/dist/WebClient';
-import { deleteReply } from '../api/deleteReply';
 import { isTaskSubmission } from '../utils/validateTaskSubmission';
+import replyApi from '../api/marketplace/reply/replyApi';
 
 dotenv.config();
 
@@ -40,7 +40,7 @@ export const deleteReplyFunction = async ({
       const isSubmission = isTaskSubmission(thread.messages![0].text!);
 
       if (isSubmission) {
-        const deleteReplyResponse = await deleteReply(
+        const deleteReplyResponse = await replyApi.remove(
           event.previous_message.ts
         );
 

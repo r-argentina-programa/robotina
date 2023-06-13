@@ -7,7 +7,7 @@ import {
   modifyReplyEvent,
 } from '../modifyReply';
 
-jest.mock('../../api/modifyReply');
+jest.mock('../../api/marketplace/reply/replyApi');
 
 jest.mock('@slack/bolt', () => {
   const properties = {

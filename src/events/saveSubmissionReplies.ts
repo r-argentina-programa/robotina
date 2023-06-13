@@ -1,9 +1,9 @@
 import * as dotenv from 'dotenv';
 import { App, Logger, MessageEvent } from '@slack/bolt';
 import { WebClient } from '@slack/web-api/dist/WebClient';
-import { submitReply } from '../api/submitReply';
-import { IReply } from '../interfaces/IReply';
 import { isTaskSubmission } from '../utils/validateTaskSubmission';
+import replyApi from '../api/marketplace/reply/replyApi';
+import { CreateReplyDto } from '../api/marketplace/reply/dto/CreateReplyDto';
 
 dotenv.config();
 
@@ -43,7 +43,7 @@ export const saveSubmissionRepliesFunction = async ({
         if (!user) {
           throw new Error('Slack-api Error: User not found');
         }
-        const reply: IReply = {
+        const reply: CreateReplyDto = {
           authorId: userId,
           // @ts-ignore message.text exist in the api
           text: message.text,
@@ -53,7 +53,8 @@ export const saveSubmissionRepliesFunction = async ({
             (user!.profile!.display_name as string) ||
             (user!.profile!.real_name as string),
         };
-        const replyResponse = await submitReply(reply);
+
+        const replyResponse = await replyApi.create(reply);
 
         logger.info('Reply submitted: ', replyResponse);
       }

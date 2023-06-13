@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as dotenv from 'dotenv';
 import { AckFn, App, RespondFn, SayFn, SlashCommand } from '@slack/bolt';
 import { WebClient } from '@slack/web-api/dist/WebClient';
@@ -9,9 +10,10 @@ import {
 import { unknownCommandBlock } from '../../blocks/unknownCommandBlock';
 import { wrongFormatBlock } from '../../blocks/wrongFormatBlock';
 import { uploadTarea } from './uploadTarea';
-import { createThread, ICreateThread } from '../../api/createThread';
 import { validateSubmissionDeliveryFormat } from '../../utils/validateSubmissionDeliveryFormat';
 import { validateChannelName } from '../../utils/validateChannelName';
+import threadApi from '../../api/marketplace/thread/threadApi';
+import { CreateThreadDto } from '../../api/marketplace/thread/dto/CreateThreadDto';
 
 dotenv.config();
 
@@ -77,17 +79,18 @@ export const tareaCommandFunction = async ({
         `Tarea subida con éxito <@${user.id}>! \n\nTarea:\n${command.text}\n\n*Para agregar correcciones responder en este hilo.*`
       );
 
-      const thread: ICreateThread = {
-        authorId: <string>process.env.BOT_ID,
+      const thread: CreateThreadDto = {
+        authorId: process.env.BOT_ID!,
         studentId: tarea.fkStudentId,
         text: messageResponse.message?.text as string,
         timestamp: messageResponse.ts as string,
         taskId: tarea.fkTaskId,
       };
 
-      await createThread(thread);
+      await threadApi.create(thread);
     }
   } catch (error) {
+    console.log(error);
     throw new Error('hubo un error');
   }
 };
