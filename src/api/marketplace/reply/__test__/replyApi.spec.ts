@@ -73,6 +73,7 @@ describe('Marketplace Reply API', () => {
   describe('update', () => {
     it('should update a reply', async () => {
       const originalReply: Reply = {
+        id: 1,
         authorId: '1',
         text: 'Lorem Ipsum',
         threadTS: '123456',
@@ -103,6 +104,7 @@ describe('Marketplace Reply API', () => {
 
     it('should throw an error when updating a reply fails', async () => {
       const originalReply: Reply = {
+        id: 1,
         authorId: '1',
         text: 'Lorem Ipsum',
         threadTS: '123456',
