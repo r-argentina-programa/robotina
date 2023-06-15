@@ -1,3 +1,5 @@
+import env from '../../../../config/env.config';
+
 export const validConversationHistoryResponse = {
   ok: true,
   latest: '1686691426.115159',
@@ -14,7 +16,7 @@ export const validConversationHistoryResponse = {
         "```console.log('Hello world!!!!!!')```\n" +
         '\n' +
         '*Para agregar correcciones responder en este hilo (no en el mensaje original).*',
-      user: 'U0443GZ6V39',
+      user: env.BOT_ID,
       ts: '1686691426.115159',
       app_id: 'A0443AGKZFH',
       blocks: [Array],

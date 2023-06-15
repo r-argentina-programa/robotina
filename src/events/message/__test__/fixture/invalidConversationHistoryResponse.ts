@@ -1,3 +1,5 @@
+import env from '../../../../config/env.config';
+
 export const invalidConversationHistoryResponse = {
   ok: true,
   latest: '1686691426.115159',
@@ -6,7 +8,7 @@ export const invalidConversationHistoryResponse = {
       bot_id: 'B044BF79ECE',
       type: 'message',
       text: 'Hola equipo!',
-      user: 'U0443GZ6V39',
+      user: env.BOT_ID,
       ts: '1686691426.115159',
       app_id: 'A0443AGKZFH',
       blocks: [Array],
