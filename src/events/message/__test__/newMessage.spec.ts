@@ -1,12 +1,12 @@
 import { expect, jest } from '@jest/globals';
 import { Logger } from '@slack/bolt';
 import { WebClient } from '@slack/web-api';
-import { handleSubmissionReply } from '../newMessage';
+import { handleSubmissionReplyNew } from '../messageNew';
 import { validConversationHistoryResponse } from './fixture/validConversationHistoryResponse';
 import { userInfoResponse } from './fixture/userInfoResponse';
-import { validMessageEvent } from './fixture/validMessageEvent';
 import replyApi from '../../../api/marketplace/reply/replyApi';
 import { invalidConversationHistoryResponse } from './fixture/invalidConversationHistoryResponse';
+import { messageNewEvent } from './fixture/MessageNewEvent';
 
 jest.mock('../../../api/marketplace/reply/replyApi');
 
@@ -57,31 +57,31 @@ describe('handleSubmissionReply', () => {
         username: '',
       });
 
-    await handleSubmissionReply({
+    await handleSubmissionReplyNew({
       client: webClientMock,
       // @ts-ignore
-      event: validMessageEvent,
+      message: messageNewEvent,
       logger: loggerMock,
     });
 
     expect(conversationHistoryMock).toHaveBeenCalledTimes(1);
     expect(conversationHistoryMock).toHaveBeenCalledWith({
-      latest: validMessageEvent.thread_ts,
-      channel: validMessageEvent.channel,
+      latest: messageNewEvent.thread_ts,
+      channel: messageNewEvent.channel,
       limit: 1,
       inclusive: true,
     });
 
     expect(userInfoMock).toHaveBeenCalledTimes(1);
     expect(userInfoMock).toHaveBeenCalledWith({
-      user: validMessageEvent.user,
+      user: messageNewEvent.user,
     });
     expect(replyCreateMock).toHaveBeenCalledTimes(1);
     expect(replyCreateMock).toHaveBeenCalledWith({
       authorId: userInfoResponse.user.id,
-      text: validMessageEvent.text!,
-      threadTS: validMessageEvent.thread_ts!,
-      timestamp: validMessageEvent.ts,
+      text: messageNewEvent.text!,
+      threadTS: messageNewEvent.thread_ts!,
+      timestamp: messageNewEvent.ts,
       username: expect.any(String),
     });
     expect(loggerMock.info).toHaveBeenCalledTimes(1);
@@ -97,17 +97,17 @@ describe('handleSubmissionReply', () => {
     const userInfoMock = jest.spyOn(webClientMock.users, 'info');
     const replyCreateMock = jest.spyOn(replyApi, 'create');
 
-    await handleSubmissionReply({
+    await handleSubmissionReplyNew({
       client: webClientMock,
       // @ts-ignore
-      event: validMessageEvent,
+      message: messageNewEvent,
       logger: loggerMock,
     });
 
     expect(conversationHistoryMock).toHaveBeenCalledTimes(1);
     expect(conversationHistoryMock).toHaveBeenCalledWith({
-      latest: validMessageEvent.thread_ts,
-      channel: validMessageEvent.channel,
+      latest: messageNewEvent.thread_ts,
+      channel: messageNewEvent.channel,
       limit: 1,
       inclusive: true,
     });
@@ -127,10 +127,10 @@ describe('handleSubmissionReply', () => {
     const userInfoMock = jest.spyOn(webClientMock.users, 'info');
     const replyCreateMock = jest.spyOn(replyApi, 'create');
 
-    await handleSubmissionReply({
+    await handleSubmissionReplyNew({
       client: webClientMock,
       // @ts-ignore
-      event: validMessageEvent,
+      message: messageNewEvent,
       logger: loggerMock,
     });
 

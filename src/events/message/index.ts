@@ -1,6 +1,8 @@
 import { App as SlackApp } from '@slack/bolt';
-import { handleSubmissionReply } from './newMessage';
+import { handleSubmissionReplyNew } from './messageNew';
 
-export const mapMessageEventsToHandlers = (app: SlackApp) => {
-  app.event('message', handleSubmissionReply);
+const subscribeToMessageEvents = (app: SlackApp) => {
+  app.message(handleSubmissionReplyNew);
 };
+
+export default subscribeToMessageEvents;

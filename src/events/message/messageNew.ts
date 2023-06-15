@@ -1,28 +1,24 @@
-import {
-  GenericMessageEvent,
-  Middleware,
-  SlackEventMiddlewareArgs,
-} from '@slack/bolt';
+import { Middleware, SlackEventMiddlewareArgs } from '@slack/bolt';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers';
 import { isTaskSubmission } from '../../utils/validateTaskSubmission';
 import replyApi from '../../api/marketplace/reply/replyApi';
 import { CreateReplyDto } from '../../api/marketplace/reply/dto/CreateReplyDto';
+import env from '../../config/env.config';
 
-export const handleSubmissionReply: Middleware<
+export const handleSubmissionReplyNew: Middleware<
   SlackEventMiddlewareArgs<'message'>,
   StringIndexed
-> = async ({ client, event, logger }) => {
-  const genericMessageEvent = event as GenericMessageEvent;
-  const isMessageFromThread = genericMessageEvent.thread_ts;
-  const isThreadFromBot =
-    genericMessageEvent.parent_user_id === process.env.BOT_ID;
-
-  if (isMessageFromThread && isThreadFromBot) {
+> = async ({ client, message, logger }) => {
+  if (
+    message.subtype === undefined &&
+    message.thread_ts &&
+    message.parent_user_id === env.BOT_ID
+  ) {
     try {
       const { messages: messagesFromChannel } =
         await client.conversations.history({
-          latest: genericMessageEvent.thread_ts,
-          channel: genericMessageEvent.channel,
+          latest: message.thread_ts,
+          channel: message.channel,
           limit: 1,
           inclusive: true,
         });
@@ -36,14 +32,14 @@ export const handleSubmissionReply: Middleware<
       }
 
       const { user: slackUser } = await client.users.info({
-        user: genericMessageEvent.user,
+        user: message.user,
       });
 
       const createReplyDto: CreateReplyDto = {
         authorId: slackUser!.id!,
-        text: genericMessageEvent.text!,
-        threadTS: genericMessageEvent.thread_ts!,
-        timestamp: genericMessageEvent.ts,
+        text: message.text!,
+        threadTS: message.thread_ts!,
+        timestamp: message.ts,
         username:
           (slackUser!.profile!.display_name as string) ||
           (slackUser!.profile!.real_name as string),
@@ -58,7 +54,7 @@ export const handleSubmissionReply: Middleware<
       );
     } catch (error) {
       logger.error(
-        `Something when wrong went handling a submission reply. Displaying relevant data: Message ID "${genericMessageEvent.ts}", Message author ID "${genericMessageEvent.user}", "Thread ID ${genericMessageEvent.thread_ts}", Thread author ID "${genericMessageEvent.parent_user_id}".`
+        `Something when wrong went handling a submission reply. Displaying relevant data: Message ID "${message.ts}", Message author ID "${message.user}", "Thread ID ${message.thread_ts}", Thread author ID "${message.parent_user_id}".`
       );
       logger.error(error);
     }

@@ -1,6 +1,6 @@
 import env from '../../../../config/env.config';
 
-export const validMessageEvent = {
+export const messageNewEvent = {
   client_msg_id: '74138583-456a-465b-82f9-6589141d5cdb',
   type: 'message',
   text: 'AGUANTE RACING 15',

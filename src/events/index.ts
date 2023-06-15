@@ -3,10 +3,10 @@ import { deleteReplyEvent } from './deleteReply';
 import { greetUserEvent } from './greeting';
 import { modifyReplyEvent } from './modifyReply';
 import { submitWithMessageReaction } from './messageReaction';
-import { mapMessageEventsToHandlers } from './message';
+import subscribeToMessageEvents from './message';
 
 export const configureAppEvents = (app: SlackApp) => {
-  mapMessageEventsToHandlers(app);
+  subscribeToMessageEvents(app);
   greetUserEvent(app);
   modifyReplyEvent(app);
   deleteReplyEvent(app);
