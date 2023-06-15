@@ -6,7 +6,7 @@ import { validConversationHistoryResponse } from './fixture/validConversationHis
 import { userInfoResponse } from './fixture/userInfoResponse';
 import replyApi from '../../../api/marketplace/reply/replyApi';
 import { invalidConversationHistoryResponse } from './fixture/invalidConversationHistoryResponse';
-import { messageNewEvent } from './fixture/MessageNewEvent';
+import { messageNewEvent } from './fixture/messageNewEvent';
 
 jest.mock('../../../api/marketplace/reply/replyApi');
 
