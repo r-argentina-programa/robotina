@@ -10,6 +10,9 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest
 
+    env:
+      BOT_ID: ${{ secrets.BOT_ID }}
+
     strategy:
       matrix:
         node-version: [16.x]
