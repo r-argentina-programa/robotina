@@ -1,10 +1,10 @@
 import { App as SlackApp } from '@slack/bolt';
-import { greetUserEvent } from './greeting';
 import { submitWithMessageReaction } from './messageReaction';
 import subscribeToMessageEvents from './message';
+import subscribeToTeamJoinEvents from './teamJoin';
 
 export const configureAppEvents = (app: SlackApp) => {
   subscribeToMessageEvents(app);
-  greetUserEvent(app);
+  subscribeToTeamJoinEvents(app);
   submitWithMessageReaction(app);
 };
