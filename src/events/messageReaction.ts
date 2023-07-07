@@ -12,6 +12,7 @@ import { validateSubmissionDeliveryFormat } from '../utils/validateSubmissionDel
 import userApi from '../api/marketplace/user/userApi';
 import { CreateThreadDto } from '../api/marketplace/thread/dto/CreateThreadDto';
 import threadApi from '../api/marketplace/thread/threadApi';
+import { extractOnlySubmission } from '../utils/extractOnlySubmission';
 
 dotenv.config();
 
@@ -106,7 +107,7 @@ export const submitWithMessageReactionFunction = async ({
     const tarea = await uploadTarea({
       classNumber,
       slackId: user.id as string,
-      delivery: messageText,
+      delivery: extractOnlySubmission(messageText),
       firstName: user.profile!.first_name,
       lastName: user.profile!.last_name,
       email: user.profile!.email as string,
