@@ -55,14 +55,16 @@ describe('handleRobotFaceReaction', () => {
 
   describe('User flows', () => {
     it('should allow message authors to save their messages as submissions', async () => {
-      const submissionMock = {
+      const typeCodeText = conversationsHistoryResponse.messages[0].text;
+
+      const submissionResponseMock = {
         completed: false,
-        delivery: '',
+        delivery: typeCodeText,
         fkStudentId: 1,
         fkTaskId: 1,
         id: 1,
         isActive: true,
-        viewer: '',
+        viewer: undefined,
       } as Submission;
 
       clientMock.conversations.history.mockResolvedValueOnce(
@@ -80,7 +82,7 @@ describe('handleRobotFaceReaction', () => {
         conversationsInfoResponse
       );
 
-      uploadTareaMock.mockResolvedValueOnce(submissionMock);
+      uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
 
       clientMock.chat.getPermalink.mockResolvedValueOnce(
         // @ts-ignore
@@ -101,32 +103,33 @@ describe('handleRobotFaceReaction', () => {
 
       expect(uploadTareaMock).toBeCalledTimes(1);
       expect(uploadTareaMock).toHaveBeenCalledWith({
-        classNumber: expect.any(String),
-        slackId: expect.any(String),
-        delivery: expect.any(String),
-        firstName: expect.any(String),
-        lastName: expect.any(String),
-        email: expect.any(String),
+        classNumber: '1',
+        delivery: typeCodeText,
+        slackId: messageAuthorEvent.item_user,
+        firstName: usersInfoResponse.user.profile.first_name,
+        lastName: usersInfoResponse.user.profile.last_name,
+        email: usersInfoResponse.user.profile.email,
       });
 
       expect(clientMock.chat.postMessage).toBeCalledTimes(2);
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
         channel: messageAuthorEvent.item.channel,
-        text: expect.any(String),
+        text: `Tarea subida con éxito <@${messageAuthorEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original.\n\nTarea:
+      ${typeCodeText}\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
       });
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
         channel: messageAuthorEvent.item.channel,
-        text: expect.any(String),
+        text: 'Si querés agregar una corrección a esta tarea hacelo como una respuesta al mensaje que mandó el bot.',
         thread_ts: messageAuthorEvent.item.ts,
       });
 
       expect(threadApi.create).toHaveBeenCalledTimes(1);
       expect(threadApi.create).toHaveBeenCalledWith({
-        authorId: expect.any(String),
-        studentId: expect.any(Number),
-        text: expect.any(String),
-        timestamp: expect.any(String),
-        taskId: expect.any(Number),
+        authorId: env.BOT_ID,
+        studentId: submissionResponseMock.fkStudentId,
+        taskId: submissionResponseMock.fkTaskId,
+        text: chatPostMessageResponse.message.text,
+        timestamp: chatPostMessageResponse.ts,
       });
 
       expect(clientMock.reactions.add).toBeCalledTimes(1);
@@ -138,9 +141,11 @@ describe('handleRobotFaceReaction', () => {
     });
 
     it('should allow mentors to save other user messages as submissions', async () => {
+      const typeCodeText = conversationsHistoryResponse.messages[0].text;
+
       const submissionResponseMock = {
         completed: false,
-        delivery: '```console.log("Hello World!!!")```',
+        delivery: typeCodeText,
         fkStudentId: 1,
         fkTaskId: 1,
         id: 1,
@@ -197,8 +202,8 @@ describe('handleRobotFaceReaction', () => {
 
       expect(uploadTareaMock).toBeCalledTimes(1);
       expect(uploadTareaMock).toHaveBeenCalledWith({
-        classNumber: expect.any(String),
-        delivery: conversationsHistoryResponse.messages[0].text,
+        classNumber: '1',
+        delivery: typeCodeText,
         slackId: randomUserEvent.item_user,
         firstName: usersInfoResponse.user.profile.first_name,
         lastName: usersInfoResponse.user.profile.last_name,
@@ -208,12 +213,13 @@ describe('handleRobotFaceReaction', () => {
       expect(clientMock.chat.postMessage).toBeCalledTimes(2);
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
         channel: randomUserEvent.item.channel,
-        text: expect.any(String),
+        text: `Tarea subida con éxito <@${randomUserEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original.\n\nTarea:
+      ${typeCodeText}\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
       });
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
         channel: randomUserEvent.item.channel,
+        text: 'Si querés agregar una corrección a esta tarea hacelo como una respuesta al mensaje que mandó el bot.',
         thread_ts: randomUserEvent.item.ts,
-        text: expect.any(String),
       });
 
       expect(threadApi.create).toHaveBeenCalledTimes(1);
