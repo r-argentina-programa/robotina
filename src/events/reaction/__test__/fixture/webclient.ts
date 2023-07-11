@@ -1,3 +1,5 @@
+import env from '../../../../config/env.config';
+
 export const conversationsHistoryResponse = {
   messages: [
     {
@@ -113,7 +115,7 @@ export const chatPostMessageResponse = {
   channel: 'C04T7UT7QSE',
   ts: '1688995709.519859',
   message: {
-    bot_id: 'B044BF79ECE',
+    bot_id: env.BOT_ID,
     type: 'message',
     text:
       'Tarea subida con éxito <@U044WEP8EQ1>! \n' +
@@ -133,7 +135,7 @@ export const chatPostMessageResponse = {
     blocks: [[Object]],
     team: 'T044HRG6926',
     bot_profile: {
-      id: 'B044BF79ECE',
+      id: env.BOT_ID,
       app_id: 'A0443AGKZFH',
       name: 'r-a-team-test-app',
       icons: [Object],
