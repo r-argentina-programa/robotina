@@ -536,4 +536,128 @@ describe('handleRobotFaceReaction', () => {
     expect(clientMock.reactions.add).toBeCalledTimes(0);
     expect(loggerMock.error).toBeCalledTimes(0);
   });
+
+  it('should save type CODE submissions correctly', async () => {
+    const typeCodeText = conversationsHistoryResponse.messages[0].text;
+
+    const submissionResponseMock = {
+      completed: false,
+      delivery: typeCodeText,
+      fkStudentId: 1,
+      fkTaskId: 1,
+      id: 1,
+      isActive: true,
+      viewer: undefined,
+    } as Submission;
+
+    clientMock.conversations.history.mockResolvedValueOnce(
+      // @ts-ignore
+      conversationsHistoryResponse
+    );
+
+    clientMock.users.info.mockResolvedValueOnce(
+      // @ts-ignore
+      { ...usersInfoResponse, id: randomUserEvent.item_user }
+    );
+
+    clientMock.conversations.info.mockResolvedValueOnce(
+      // @ts-ignore
+      conversationsInfoResponse
+    );
+
+    uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
+
+    clientMock.chat.getPermalink.mockResolvedValueOnce(
+      // @ts-ignore
+      chatGetPermalinkResponse
+    );
+
+    clientMock.chat.postMessage.mockResolvedValueOnce(
+      // @ts-ignore
+      chatPostMessageResponse
+    );
+
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: messageAuthorEvent,
+      logger: loggerMock,
+    });
+
+    expect(uploadTareaMock).toBeCalledTimes(1);
+    expect(uploadTareaMock).toHaveBeenCalledWith({
+      classNumber: expect.any(String),
+      delivery: typeCodeText,
+      slackId: expect.any(String),
+      firstName: expect.any(String),
+      lastName: expect.any(String),
+      email: expect.any(String),
+    });
+  });
+
+  it('should save type LINK submissions correctly', async () => {
+    const typeLinkText =
+      'Hola, aca dejo la tarea\n\nhttp://github.com/r-argentina-programa/robotina\n';
+
+    const submissionResponseMock = {
+      completed: false,
+      delivery: typeLinkText,
+      fkStudentId: 1,
+      fkTaskId: 1,
+      id: 1,
+      isActive: true,
+      viewer: undefined,
+    } as Submission;
+
+    clientMock.conversations.history.mockResolvedValueOnce({
+      messages: [
+        // @ts-ignore
+        {
+          ...conversationsHistoryResponse.messages[0],
+          text: typeLinkText,
+        },
+      ],
+    });
+
+    clientMock.users.info.mockResolvedValueOnce(
+      // @ts-ignore
+      { ...usersInfoResponse, id: randomUserEvent.item_user }
+    );
+
+    clientMock.conversations.info.mockResolvedValueOnce(
+      // @ts-ignore
+      {
+        ...conversationsInfoResponse,
+        channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
+      }
+    );
+    uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
+
+    clientMock.chat.getPermalink.mockResolvedValueOnce(
+      // @ts-ignore
+      chatGetPermalinkResponse
+    );
+
+    clientMock.chat.postMessage.mockResolvedValueOnce(
+      // @ts-ignore
+      chatPostMessageResponse
+    );
+
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: messageAuthorEvent,
+      logger: loggerMock,
+    });
+
+    expect(uploadTareaMock).toBeCalledTimes(1);
+    expect(uploadTareaMock).toHaveBeenCalledWith({
+      classNumber: expect.any(String),
+      delivery: typeLinkText,
+      slackId: expect.any(String),
+      firstName: expect.any(String),
+      lastName: expect.any(String),
+      email: expect.any(String),
+    });
+  });
 });
