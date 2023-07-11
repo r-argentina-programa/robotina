@@ -53,611 +53,617 @@ describe('handleRobotFaceReaction', () => {
     jest.clearAllMocks();
   });
 
-  it('should allow message authors to save their messages as submissions', async () => {
-    const submissionMock = {
-      completed: false,
-      delivery: '',
-      fkStudentId: 1,
-      fkTaskId: 1,
-      id: 1,
-      isActive: true,
-      viewer: '',
-    } as Submission;
+  describe('User flows', () => {
+    it('should allow message authors to save their messages as submissions', async () => {
+      const submissionMock = {
+        completed: false,
+        delivery: '',
+        fkStudentId: 1,
+        fkTaskId: 1,
+        id: 1,
+        isActive: true,
+        viewer: '',
+      } as Submission;
 
-    clientMock.conversations.history.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsHistoryResponse
-    );
-
-    clientMock.users.info.mockResolvedValueOnce(
-      // @ts-ignore
-      usersInfoResponse
-    );
-
-    clientMock.conversations.info.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsInfoResponse
-    );
-
-    uploadTareaMock.mockResolvedValueOnce(submissionMock);
-
-    clientMock.chat.getPermalink.mockResolvedValueOnce(
-      // @ts-ignore
-      chatGetPermalinkResponse
-    );
-
-    clientMock.chat.postMessage.mockResolvedValueOnce(
-      // @ts-ignore
-      chatPostMessageResponse
-    );
-
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: messageAuthorEvent,
-      logger: loggerMock,
-    });
-
-    expect(uploadTareaMock).toBeCalledTimes(1);
-    expect(uploadTareaMock).toHaveBeenCalledWith({
-      classNumber: expect.any(String),
-      slackId: expect.any(String),
-      delivery: expect.any(String),
-      firstName: expect.any(String),
-      lastName: expect.any(String),
-      email: expect.any(String),
-    });
-
-    expect(clientMock.chat.postMessage).toBeCalledTimes(2);
-    expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
-      channel: messageAuthorEvent.item.channel,
-      text: expect.any(String),
-    });
-    expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
-      channel: messageAuthorEvent.item.channel,
-      text: expect.any(String),
-      thread_ts: messageAuthorEvent.item.ts,
-    });
-
-    expect(threadApi.create).toHaveBeenCalledTimes(1);
-    expect(threadApi.create).toHaveBeenCalledWith({
-      authorId: expect.any(String),
-      studentId: expect.any(Number),
-      text: expect.any(String),
-      timestamp: expect.any(String),
-      taskId: expect.any(Number),
-    });
-
-    expect(clientMock.reactions.add).toBeCalledTimes(1);
-    expect(clientMock.reactions.add).toBeCalledWith({
-      channel: messageAuthorEvent.item.channel,
-      name: 'white_check_mark',
-      timestamp: messageAuthorEvent.item.ts,
-    });
-  });
-
-  it('should allow mentors to save other user messages as submissions', async () => {
-    const submissionResponseMock = {
-      completed: false,
-      delivery: '```console.log("Hello World!!!")```',
-      fkStudentId: 1,
-      fkTaskId: 1,
-      id: 1,
-      isActive: true,
-      viewer: undefined,
-    } as Submission;
-
-    clientMock.conversations.history.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsHistoryResponse
-    );
-
-    const userGetAllMock = jest
-      .spyOn(userApi, 'getAll')
-      .mockResolvedValueOnce([
-        { id: 1, username: '', externalId: '', roles: [Role.MENTOR] },
-      ]);
-
-    clientMock.users.info.mockResolvedValueOnce(
-      // @ts-ignore
-      { ...usersInfoResponse, id: randomUserEvent.item_user }
-    );
-
-    clientMock.conversations.info.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsInfoResponse
-    );
-
-    uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
-
-    clientMock.chat.getPermalink.mockResolvedValueOnce(
-      // @ts-ignore
-      chatGetPermalinkResponse
-    );
-
-    clientMock.chat.postMessage.mockResolvedValueOnce(
-      // @ts-ignore
-      chatPostMessageResponse
-    );
-
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: randomUserEvent,
-      logger: loggerMock,
-    });
-
-    expect(userGetAllMock).toHaveBeenCalledTimes(1);
-    expect(userGetAllMock).toHaveBeenCalledWith({
-      filter: {
-        externalId: `oauth2|sign-in-with-slack|${env.SLACK_TEAM_ID}-${randomUserEvent.user}`,
-      },
-    });
-
-    expect(uploadTareaMock).toBeCalledTimes(1);
-    expect(uploadTareaMock).toHaveBeenCalledWith({
-      classNumber: expect.any(String),
-      delivery: conversationsHistoryResponse.messages[0].text,
-      slackId: randomUserEvent.item_user,
-      firstName: usersInfoResponse.user.profile.first_name,
-      lastName: usersInfoResponse.user.profile.last_name,
-      email: usersInfoResponse.user.profile.email,
-    });
-
-    expect(clientMock.chat.postMessage).toBeCalledTimes(2);
-    expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
-      channel: randomUserEvent.item.channel,
-      text: expect.any(String),
-    });
-    expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
-      channel: randomUserEvent.item.channel,
-      thread_ts: randomUserEvent.item.ts,
-      text: expect.any(String),
-    });
-
-    expect(threadApi.create).toHaveBeenCalledTimes(1);
-    expect(threadApi.create).toHaveBeenCalledWith({
-      authorId: env.BOT_ID,
-      studentId: submissionResponseMock.fkStudentId,
-      taskId: submissionResponseMock.fkTaskId,
-      text: chatPostMessageResponse.message.text,
-      timestamp: chatPostMessageResponse.ts,
-    });
-
-    expect(clientMock.reactions.add).toBeCalledTimes(1);
-    expect(clientMock.reactions.add).toBeCalledWith({
-      channel: randomUserEvent.item.channel,
-      timestamp: randomUserEvent.item.ts,
-      name: 'white_check_mark',
-    });
-  });
-
-  it('should exit if a random user attempts to save other user messages as submissions', async () => {
-    clientMock.conversations.history.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsHistoryResponse
-    );
-
-    const userGetAllMock = jest
-      .spyOn(userApi, 'getAll')
-      .mockResolvedValueOnce([
-        { id: 1, username: '', externalId: '', roles: [Role.STUDENT] },
-      ]);
-
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: randomUserEvent,
-      logger: loggerMock,
-    });
-
-    expect(userGetAllMock).toHaveBeenCalledTimes(1);
-    expect(userGetAllMock).toHaveBeenCalledWith({
-      filter: {
-        externalId: `oauth2|sign-in-with-slack|${env.SLACK_TEAM_ID}-${randomUserEvent.user}`,
-      },
-    });
-
-    expect(uploadTareaMock).toBeCalledTimes(0);
-    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
-    expect(threadApi.create).toHaveBeenCalledTimes(0);
-    expect(clientMock.reactions.add).toBeCalledTimes(0);
-    expect(loggerMock.error).toBeCalledTimes(0);
-  });
-
-  it('should throw an error if the reacted message is not found in the channel', async () => {
-    clientMock.conversations.history.mockResolvedValueOnce(
-      // @ts-ignore
-      { messages: undefined }
-    );
-
-    const userGetAllMock = jest.spyOn(userApi, 'getAll');
-
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: messageAuthorEvent,
-      logger: loggerMock,
-    });
-
-    expect(userGetAllMock).toHaveBeenCalledTimes(0);
-    expect(uploadTareaMock).toBeCalledTimes(0);
-    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
-    expect(threadApi.create).toHaveBeenCalledTimes(0);
-    expect(clientMock.reactions.add).toBeCalledTimes(0);
-
-    expect(loggerMock.error).toBeCalledTimes(2);
-    expect(loggerMock.error).toHaveBeenNthCalledWith(
-      2,
-      new Error(
-        `Message with ID ${messageAuthorEvent.item.ts} not found in channel ${messageAuthorEvent.item.channel}.`
-      )
-    );
-  });
-
-  it('should throw an error if the reacted message has no reactions', async () => {
-    clientMock.conversations.history.mockResolvedValueOnce(
-      // @ts-ignore
-      { messages: [{ reactions: undefined }] }
-    );
-
-    const userGetAllMock = jest.spyOn(userApi, 'getAll');
-
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: messageAuthorEvent,
-      logger: loggerMock,
-    });
-
-    expect(userGetAllMock).toHaveBeenCalledTimes(0);
-    expect(uploadTareaMock).toBeCalledTimes(0);
-    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
-    expect(threadApi.create).toHaveBeenCalledTimes(0);
-    expect(clientMock.reactions.add).toBeCalledTimes(0);
-
-    expect(loggerMock.error).toBeCalledTimes(2);
-    expect(loggerMock.error).toHaveBeenNthCalledWith(
-      2,
-      new Error(
-        `Message with ID ${messageAuthorEvent.item.ts} in channel ${messageAuthorEvent.item.channel} has no reactions.`
-      )
-    );
-  });
-
-  it('should exit if Robotina has already processed the reacted message', async () => {
-    clientMock.conversations.history.mockResolvedValueOnce({
-      messages: [
+      clientMock.conversations.history.mockResolvedValueOnce(
         // @ts-ignore
-        { reactions: [{ users: [env.BOT_ID], name: 'white_check_mark' }] },
-      ],
+        conversationsHistoryResponse
+      );
+
+      clientMock.users.info.mockResolvedValueOnce(
+        // @ts-ignore
+        usersInfoResponse
+      );
+
+      clientMock.conversations.info.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsInfoResponse
+      );
+
+      uploadTareaMock.mockResolvedValueOnce(submissionMock);
+
+      clientMock.chat.getPermalink.mockResolvedValueOnce(
+        // @ts-ignore
+        chatGetPermalinkResponse
+      );
+
+      clientMock.chat.postMessage.mockResolvedValueOnce(
+        // @ts-ignore
+        chatPostMessageResponse
+      );
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
+
+      expect(uploadTareaMock).toBeCalledTimes(1);
+      expect(uploadTareaMock).toHaveBeenCalledWith({
+        classNumber: expect.any(String),
+        slackId: expect.any(String),
+        delivery: expect.any(String),
+        firstName: expect.any(String),
+        lastName: expect.any(String),
+        email: expect.any(String),
+      });
+
+      expect(clientMock.chat.postMessage).toBeCalledTimes(2);
+      expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
+        channel: messageAuthorEvent.item.channel,
+        text: expect.any(String),
+      });
+      expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
+        channel: messageAuthorEvent.item.channel,
+        text: expect.any(String),
+        thread_ts: messageAuthorEvent.item.ts,
+      });
+
+      expect(threadApi.create).toHaveBeenCalledTimes(1);
+      expect(threadApi.create).toHaveBeenCalledWith({
+        authorId: expect.any(String),
+        studentId: expect.any(Number),
+        text: expect.any(String),
+        timestamp: expect.any(String),
+        taskId: expect.any(Number),
+      });
+
+      expect(clientMock.reactions.add).toBeCalledTimes(1);
+      expect(clientMock.reactions.add).toBeCalledWith({
+        channel: messageAuthorEvent.item.channel,
+        name: 'white_check_mark',
+        timestamp: messageAuthorEvent.item.ts,
+      });
     });
 
-    const userGetAllMock = jest.spyOn(userApi, 'getAll');
+    it('should allow mentors to save other user messages as submissions', async () => {
+      const submissionResponseMock = {
+        completed: false,
+        delivery: '```console.log("Hello World!!!")```',
+        fkStudentId: 1,
+        fkTaskId: 1,
+        id: 1,
+        isActive: true,
+        viewer: undefined,
+      } as Submission;
 
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: messageAuthorEvent,
-      logger: loggerMock,
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsHistoryResponse
+      );
+
+      const userGetAllMock = jest
+        .spyOn(userApi, 'getAll')
+        .mockResolvedValueOnce([
+          { id: 1, username: '', externalId: '', roles: [Role.MENTOR] },
+        ]);
+
+      clientMock.users.info.mockResolvedValueOnce(
+        // @ts-ignore
+        { ...usersInfoResponse, id: randomUserEvent.item_user }
+      );
+
+      clientMock.conversations.info.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsInfoResponse
+      );
+
+      uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
+
+      clientMock.chat.getPermalink.mockResolvedValueOnce(
+        // @ts-ignore
+        chatGetPermalinkResponse
+      );
+
+      clientMock.chat.postMessage.mockResolvedValueOnce(
+        // @ts-ignore
+        chatPostMessageResponse
+      );
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: randomUserEvent,
+        logger: loggerMock,
+      });
+
+      expect(userGetAllMock).toHaveBeenCalledTimes(1);
+      expect(userGetAllMock).toHaveBeenCalledWith({
+        filter: {
+          externalId: `oauth2|sign-in-with-slack|${env.SLACK_TEAM_ID}-${randomUserEvent.user}`,
+        },
+      });
+
+      expect(uploadTareaMock).toBeCalledTimes(1);
+      expect(uploadTareaMock).toHaveBeenCalledWith({
+        classNumber: expect.any(String),
+        delivery: conversationsHistoryResponse.messages[0].text,
+        slackId: randomUserEvent.item_user,
+        firstName: usersInfoResponse.user.profile.first_name,
+        lastName: usersInfoResponse.user.profile.last_name,
+        email: usersInfoResponse.user.profile.email,
+      });
+
+      expect(clientMock.chat.postMessage).toBeCalledTimes(2);
+      expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
+        channel: randomUserEvent.item.channel,
+        text: expect.any(String),
+      });
+      expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
+        channel: randomUserEvent.item.channel,
+        thread_ts: randomUserEvent.item.ts,
+        text: expect.any(String),
+      });
+
+      expect(threadApi.create).toHaveBeenCalledTimes(1);
+      expect(threadApi.create).toHaveBeenCalledWith({
+        authorId: env.BOT_ID,
+        studentId: submissionResponseMock.fkStudentId,
+        taskId: submissionResponseMock.fkTaskId,
+        text: chatPostMessageResponse.message.text,
+        timestamp: chatPostMessageResponse.ts,
+      });
+
+      expect(clientMock.reactions.add).toBeCalledTimes(1);
+      expect(clientMock.reactions.add).toBeCalledWith({
+        channel: randomUserEvent.item.channel,
+        timestamp: randomUserEvent.item.ts,
+        name: 'white_check_mark',
+      });
     });
 
-    expect(userGetAllMock).toHaveBeenCalledTimes(0);
-    expect(uploadTareaMock).toBeCalledTimes(0);
-    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
-    expect(threadApi.create).toHaveBeenCalledTimes(0);
-    expect(clientMock.reactions.add).toBeCalledTimes(0);
-    expect(loggerMock.error).toBeCalledTimes(0);
-    expect(loggerMock.info).toBeCalledTimes(1);
+    it('should exit if a random user attempts to save other user messages as submissions', async () => {
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsHistoryResponse
+      );
+
+      const userGetAllMock = jest
+        .spyOn(userApi, 'getAll')
+        .mockResolvedValueOnce([
+          { id: 1, username: '', externalId: '', roles: [Role.STUDENT] },
+        ]);
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: randomUserEvent,
+        logger: loggerMock,
+      });
+
+      expect(userGetAllMock).toHaveBeenCalledTimes(1);
+      expect(userGetAllMock).toHaveBeenCalledWith({
+        filter: {
+          externalId: `oauth2|sign-in-with-slack|${env.SLACK_TEAM_ID}-${randomUserEvent.user}`,
+        },
+      });
+
+      expect(uploadTareaMock).toBeCalledTimes(0);
+      expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+      expect(threadApi.create).toHaveBeenCalledTimes(0);
+      expect(clientMock.reactions.add).toBeCalledTimes(0);
+      expect(loggerMock.error).toBeCalledTimes(0);
+    });
   });
 
-  it('should exit if the reacted message author is Robotina', async () => {
-    clientMock.conversations.history.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsHistoryResponse
-    );
+  describe('Submission types', () => {
+    it('should save type CODE submissions correctly', async () => {
+      const typeCodeText = conversationsHistoryResponse.messages[0].text;
 
-    const userGetAllMock = jest.spyOn(userApi, 'getAll');
+      const submissionResponseMock = {
+        completed: false,
+        delivery: typeCodeText,
+        fkStudentId: 1,
+        fkTaskId: 1,
+        id: 1,
+        isActive: true,
+        viewer: undefined,
+      } as Submission;
 
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: { ...messageAuthorEvent, item_user: env.BOT_ID },
-      logger: loggerMock,
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsHistoryResponse
+      );
+
+      clientMock.users.info.mockResolvedValueOnce(
+        // @ts-ignore
+        { ...usersInfoResponse, id: randomUserEvent.item_user }
+      );
+
+      clientMock.conversations.info.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsInfoResponse
+      );
+
+      uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
+
+      clientMock.chat.getPermalink.mockResolvedValueOnce(
+        // @ts-ignore
+        chatGetPermalinkResponse
+      );
+
+      clientMock.chat.postMessage.mockResolvedValueOnce(
+        // @ts-ignore
+        chatPostMessageResponse
+      );
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
+
+      expect(uploadTareaMock).toBeCalledTimes(1);
+      expect(uploadTareaMock).toHaveBeenCalledWith({
+        classNumber: expect.any(String),
+        delivery: typeCodeText,
+        slackId: expect.any(String),
+        firstName: expect.any(String),
+        lastName: expect.any(String),
+        email: expect.any(String),
+      });
     });
 
-    expect(userGetAllMock).toHaveBeenCalledTimes(0);
-    expect(uploadTareaMock).toBeCalledTimes(0);
-    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
-    expect(threadApi.create).toHaveBeenCalledTimes(0);
-    expect(clientMock.reactions.add).toBeCalledTimes(0);
-    expect(loggerMock.error).toBeCalledTimes(0);
-    expect(loggerMock.info).toBeCalledTimes(1);
-  });
+    it('should save type LINK submissions correctly', async () => {
+      const typeLinkText =
+        'Hola, aca dejo la tarea\n\nhttp://github.com/r-argentina-programa/robotina\n';
 
-  it('should throw an error if the user is not found', async () => {
-    clientMock.conversations.history.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsHistoryResponse
-    );
+      const submissionResponseMock = {
+        completed: false,
+        delivery: typeLinkText,
+        fkStudentId: 1,
+        fkTaskId: 1,
+        id: 1,
+        isActive: true,
+        viewer: undefined,
+      } as Submission;
 
-    const userGetAllMock = jest.spyOn(userApi, 'getAll');
+      clientMock.conversations.history.mockResolvedValueOnce({
+        messages: [
+          // @ts-ignore
+          {
+            ...conversationsHistoryResponse.messages[0],
+            text: typeLinkText,
+          },
+        ],
+      });
 
-    clientMock.users.info.mockResolvedValueOnce(
-      // @ts-ignore
-      { user: undefined }
-    );
+      clientMock.users.info.mockResolvedValueOnce(
+        // @ts-ignore
+        { ...usersInfoResponse, id: randomUserEvent.item_user }
+      );
 
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: messageAuthorEvent,
-      logger: loggerMock,
-    });
-
-    expect(userGetAllMock).toHaveBeenCalledTimes(0);
-    expect(uploadTareaMock).toBeCalledTimes(0);
-    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
-    expect(threadApi.create).toHaveBeenCalledTimes(0);
-    expect(clientMock.reactions.add).toBeCalledTimes(0);
-
-    expect(loggerMock.error).toBeCalledTimes(2);
-    expect(loggerMock.error).toHaveBeenNthCalledWith(
-      2,
-      new Error(`User with ID ${messageAuthorEvent.item_user} not found.`)
-    );
-  });
-
-  it('should throw an error if the channel is not found', async () => {
-    clientMock.conversations.history.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsHistoryResponse
-    );
-
-    const userGetAllMock = jest.spyOn(userApi, 'getAll');
-
-    clientMock.users.info.mockResolvedValueOnce(
-      // @ts-ignore
-      usersInfoResponse
-    );
-
-    clientMock.conversations.info.mockResolvedValueOnce(
-      // @ts-ignore
-      { channel: undefined }
-    );
-
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: messageAuthorEvent,
-      logger: loggerMock,
-    });
-
-    expect(userGetAllMock).toHaveBeenCalledTimes(0);
-    expect(uploadTareaMock).toBeCalledTimes(0);
-    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
-    expect(threadApi.create).toHaveBeenCalledTimes(0);
-    expect(clientMock.reactions.add).toBeCalledTimes(0);
-
-    expect(loggerMock.error).toBeCalledTimes(2);
-    expect(loggerMock.error).toHaveBeenNthCalledWith(
-      2,
-      new Error(`Channel ${messageAuthorEvent.item.channel} not found.`)
-    );
-  });
-
-  it('should throw an error if the channel name format is invalid', async () => {
-    clientMock.conversations.history.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsHistoryResponse
-    );
-
-    const userGetAllMock = jest.spyOn(userApi, 'getAll');
-
-    clientMock.users.info.mockResolvedValueOnce(
-      // @ts-ignore
-      usersInfoResponse
-    );
-
-    clientMock.conversations.info.mockResolvedValueOnce(
-      // @ts-ignore
-      {
-        ...conversationsInfoResponse,
-        channel: { ...conversationsInfoResponse.channel, name: 'clase1' },
-      }
-    );
-
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: messageAuthorEvent,
-      logger: loggerMock,
-    });
-
-    expect(userGetAllMock).toHaveBeenCalledTimes(0);
-    expect(uploadTareaMock).toBeCalledTimes(0);
-    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
-    expect(threadApi.create).toHaveBeenCalledTimes(0);
-    expect(clientMock.reactions.add).toBeCalledTimes(0);
-
-    expect(loggerMock.error).toBeCalledTimes(2);
-    expect(loggerMock.error).toHaveBeenNthCalledWith(
-      2,
-      new Error(
-        `Channel name must be in the format "clase-<number>" or "clase-react-<number>".`
-      )
-    );
-  });
-
-  it('should make Robotina respond with a message if the submission format is invalid', async () => {
-    clientMock.conversations.history.mockResolvedValueOnce({
-      messages: [
+      clientMock.conversations.info.mockResolvedValueOnce(
         // @ts-ignore
         {
-          ...conversationsHistoryResponse.messages[0],
-          text: 'Hola, aca dejo la tarea\n\n```console.log("Hello World!!!")```\n',
-        },
-      ],
-    });
+          ...conversationsInfoResponse,
+          channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
+        }
+      );
+      uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
 
-    const userGetAllMock = jest.spyOn(userApi, 'getAll');
+      clientMock.chat.getPermalink.mockResolvedValueOnce(
+        // @ts-ignore
+        chatGetPermalinkResponse
+      );
 
-    clientMock.users.info.mockResolvedValueOnce(
-      // @ts-ignore
-      { ...usersInfoResponse, id: randomUserEvent.item_user }
-    );
+      clientMock.chat.postMessage.mockResolvedValueOnce(
+        // @ts-ignore
+        chatPostMessageResponse
+      );
 
-    clientMock.conversations.info.mockResolvedValueOnce(
-      // @ts-ignore
-      {
-        ...conversationsInfoResponse,
-        channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
-      }
-    );
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
 
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: messageAuthorEvent,
-      logger: loggerMock,
-    });
-
-    expect(userGetAllMock).toHaveBeenCalledTimes(0);
-    expect(uploadTareaMock).toBeCalledTimes(0);
-
-    expect(clientMock.chat.postMessage).toBeCalledTimes(1);
-    expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
-      channel: messageAuthorEvent.item.channel,
-      thread_ts: messageAuthorEvent.item.ts,
-      text: `<@${messageAuthorEvent.user}> el formato de la entrega no es válido, si estás en la clase 4 o menos tenés que enviar la tarea como bloque de código y a partir de la clase 5 tenés que enviar el link de github..`,
-    });
-
-    expect(threadApi.create).toHaveBeenCalledTimes(0);
-    expect(clientMock.reactions.add).toBeCalledTimes(0);
-    expect(loggerMock.error).toBeCalledTimes(0);
-  });
-
-  it('should save type CODE submissions correctly', async () => {
-    const typeCodeText = conversationsHistoryResponse.messages[0].text;
-
-    const submissionResponseMock = {
-      completed: false,
-      delivery: typeCodeText,
-      fkStudentId: 1,
-      fkTaskId: 1,
-      id: 1,
-      isActive: true,
-      viewer: undefined,
-    } as Submission;
-
-    clientMock.conversations.history.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsHistoryResponse
-    );
-
-    clientMock.users.info.mockResolvedValueOnce(
-      // @ts-ignore
-      { ...usersInfoResponse, id: randomUserEvent.item_user }
-    );
-
-    clientMock.conversations.info.mockResolvedValueOnce(
-      // @ts-ignore
-      conversationsInfoResponse
-    );
-
-    uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
-
-    clientMock.chat.getPermalink.mockResolvedValueOnce(
-      // @ts-ignore
-      chatGetPermalinkResponse
-    );
-
-    clientMock.chat.postMessage.mockResolvedValueOnce(
-      // @ts-ignore
-      chatPostMessageResponse
-    );
-
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: messageAuthorEvent,
-      logger: loggerMock,
-    });
-
-    expect(uploadTareaMock).toBeCalledTimes(1);
-    expect(uploadTareaMock).toHaveBeenCalledWith({
-      classNumber: expect.any(String),
-      delivery: typeCodeText,
-      slackId: expect.any(String),
-      firstName: expect.any(String),
-      lastName: expect.any(String),
-      email: expect.any(String),
+      expect(uploadTareaMock).toBeCalledTimes(1);
+      expect(uploadTareaMock).toHaveBeenCalledWith({
+        classNumber: expect.any(String),
+        delivery: typeLinkText,
+        slackId: expect.any(String),
+        firstName: expect.any(String),
+        lastName: expect.any(String),
+        email: expect.any(String),
+      });
     });
   });
 
-  it('should save type LINK submissions correctly', async () => {
-    const typeLinkText =
-      'Hola, aca dejo la tarea\n\nhttp://github.com/r-argentina-programa/robotina\n';
+  describe('Exceptions', () => {
+    it('should throw an error if the reacted message is not found in the channel', async () => {
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        { messages: undefined }
+      );
 
-    const submissionResponseMock = {
-      completed: false,
-      delivery: typeLinkText,
-      fkStudentId: 1,
-      fkTaskId: 1,
-      id: 1,
-      isActive: true,
-      viewer: undefined,
-    } as Submission;
+      const userGetAllMock = jest.spyOn(userApi, 'getAll');
 
-    clientMock.conversations.history.mockResolvedValueOnce({
-      messages: [
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
+
+      expect(userGetAllMock).toHaveBeenCalledTimes(0);
+      expect(uploadTareaMock).toBeCalledTimes(0);
+      expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+      expect(threadApi.create).toHaveBeenCalledTimes(0);
+      expect(clientMock.reactions.add).toBeCalledTimes(0);
+
+      expect(loggerMock.error).toBeCalledTimes(2);
+      expect(loggerMock.error).toHaveBeenNthCalledWith(
+        2,
+        new Error(
+          `Message with ID ${messageAuthorEvent.item.ts} not found in channel ${messageAuthorEvent.item.channel}.`
+        )
+      );
+    });
+
+    it('should throw an error if the reacted message has no reactions', async () => {
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        { messages: [{ reactions: undefined }] }
+      );
+
+      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
+
+      expect(userGetAllMock).toHaveBeenCalledTimes(0);
+      expect(uploadTareaMock).toBeCalledTimes(0);
+      expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+      expect(threadApi.create).toHaveBeenCalledTimes(0);
+      expect(clientMock.reactions.add).toBeCalledTimes(0);
+
+      expect(loggerMock.error).toBeCalledTimes(2);
+      expect(loggerMock.error).toHaveBeenNthCalledWith(
+        2,
+        new Error(
+          `Message with ID ${messageAuthorEvent.item.ts} in channel ${messageAuthorEvent.item.channel} has no reactions.`
+        )
+      );
+    });
+
+    it('should exit if Robotina has already processed the reacted message', async () => {
+      clientMock.conversations.history.mockResolvedValueOnce({
+        messages: [
+          // @ts-ignore
+          { reactions: [{ users: [env.BOT_ID], name: 'white_check_mark' }] },
+        ],
+      });
+
+      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
+
+      expect(userGetAllMock).toHaveBeenCalledTimes(0);
+      expect(uploadTareaMock).toBeCalledTimes(0);
+      expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+      expect(threadApi.create).toHaveBeenCalledTimes(0);
+      expect(clientMock.reactions.add).toBeCalledTimes(0);
+      expect(loggerMock.error).toBeCalledTimes(0);
+      expect(loggerMock.info).toBeCalledTimes(1);
+    });
+
+    it('should exit if the reacted message author is Robotina', async () => {
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsHistoryResponse
+      );
+
+      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: { ...messageAuthorEvent, item_user: env.BOT_ID },
+        logger: loggerMock,
+      });
+
+      expect(userGetAllMock).toHaveBeenCalledTimes(0);
+      expect(uploadTareaMock).toBeCalledTimes(0);
+      expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+      expect(threadApi.create).toHaveBeenCalledTimes(0);
+      expect(clientMock.reactions.add).toBeCalledTimes(0);
+      expect(loggerMock.error).toBeCalledTimes(0);
+      expect(loggerMock.info).toBeCalledTimes(1);
+    });
+
+    it('should throw an error if the user is not found', async () => {
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsHistoryResponse
+      );
+
+      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+      clientMock.users.info.mockResolvedValueOnce(
+        // @ts-ignore
+        { user: undefined }
+      );
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
+
+      expect(userGetAllMock).toHaveBeenCalledTimes(0);
+      expect(uploadTareaMock).toBeCalledTimes(0);
+      expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+      expect(threadApi.create).toHaveBeenCalledTimes(0);
+      expect(clientMock.reactions.add).toBeCalledTimes(0);
+
+      expect(loggerMock.error).toBeCalledTimes(2);
+      expect(loggerMock.error).toHaveBeenNthCalledWith(
+        2,
+        new Error(`User with ID ${messageAuthorEvent.item_user} not found.`)
+      );
+    });
+
+    it('should throw an error if the channel is not found', async () => {
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsHistoryResponse
+      );
+
+      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+      clientMock.users.info.mockResolvedValueOnce(
+        // @ts-ignore
+        usersInfoResponse
+      );
+
+      clientMock.conversations.info.mockResolvedValueOnce(
+        // @ts-ignore
+        { channel: undefined }
+      );
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
+
+      expect(userGetAllMock).toHaveBeenCalledTimes(0);
+      expect(uploadTareaMock).toBeCalledTimes(0);
+      expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+      expect(threadApi.create).toHaveBeenCalledTimes(0);
+      expect(clientMock.reactions.add).toBeCalledTimes(0);
+
+      expect(loggerMock.error).toBeCalledTimes(2);
+      expect(loggerMock.error).toHaveBeenNthCalledWith(
+        2,
+        new Error(`Channel ${messageAuthorEvent.item.channel} not found.`)
+      );
+    });
+
+    it('should throw an error if the channel name format is invalid', async () => {
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsHistoryResponse
+      );
+
+      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+      clientMock.users.info.mockResolvedValueOnce(
+        // @ts-ignore
+        usersInfoResponse
+      );
+
+      clientMock.conversations.info.mockResolvedValueOnce(
         // @ts-ignore
         {
-          ...conversationsHistoryResponse.messages[0],
-          text: typeLinkText,
-        },
-      ],
+          ...conversationsInfoResponse,
+          channel: { ...conversationsInfoResponse.channel, name: 'clase1' },
+        }
+      );
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
+
+      expect(userGetAllMock).toHaveBeenCalledTimes(0);
+      expect(uploadTareaMock).toBeCalledTimes(0);
+      expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+      expect(threadApi.create).toHaveBeenCalledTimes(0);
+      expect(clientMock.reactions.add).toBeCalledTimes(0);
+
+      expect(loggerMock.error).toBeCalledTimes(2);
+      expect(loggerMock.error).toHaveBeenNthCalledWith(
+        2,
+        new Error(
+          `Channel name must be in the format "clase-<number>" or "clase-react-<number>".`
+        )
+      );
     });
 
-    clientMock.users.info.mockResolvedValueOnce(
-      // @ts-ignore
-      { ...usersInfoResponse, id: randomUserEvent.item_user }
-    );
+    it('should make Robotina respond with a message if the submission format is invalid', async () => {
+      clientMock.conversations.history.mockResolvedValueOnce({
+        messages: [
+          // @ts-ignore
+          {
+            ...conversationsHistoryResponse.messages[0],
+            text: 'Hola, aca dejo la tarea\n\n```console.log("Hello World!!!")```\n',
+          },
+        ],
+      });
 
-    clientMock.conversations.info.mockResolvedValueOnce(
-      // @ts-ignore
-      {
-        ...conversationsInfoResponse,
-        channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
-      }
-    );
-    uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
+      const userGetAllMock = jest.spyOn(userApi, 'getAll');
 
-    clientMock.chat.getPermalink.mockResolvedValueOnce(
-      // @ts-ignore
-      chatGetPermalinkResponse
-    );
+      clientMock.users.info.mockResolvedValueOnce(
+        // @ts-ignore
+        { ...usersInfoResponse, id: randomUserEvent.item_user }
+      );
 
-    clientMock.chat.postMessage.mockResolvedValueOnce(
-      // @ts-ignore
-      chatPostMessageResponse
-    );
+      clientMock.conversations.info.mockResolvedValueOnce(
+        // @ts-ignore
+        {
+          ...conversationsInfoResponse,
+          channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
+        }
+      );
 
-    await handleRobotFaceReaction({
-      client: clientMock,
-      // @ts-ignore
-      event: messageAuthorEvent,
-      logger: loggerMock,
-    });
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
 
-    expect(uploadTareaMock).toBeCalledTimes(1);
-    expect(uploadTareaMock).toHaveBeenCalledWith({
-      classNumber: expect.any(String),
-      delivery: typeLinkText,
-      slackId: expect.any(String),
-      firstName: expect.any(String),
-      lastName: expect.any(String),
-      email: expect.any(String),
+      expect(userGetAllMock).toHaveBeenCalledTimes(0);
+      expect(uploadTareaMock).toBeCalledTimes(0);
+
+      expect(clientMock.chat.postMessage).toBeCalledTimes(1);
+      expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
+        channel: messageAuthorEvent.item.channel,
+        thread_ts: messageAuthorEvent.item.ts,
+        text: `<@${messageAuthorEvent.user}> el formato de la entrega no es válido, si estás en la clase 4 o menos tenés que enviar la tarea como bloque de código y a partir de la clase 5 tenés que enviar el link de github..`,
+      });
+
+      expect(threadApi.create).toHaveBeenCalledTimes(0);
+      expect(clientMock.reactions.add).toBeCalledTimes(0);
+      expect(loggerMock.error).toBeCalledTimes(0);
     });
   });
 });
