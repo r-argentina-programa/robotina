@@ -232,9 +232,38 @@ describe('handleRobotFaceReaction', () => {
     });
   });
 
-  it.todo(
-    'should exit if a random user attempts to save other user messages as submissions'
-  );
+  it('should exit if a random user attempts to save other user messages as submissions', async () => {
+    clientMock.conversations.history.mockResolvedValueOnce(
+      // @ts-ignore
+      conversationsHistoryResponse
+    );
+
+    const userGetAllMock = jest
+      .spyOn(userApi, 'getAll')
+      .mockResolvedValueOnce([
+        { id: 1, username: '', externalId: '', roles: [Role.STUDENT] },
+      ]);
+
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: randomUserEvent,
+      logger: loggerMock,
+    });
+
+    expect(userGetAllMock).toHaveBeenCalledTimes(1);
+    expect(userGetAllMock).toHaveBeenCalledWith({
+      filter: {
+        externalId: `oauth2|sign-in-with-slack|${env.SLACK_TEAM_ID}-${randomUserEvent.user}`,
+      },
+    });
+
+    expect(uploadTareaMock).toBeCalledTimes(0);
+    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+    expect(threadApi.create).toHaveBeenCalledTimes(0);
+    expect(clientMock.reactions.add).toBeCalledTimes(0);
+    expect(loggerMock.error).toBeCalledTimes(0);
+  });
 
   it.todo(
     'should throw an error if the reacted message is not found in the channel'
