@@ -109,7 +109,7 @@ export const handleRobotFaceReaction: Middleware<
 
       if (!lessonId) {
         throw new Error(
-          'Channel name must be in the format "clase-<number>" or "clase-react-<number>'
+          'Channel name must be in the format "clase-<number>" or "clase-react-<number>".'
         );
       }
 
