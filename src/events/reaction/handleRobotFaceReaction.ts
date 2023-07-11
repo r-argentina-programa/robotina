@@ -173,8 +173,6 @@ export const handleRobotFaceReaction: Middleware<
 
       logger.info('Submission processed successfully!');
     } catch (error) {
-      console.log('ERROR', error);
-
       logger.error(
         `Something went wrong when processing a submission. Displaying relevant data: Event type: "${event.type}", user: "${event.user}".`
       );
