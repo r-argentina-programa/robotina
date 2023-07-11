@@ -265,23 +265,275 @@ describe('handleRobotFaceReaction', () => {
     expect(loggerMock.error).toBeCalledTimes(0);
   });
 
-  it.todo(
-    'should throw an error if the reacted message is not found in the channel'
-  );
+  it('should throw an error if the reacted message is not found in the channel', async () => {
+    clientMock.conversations.history.mockResolvedValueOnce(
+      // @ts-ignore
+      { messages: undefined }
+    );
 
-  it.todo('should throw an error if the reacted message has no reactions');
+    const userGetAllMock = jest.spyOn(userApi, 'getAll');
 
-  it.todo('should exit if Robotina has already processed the reacted message');
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: messageAuthorEvent,
+      logger: loggerMock,
+    });
 
-  it.todo('should exit if the reacted message author is Robotina');
+    expect(userGetAllMock).toHaveBeenCalledTimes(0);
+    expect(uploadTareaMock).toBeCalledTimes(0);
+    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+    expect(threadApi.create).toHaveBeenCalledTimes(0);
+    expect(clientMock.reactions.add).toBeCalledTimes(0);
 
-  it.todo('should throw an error if the user is not found');
+    expect(loggerMock.error).toBeCalledTimes(2);
+    expect(loggerMock.error).toHaveBeenNthCalledWith(
+      2,
+      new Error(
+        `Message with ID ${messageAuthorEvent.item.ts} not found in channel ${messageAuthorEvent.item.channel}.`
+      )
+    );
+  });
 
-  it.todo('should throw an error if the channel is not found');
+  it('should throw an error if the reacted message has no reactions', async () => {
+    clientMock.conversations.history.mockResolvedValueOnce(
+      // @ts-ignore
+      { messages: [{ reactions: undefined }] }
+    );
 
-  it.todo('should throw an error if the channel name format is invalid');
+    const userGetAllMock = jest.spyOn(userApi, 'getAll');
 
-  it.todo(
-    'should make Robotina respond with a message if the submission format is invalid'
-  );
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: messageAuthorEvent,
+      logger: loggerMock,
+    });
+
+    expect(userGetAllMock).toHaveBeenCalledTimes(0);
+    expect(uploadTareaMock).toBeCalledTimes(0);
+    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+    expect(threadApi.create).toHaveBeenCalledTimes(0);
+    expect(clientMock.reactions.add).toBeCalledTimes(0);
+
+    expect(loggerMock.error).toBeCalledTimes(2);
+    expect(loggerMock.error).toHaveBeenNthCalledWith(
+      2,
+      new Error(
+        `Message with ID ${messageAuthorEvent.item.ts} in channel ${messageAuthorEvent.item.channel} has no reactions.`
+      )
+    );
+  });
+
+  it('should exit if Robotina has already processed the reacted message', async () => {
+    clientMock.conversations.history.mockResolvedValueOnce({
+      messages: [
+        // @ts-ignore
+        { reactions: [{ users: [env.BOT_ID], name: 'white_check_mark' }] },
+      ],
+    });
+
+    const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: messageAuthorEvent,
+      logger: loggerMock,
+    });
+
+    expect(userGetAllMock).toHaveBeenCalledTimes(0);
+    expect(uploadTareaMock).toBeCalledTimes(0);
+    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+    expect(threadApi.create).toHaveBeenCalledTimes(0);
+    expect(clientMock.reactions.add).toBeCalledTimes(0);
+    expect(loggerMock.error).toBeCalledTimes(0);
+    expect(loggerMock.info).toBeCalledTimes(1);
+  });
+
+  it('should exit if the reacted message author is Robotina', async () => {
+    clientMock.conversations.history.mockResolvedValueOnce(
+      // @ts-ignore
+      conversationsHistoryResponse
+    );
+
+    const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: { ...messageAuthorEvent, item_user: env.BOT_ID },
+      logger: loggerMock,
+    });
+
+    expect(userGetAllMock).toHaveBeenCalledTimes(0);
+    expect(uploadTareaMock).toBeCalledTimes(0);
+    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+    expect(threadApi.create).toHaveBeenCalledTimes(0);
+    expect(clientMock.reactions.add).toBeCalledTimes(0);
+    expect(loggerMock.error).toBeCalledTimes(0);
+    expect(loggerMock.info).toBeCalledTimes(1);
+  });
+
+  it('should throw an error if the user is not found', async () => {
+    clientMock.conversations.history.mockResolvedValueOnce(
+      // @ts-ignore
+      conversationsHistoryResponse
+    );
+
+    const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+    clientMock.users.info.mockResolvedValueOnce(
+      // @ts-ignore
+      { user: undefined }
+    );
+
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: messageAuthorEvent,
+      logger: loggerMock,
+    });
+
+    expect(userGetAllMock).toHaveBeenCalledTimes(0);
+    expect(uploadTareaMock).toBeCalledTimes(0);
+    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+    expect(threadApi.create).toHaveBeenCalledTimes(0);
+    expect(clientMock.reactions.add).toBeCalledTimes(0);
+
+    expect(loggerMock.error).toBeCalledTimes(2);
+    expect(loggerMock.error).toHaveBeenNthCalledWith(
+      2,
+      new Error(`User with ID ${messageAuthorEvent.item_user} not found.`)
+    );
+  });
+
+  it('should throw an error if the channel is not found', async () => {
+    clientMock.conversations.history.mockResolvedValueOnce(
+      // @ts-ignore
+      conversationsHistoryResponse
+    );
+
+    const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+    clientMock.users.info.mockResolvedValueOnce(
+      // @ts-ignore
+      usersInfoResponse
+    );
+
+    clientMock.conversations.info.mockResolvedValueOnce(
+      // @ts-ignore
+      { channel: undefined }
+    );
+
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: messageAuthorEvent,
+      logger: loggerMock,
+    });
+
+    expect(userGetAllMock).toHaveBeenCalledTimes(0);
+    expect(uploadTareaMock).toBeCalledTimes(0);
+    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+    expect(threadApi.create).toHaveBeenCalledTimes(0);
+    expect(clientMock.reactions.add).toBeCalledTimes(0);
+
+    expect(loggerMock.error).toBeCalledTimes(2);
+    expect(loggerMock.error).toHaveBeenNthCalledWith(
+      2,
+      new Error(`Channel ${messageAuthorEvent.item.channel} not found.`)
+    );
+  });
+
+  it('should throw an error if the channel name format is invalid', async () => {
+    clientMock.conversations.history.mockResolvedValueOnce(
+      // @ts-ignore
+      conversationsHistoryResponse
+    );
+
+    const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+    clientMock.users.info.mockResolvedValueOnce(
+      // @ts-ignore
+      usersInfoResponse
+    );
+
+    clientMock.conversations.info.mockResolvedValueOnce(
+      // @ts-ignore
+      {
+        ...conversationsInfoResponse,
+        channel: { ...conversationsInfoResponse.channel, name: 'clase1' },
+      }
+    );
+
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: messageAuthorEvent,
+      logger: loggerMock,
+    });
+
+    expect(userGetAllMock).toHaveBeenCalledTimes(0);
+    expect(uploadTareaMock).toBeCalledTimes(0);
+    expect(clientMock.chat.postMessage).toBeCalledTimes(0);
+    expect(threadApi.create).toHaveBeenCalledTimes(0);
+    expect(clientMock.reactions.add).toBeCalledTimes(0);
+
+    expect(loggerMock.error).toBeCalledTimes(2);
+    expect(loggerMock.error).toHaveBeenNthCalledWith(
+      2,
+      new Error(
+        `Channel name must be in the format "clase-<number>" or "clase-react-<number>".`
+      )
+    );
+  });
+
+  it('should make Robotina respond with a message if the submission format is invalid', async () => {
+    clientMock.conversations.history.mockResolvedValueOnce({
+      messages: [
+        // @ts-ignore
+        {
+          ...conversationsHistoryResponse.messages[0],
+          text: 'Hola, aca dejo la tarea\n\n```console.log("Hello World!!!")```\n',
+        },
+      ],
+    });
+
+    const userGetAllMock = jest.spyOn(userApi, 'getAll');
+
+    clientMock.users.info.mockResolvedValueOnce(
+      // @ts-ignore
+      { ...usersInfoResponse, id: randomUserEvent.item_user }
+    );
+
+    clientMock.conversations.info.mockResolvedValueOnce(
+      // @ts-ignore
+      {
+        ...conversationsInfoResponse,
+        channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
+      }
+    );
+
+    await handleRobotFaceReaction({
+      client: clientMock,
+      // @ts-ignore
+      event: messageAuthorEvent,
+      logger: loggerMock,
+    });
+
+    expect(userGetAllMock).toHaveBeenCalledTimes(0);
+    expect(uploadTareaMock).toBeCalledTimes(0);
+
+    expect(clientMock.chat.postMessage).toBeCalledTimes(1);
+    expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
+      channel: messageAuthorEvent.item.channel,
+      thread_ts: messageAuthorEvent.item.ts,
+      text: `<@${messageAuthorEvent.user}> el formato de la entrega no es válido, si estás en la clase 4 o menos tenés que enviar la tarea como bloque de código y a partir de la clase 5 tenés que enviar el link de github..`,
+    });
+
+    expect(threadApi.create).toHaveBeenCalledTimes(0);
+    expect(clientMock.reactions.add).toBeCalledTimes(0);
+    expect(loggerMock.error).toBeCalledTimes(0);
+  });
 });
