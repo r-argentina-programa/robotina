@@ -138,6 +138,8 @@ describe('handleRobotFaceReaction', () => {
         name: 'white_check_mark',
         timestamp: messageAuthorEvent.item.ts,
       });
+
+      expect(loggerMock.error).toBeCalledTimes(0);
     });
 
     it('should allow mentors to save other user messages as submissions', async () => {
@@ -237,6 +239,8 @@ describe('handleRobotFaceReaction', () => {
         timestamp: randomUserEvent.item.ts,
         name: 'white_check_mark',
       });
+
+      expect(loggerMock.error).toBeCalledTimes(0);
     });
 
     it('should exit if a random user attempts to save other user messages as submissions', async () => {
