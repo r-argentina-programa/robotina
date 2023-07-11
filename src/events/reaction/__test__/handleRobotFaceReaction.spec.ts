@@ -503,21 +503,16 @@ describe('handleRobotFaceReaction', () => {
     });
 
     it('should make Robotina respond with a message if the submission format is invalid', async () => {
-      clientMock.conversations.history.mockResolvedValueOnce({
-        messages: [
-          // @ts-ignore
-          {
-            ...conversationsHistoryResponse.messages[0],
-            text: 'Hola, aca dejo la tarea\n\n```console.log("Hello World!!!")```\n',
-          },
-        ],
-      });
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsHistoryResponse
+      );
 
       const userGetAllMock = jest.spyOn(userApi, 'getAll');
 
       clientMock.users.info.mockResolvedValueOnce(
         // @ts-ignore
-        { ...usersInfoResponse, id: randomUserEvent.item_user }
+        usersInfoResponse
       );
 
       clientMock.conversations.info.mockResolvedValueOnce(
