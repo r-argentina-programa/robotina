@@ -55,7 +55,7 @@ describe('handleRobotFaceReaction', () => {
 
   describe('User flows', () => {
     it('should allow message authors to save their messages as submissions', async () => {
-      const typeCodeText = conversationsHistoryResponse.messages[0].text;
+      const typeCodeText = 'console.log("Hello World!!!")';
 
       const submissionResponseMock = {
         completed: false,
@@ -143,7 +143,7 @@ describe('handleRobotFaceReaction', () => {
     });
 
     it('should allow mentors to save other user messages as submissions', async () => {
-      const typeCodeText = conversationsHistoryResponse.messages[0].text;
+      const typeCodeText = 'console.log("Hello World!!!")';
 
       const submissionResponseMock = {
         completed: false,

@@ -10,6 +10,7 @@ import userApi from '../../api/marketplace/user/userApi';
 import { CreateThreadDto } from '../../api/marketplace/thread/dto/CreateThreadDto';
 import threadApi from '../../api/marketplace/thread/threadApi';
 import env from '../../config/env.config';
+import { extractOnlySubmission } from '../../utils/extractOnlySubmission';
 
 export const handleRobotFaceReaction: Middleware<
   SlackEventMiddlewareArgs<'reaction_added'>,
@@ -127,10 +128,12 @@ export const handleRobotFaceReaction: Middleware<
         return;
       }
 
+      const onlySubmissionContent = extractOnlySubmission(reactedMessage.text!);
+
       const tarea = await uploadTarea({
         classNumber: lessonId,
         slackId: slackUser.id!,
-        delivery: reactedMessage.text!,
+        delivery: onlySubmissionContent,
         firstName: slackUser.profile!.first_name,
         lastName: slackUser.profile!.last_name,
         email: slackUser.profile!.email!,
@@ -143,10 +146,8 @@ export const handleRobotFaceReaction: Middleware<
 
       const botMessage = await client.chat.postMessage({
         channel: event.item.channel,
-        text: `Tarea subida con éxito <@${
-          slackUser.id
-        }>! \n\nAcá está el <${permalink}|Link> al mensaje original.\n\nTarea:
-      ${reactedMessage.text!}\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
+        text: `Tarea subida con éxito <@${slackUser.id}>! \n\nAcá está el <${permalink}|Link> al mensaje original.\n\nTarea:
+      ${onlySubmissionContent}\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
       });
 
       await client.chat.postMessage({
