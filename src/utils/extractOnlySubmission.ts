@@ -14,5 +14,5 @@ export const extractOnlySubmission = (message: string): string => {
     return extractLinkFromSubmission(message);
   }
 
-  return '';
+  return message;
 };
