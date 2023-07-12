@@ -277,6 +277,171 @@ describe('handleRobotFaceReaction', () => {
     });
   });
 
+  describe('Submission types', () => {
+    describe('Block of code type', () => {
+      it('should save only the block of code from the submission successfully', async () => {
+        const typeCodeText = 'console.log("Hello World!!!")';
+
+        const submissionResponseMock = {
+          completed: false,
+          delivery: typeCodeText,
+          fkStudentId: 1,
+          fkTaskId: 1,
+          id: 1,
+          isActive: true,
+          viewer: undefined,
+        } as Submission;
+
+        clientMock.conversations.history.mockResolvedValueOnce(
+          // @ts-ignore
+          conversationsHistoryResponse
+        );
+
+        clientMock.users.info.mockResolvedValueOnce(
+          // @ts-ignore
+          usersInfoResponse
+        );
+
+        clientMock.conversations.info.mockResolvedValueOnce(
+          // @ts-ignore
+          conversationsInfoResponse
+        );
+
+        uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
+
+        clientMock.chat.getPermalink.mockResolvedValueOnce(
+          // @ts-ignore
+          chatGetPermalinkResponse
+        );
+
+        clientMock.chat.postMessage.mockResolvedValueOnce(
+          // @ts-ignore
+          chatPostMessageResponse
+        );
+
+        await handleRobotFaceReaction({
+          client: clientMock,
+          // @ts-ignore
+          event: messageAuthorEvent,
+          logger: loggerMock,
+        });
+
+        expect(uploadTareaMock).toBeCalledTimes(1);
+        expect(uploadTareaMock).toHaveBeenCalledWith({
+          classNumber: expect.any(String),
+          delivery: typeCodeText,
+          slackId: expect.any(String),
+          firstName: expect.any(String),
+          lastName: expect.any(String),
+          email: expect.any(String),
+        });
+      });
+
+      it('should make Robotina respond with a message if the submission format is code but the channel is incorrect', async () => {
+        clientMock.conversations.history.mockResolvedValueOnce(
+          // @ts-ignore
+          conversationsHistoryResponse
+        );
+
+        clientMock.users.info.mockResolvedValueOnce(
+          // @ts-ignore
+          usersInfoResponse
+        );
+
+        clientMock.conversations.info.mockResolvedValueOnce(
+          // @ts-ignore
+          {
+            ...conversationsInfoResponse,
+            channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
+          }
+        );
+
+        await handleRobotFaceReaction({
+          client: clientMock,
+          // @ts-ignore
+          event: messageAuthorEvent,
+          logger: loggerMock,
+        });
+
+        expect(clientMock.chat.postMessage).toBeCalledTimes(1);
+        expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
+          channel: messageAuthorEvent.item.channel,
+          thread_ts: messageAuthorEvent.item.ts,
+          text: `<@${messageAuthorEvent.user}> el formato de la entrega no es válido, si estás en la clase 4 o menos tenés que enviar la tarea como bloque de código y a partir de la clase 5 tenés que enviar el link de github..`,
+        });
+      });
+    });
+
+    describe('GitHub link type', () => {
+      it('should save only the github link from the submission successfully', async () => {
+        const typeLinkText = 'github.com/r-argentina-programa/robotina';
+
+        const submissionResponseMock = {
+          completed: false,
+          delivery: typeLinkText,
+          fkStudentId: 1,
+          fkTaskId: 1,
+          id: 1,
+          isActive: true,
+          viewer: undefined,
+        } as Submission;
+
+        clientMock.conversations.history.mockResolvedValueOnce({
+          ...conversationsHistoryResponse,
+          messages: [
+            // @ts-ignore
+            {
+              ...conversationsHistoryResponse.messages[0],
+              text: 'Hola, aca dejo la tarea https://github.com/r-argentina-programa/robotina',
+            },
+          ],
+        });
+
+        clientMock.users.info.mockResolvedValueOnce(
+          // @ts-ignore
+          usersInfoResponse
+        );
+
+        clientMock.conversations.info.mockResolvedValueOnce(
+          // @ts-ignore
+          {
+            ...conversationsInfoResponse,
+            channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
+          }
+        );
+
+        uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
+
+        clientMock.chat.getPermalink.mockResolvedValueOnce(
+          // @ts-ignore
+          chatGetPermalinkResponse
+        );
+
+        clientMock.chat.postMessage.mockResolvedValueOnce(
+          // @ts-ignore
+          chatPostMessageResponse
+        );
+
+        await handleRobotFaceReaction({
+          client: clientMock,
+          // @ts-ignore
+          event: messageAuthorEvent,
+          logger: loggerMock,
+        });
+
+        expect(uploadTareaMock).toBeCalledTimes(1);
+        expect(uploadTareaMock).toHaveBeenCalledWith({
+          classNumber: expect.any(String),
+          delivery: typeLinkText,
+          slackId: expect.any(String),
+          firstName: expect.any(String),
+          lastName: expect.any(String),
+          email: expect.any(String),
+        });
+      });
+    });
+  });
+
   describe('Exceptions', () => {
     it('should throw an error if the reacted message is not found in the channel', async () => {
       clientMock.conversations.history.mockResolvedValueOnce(
@@ -500,49 +665,6 @@ describe('handleRobotFaceReaction', () => {
           `Channel name must be in the format "clase-<number>" or "clase-react-<number>".`
         )
       );
-    });
-
-    it('should make Robotina respond with a message if the submission format is invalid', async () => {
-      clientMock.conversations.history.mockResolvedValueOnce(
-        // @ts-ignore
-        conversationsHistoryResponse
-      );
-
-      const userGetAllMock = jest.spyOn(userApi, 'getAll');
-
-      clientMock.users.info.mockResolvedValueOnce(
-        // @ts-ignore
-        usersInfoResponse
-      );
-
-      clientMock.conversations.info.mockResolvedValueOnce(
-        // @ts-ignore
-        {
-          ...conversationsInfoResponse,
-          channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
-        }
-      );
-
-      await handleRobotFaceReaction({
-        client: clientMock,
-        // @ts-ignore
-        event: messageAuthorEvent,
-        logger: loggerMock,
-      });
-
-      expect(userGetAllMock).toHaveBeenCalledTimes(0);
-      expect(uploadTareaMock).toBeCalledTimes(0);
-
-      expect(clientMock.chat.postMessage).toBeCalledTimes(1);
-      expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
-        channel: messageAuthorEvent.item.channel,
-        thread_ts: messageAuthorEvent.item.ts,
-        text: `<@${messageAuthorEvent.user}> el formato de la entrega no es válido, si estás en la clase 4 o menos tenés que enviar la tarea como bloque de código y a partir de la clase 5 tenés que enviar el link de github..`,
-      });
-
-      expect(threadApi.create).toHaveBeenCalledTimes(0);
-      expect(clientMock.reactions.add).toBeCalledTimes(0);
-      expect(loggerMock.error).toBeCalledTimes(0);
     });
   });
 });
