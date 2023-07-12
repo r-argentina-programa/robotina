@@ -7,5 +7,5 @@ export const extractOnlySubmission = (message: string): string => {
     return extractCodeBlockFromSubmission(message);
   }
 
-  return '';
+  return message;
 };
