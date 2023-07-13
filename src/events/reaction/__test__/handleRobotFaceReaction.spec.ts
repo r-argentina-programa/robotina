@@ -488,6 +488,48 @@ describe('handleRobotFaceReaction', () => {
           text: `Che <@${usersInfoResponse.user.id}>, estás queriendo subir más de un formato a la vez, subí solo uno. O subis un bloque de código, o subís un link de GitHub.`,
         });
       });
+
+      it('should make Robotina respond with a message when the submission format is not valid', async () => {
+        clientMock.conversations.history.mockResolvedValueOnce({
+          ...conversationsHistoryResponse,
+          messages: [
+            // @ts-ignore
+            {
+              ...conversationsHistoryResponse.messages[0],
+              text: 'Hola, aca dejo la tarea \n\n`console.log("Hello World!!!")`',
+            },
+          ],
+        });
+
+        clientMock.users.info.mockResolvedValueOnce(
+          // @ts-ignore
+          usersInfoResponse
+        );
+
+        clientMock.conversations.info.mockResolvedValueOnce(
+          // @ts-ignore
+          conversationsInfoResponse
+        );
+
+        clientMock.chat.postMessage.mockResolvedValueOnce(
+          // @ts-ignore
+          chatPostMessageResponse
+        );
+
+        await handleRobotFaceReaction({
+          client: clientMock,
+          // @ts-ignore
+          event: messageAuthorEvent,
+          logger: loggerMock,
+        });
+
+        expect(clientMock.chat.postMessage).toBeCalledTimes(1);
+        expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
+          channel: messageAuthorEvent.item.channel,
+          thread_ts: messageAuthorEvent.item.ts,
+          text: `<@${usersInfoResponse.user.id}>, el formato que estás usando para entregar tu tarea no es válido o está vacío. \n\n\nLos formatos que tenés que usar son, si estás queriendo entregar una tarea de la clase 4 para abajo, un bloque de código: \`\`\` console.log("tarea") \`\`\` \nO, si estás queriendo entregar una tarea a partir de la clase 5 para arriba, entonces debería ser simplemente un link de GitHub: (https://github.com/...). \n\n\nY también acordate de mandar tu tarea en un solo formato, es decir, bloque de código o link de GitHub, no ambos.`,
+        });
+      });
     });
   });
 

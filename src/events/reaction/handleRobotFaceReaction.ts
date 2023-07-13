@@ -12,6 +12,7 @@ import threadApi from '../../api/marketplace/thread/threadApi';
 import env from '../../config/env.config';
 import { extractOnlySubmission } from '../../utils/extractOnlySubmission';
 import { validateSubmissionSingleFormat } from '../../utils/validateSubmissionSingleFormat';
+import { validateSubmissionFormat } from '../../utils/validateSubmissionFormat';
 
 export const handleRobotFaceReaction: Middleware<
   SlackEventMiddlewareArgs<'reaction_added'>,
@@ -113,6 +114,19 @@ export const handleRobotFaceReaction: Middleware<
         throw new Error(
           'Channel name must be in the format "clase-<number>" or "clase-react-<number>".'
         );
+      }
+
+      const submissionHasValidFormat = validateSubmissionFormat(
+        reactedMessage.text!
+      );
+
+      if (!submissionHasValidFormat) {
+        await client.chat.postMessage({
+          channel: event.item.channel,
+          thread_ts: event.item.ts,
+          text: `<@${slackUser.id}>, el formato que estás usando para entregar tu tarea no es válido o está vacío. \n\n\nLos formatos que tenés que usar son, si estás queriendo entregar una tarea de la clase 4 para abajo, un bloque de código: \`\`\` console.log("tarea") \`\`\` \nO, si estás queriendo entregar una tarea a partir de la clase 5 para arriba, entonces debería ser simplemente un link de GitHub: (https://github.com/...). \n\n\nY también acordate de mandar tu tarea en un solo formato, es decir, bloque de código o link de GitHub, no ambos.`,
+        });
+        return;
       }
 
       const submissionHasSingleFormat = validateSubmissionSingleFormat(
