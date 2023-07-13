@@ -11,6 +11,7 @@ import { CreateThreadDto } from '../../api/marketplace/thread/dto/CreateThreadDt
 import threadApi from '../../api/marketplace/thread/threadApi';
 import env from '../../config/env.config';
 import { extractOnlySubmission } from '../../utils/extractOnlySubmission';
+import { validateSubmissionSingleFormat } from '../../utils/validateSubmissionSingleFormat';
 
 export const handleRobotFaceReaction: Middleware<
   SlackEventMiddlewareArgs<'reaction_added'>,
@@ -112,6 +113,19 @@ export const handleRobotFaceReaction: Middleware<
         throw new Error(
           'Channel name must be in the format "clase-<number>" or "clase-react-<number>".'
         );
+      }
+
+      const submissionHasSingleFormat = validateSubmissionSingleFormat(
+        reactedMessage.text!
+      );
+
+      if (!submissionHasSingleFormat) {
+        await client.chat.postMessage({
+          channel: event.item.channel,
+          thread_ts: event.item.ts,
+          text: `Che <@${slackUser.id}>, estás queriendo subir más de un formato a la vez, subí solo uno. O subis un bloque de código, o subís un link de GitHub.`,
+        });
+        return;
       }
 
       const validSubmissionFormat = validateSubmissionDeliveryFormat({

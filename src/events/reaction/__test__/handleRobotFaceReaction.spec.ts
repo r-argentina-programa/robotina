@@ -440,6 +440,55 @@ describe('handleRobotFaceReaction', () => {
         });
       });
     });
+
+    describe('Formats exceptions', () => {
+      it('should make Robotina respond with a message when the submission has more than one format', async () => {
+        clientMock.conversations.history.mockResolvedValueOnce({
+          ...conversationsHistoryResponse,
+          messages: [
+            // @ts-ignore
+            {
+              ...conversationsHistoryResponse.messages[0],
+              text: 'Hola, aca dejo la tarea https://github.com/r-argentina-programa/robotina \n\n```console.log("Hello World!!!")```',
+            },
+          ],
+        });
+
+        clientMock.users.info.mockResolvedValueOnce(
+          // @ts-ignore
+          usersInfoResponse
+        );
+
+        clientMock.conversations.info.mockResolvedValueOnce(
+          // @ts-ignore
+          conversationsInfoResponse
+        );
+
+        clientMock.chat.getPermalink.mockResolvedValueOnce(
+          // @ts-ignore
+          chatGetPermalinkResponse
+        );
+
+        clientMock.chat.postMessage.mockResolvedValueOnce(
+          // @ts-ignore
+          chatPostMessageResponse
+        );
+
+        await handleRobotFaceReaction({
+          client: clientMock,
+          // @ts-ignore
+          event: messageAuthorEvent,
+          logger: loggerMock,
+        });
+
+        expect(clientMock.chat.postMessage).toBeCalledTimes(1);
+        expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
+          channel: messageAuthorEvent.item.channel,
+          thread_ts: messageAuthorEvent.item.ts,
+          text: `Che <@${usersInfoResponse.user.id}>, estás queriendo subir más de un formato a la vez, subí solo uno. O subis un bloque de código, o subís un link de GitHub.`,
+        });
+      });
+    });
   });
 
   describe('Exceptions', () => {
