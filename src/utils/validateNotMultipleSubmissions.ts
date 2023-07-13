@@ -3,7 +3,5 @@ export const validateNotMultipleSubmissions = (message: string) => {
   const gitHubLinkCount = (message.match(/github\.com\/[a-zA-Z]/g) || [])
     .length;
 
-  const hasMultipleSubmissions = blockOfCodeCount <= 1 && gitHubLinkCount <= 1;
-
-  return hasMultipleSubmissions;
+  return blockOfCodeCount === 1 || gitHubLinkCount === 1;
 };
