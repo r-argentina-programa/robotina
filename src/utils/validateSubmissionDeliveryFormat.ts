@@ -8,15 +8,22 @@ export const validateSubmissionDeliveryFormat = ({
   delivery,
 }: IValidateSubmissionDeliveryFormat) => {
   const FIRST_LINK_FORMAT_LESSON_NUMBER = 5;
+  const codeFormatRegex = /```[^`]+```/;
   const linkFormatRegex = /github\.com\/[a-zA-Z]/;
-  if (classNumber < FIRST_LINK_FORMAT_LESSON_NUMBER) {
+
+  if (
+    classNumber < FIRST_LINK_FORMAT_LESSON_NUMBER &&
+    codeFormatRegex.test(delivery)
+  ) {
     return true;
   }
+
   if (
     classNumber >= FIRST_LINK_FORMAT_LESSON_NUMBER &&
     linkFormatRegex.test(delivery)
   ) {
     return true;
   }
+
   return false;
 };
