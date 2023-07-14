@@ -337,40 +337,6 @@ describe('handleRobotFaceReaction', () => {
         });
       });
 
-      it('should make Robotina respond with a message if the submission format is code but the channel is incorrect', async () => {
-        clientMock.conversations.history.mockResolvedValueOnce(
-          // @ts-ignore
-          conversationsHistoryResponse
-        );
-
-        clientMock.users.info.mockResolvedValueOnce(
-          // @ts-ignore
-          usersInfoResponse
-        );
-
-        clientMock.conversations.info.mockResolvedValueOnce(
-          // @ts-ignore
-          {
-            ...conversationsInfoResponse,
-            channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
-          }
-        );
-
-        await handleRobotFaceReaction({
-          client: clientMock,
-          // @ts-ignore
-          event: messageAuthorEvent,
-          logger: loggerMock,
-        });
-
-        expect(clientMock.chat.postMessage).toBeCalledTimes(1);
-        expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
-          channel: messageAuthorEvent.item.channel,
-          thread_ts: messageAuthorEvent.item.ts,
-          text: `<@${messageAuthorEvent.user}> el formato de la entrega no es válido, si estás en la clase 4 o menos tenés que enviar la tarea como bloque de código y a partir de la clase 5 tenés que enviar el link de github..`,
-        });
-      });
-
       it('should make Robotina respond with a message when there is multiple blocks of code', async () => {
         clientMock.conversations.history.mockResolvedValueOnce({
           ...conversationsHistoryResponse,
@@ -410,6 +376,40 @@ describe('handleRobotFaceReaction', () => {
           channel: messageAuthorEvent.item.channel,
           thread_ts: messageAuthorEvent.item.ts,
           text: `<@${usersInfoResponse.user.id}> asegurate de mandar la tarea en un solo bloque de código, no en varios. Para ayudarte un poco, podés divirlo algo así: \`\`\`Tarea 1\n console.log("tarea 1")\n\n Tarea 2\n console.log("tarea 2")\`\`\``,
+        });
+      });
+
+      it('should make Robotina respond with a message if the submission format is code but the channel is incorrect', async () => {
+        clientMock.conversations.history.mockResolvedValueOnce(
+          // @ts-ignore
+          conversationsHistoryResponse
+        );
+
+        clientMock.users.info.mockResolvedValueOnce(
+          // @ts-ignore
+          usersInfoResponse
+        );
+
+        clientMock.conversations.info.mockResolvedValueOnce(
+          // @ts-ignore
+          {
+            ...conversationsInfoResponse,
+            channel: { ...conversationsInfoResponse.channel, name: 'clase-10' },
+          }
+        );
+
+        await handleRobotFaceReaction({
+          client: clientMock,
+          // @ts-ignore
+          event: messageAuthorEvent,
+          logger: loggerMock,
+        });
+
+        expect(clientMock.chat.postMessage).toBeCalledTimes(1);
+        expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
+          channel: messageAuthorEvent.item.channel,
+          thread_ts: messageAuthorEvent.item.ts,
+          text: `<@${messageAuthorEvent.user}> el formato de la entrega no es válido, si estás en la clase 4 o menos tenés que enviar la tarea como bloque de código y a partir de la clase 5 tenés que enviar el link de github..`,
         });
       });
     });
@@ -521,6 +521,43 @@ describe('handleRobotFaceReaction', () => {
           channel: messageAuthorEvent.item.channel,
           thread_ts: messageAuthorEvent.item.ts,
           text: `<@${usersInfoResponse.user.id}> asegurate de mandar la tarea en un solo link de GitHub, no en varios.`,
+        });
+      });
+
+      it('should make Robotina respond with a message if the submission format is a GitHub link but the channel is incorrect', async () => {
+        clientMock.conversations.history.mockResolvedValueOnce({
+          ...conversationsHistoryResponse,
+          messages: [
+            // @ts-ignore
+            {
+              ...conversationsHistoryResponse.messages[0],
+              text: 'Hola, aca dejo la tarea https://github.com/r-argentina-programa/robotina',
+            },
+          ],
+        });
+
+        clientMock.users.info.mockResolvedValueOnce(
+          // @ts-ignore
+          usersInfoResponse
+        );
+
+        clientMock.conversations.info.mockResolvedValueOnce(
+          // @ts-ignore
+          conversationsInfoResponse
+        );
+
+        await handleRobotFaceReaction({
+          client: clientMock,
+          // @ts-ignore
+          event: messageAuthorEvent,
+          logger: loggerMock,
+        });
+
+        expect(clientMock.chat.postMessage).toBeCalledTimes(1);
+        expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
+          channel: messageAuthorEvent.item.channel,
+          thread_ts: messageAuthorEvent.item.ts,
+          text: `<@${messageAuthorEvent.user}> el formato de la entrega no es válido, si estás en la clase 4 o menos tenés que enviar la tarea como bloque de código y a partir de la clase 5 tenés que enviar el link de github..`,
         });
       });
     });
