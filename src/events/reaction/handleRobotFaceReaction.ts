@@ -11,6 +11,9 @@ import { CreateThreadDto } from '../../api/marketplace/thread/dto/CreateThreadDt
 import threadApi from '../../api/marketplace/thread/threadApi';
 import env from '../../config/env.config';
 import { extractOnlySubmission } from '../../utils/extractOnlySubmission';
+import { validateSubmissionSingleFormat } from '../../utils/validateSubmissionSingleFormat';
+import { validateSubmissionFormat } from '../../utils/validateSubmissionFormat';
+import { validateNotMultipleSubmissions } from '../../utils/validateNotMultipleSubmissions';
 
 export const handleRobotFaceReaction: Middleware<
   SlackEventMiddlewareArgs<'reaction_added'>,
@@ -112,6 +115,60 @@ export const handleRobotFaceReaction: Middleware<
         throw new Error(
           'Channel name must be in the format "clase-<number>" or "clase-react-<number>".'
         );
+      }
+
+      const submissionHasValidFormat = validateSubmissionFormat(
+        reactedMessage.text!
+      );
+
+      if (!submissionHasValidFormat) {
+        await client.chat.postMessage({
+          channel: event.item.channel,
+          thread_ts: event.item.ts,
+          text: `<@${slackUser.id}>, el formato que estás usando para entregar tu tarea no es válido o está vacío. \n\n\nLos formatos que tenés que usar son, si estás queriendo entregar una tarea de la clase 4 para abajo, un bloque de código: \`\`\` console.log("tarea") \`\`\` \nO, si estás queriendo entregar una tarea a partir de la clase 5 para arriba, entonces debería ser simplemente un link de GitHub: (https://github.com/...). \n\n\nY también acordate de mandar tu tarea en un solo formato, es decir, bloque de código o link de GitHub, no ambos.`,
+        });
+        return;
+      }
+
+      const submissionHasSingleFormat = validateSubmissionSingleFormat(
+        reactedMessage.text!
+      );
+
+      if (!submissionHasSingleFormat) {
+        await client.chat.postMessage({
+          channel: event.item.channel,
+          thread_ts: event.item.ts,
+          text: `Che <@${slackUser.id}>, estás queriendo subir más de un formato a la vez. Intentá enviar tu tarea en uno solo. \n\n\nAcordate que si estás en la clase 4 o menos, tenés que enviar la tarea como bloque de código, y a partir de la clase 5 tenés que enviar el link de GitHub.`,
+        });
+        return;
+      }
+
+      const validateIsNotMultipleSubmissions = validateNotMultipleSubmissions(
+        reactedMessage.text!
+      );
+
+      if (
+        !validateIsNotMultipleSubmissions &&
+        reactedMessage.text!.includes('```')
+      ) {
+        await client.chat.postMessage({
+          channel: event.item.channel,
+          thread_ts: event.item.ts,
+          text: `<@${slackUser.id}> asegurate de mandar la tarea en un solo bloque de código, no en varios. Para ayudarte un poco, podés divirlo algo así: \`\`\`Tarea 1\n console.log("tarea 1")\n\n Tarea 2\n console.log("tarea 2")\`\`\``,
+        });
+        return;
+      }
+
+      if (
+        !validateIsNotMultipleSubmissions &&
+        reactedMessage.text!.includes('github.com')
+      ) {
+        await client.chat.postMessage({
+          channel: event.item.channel,
+          thread_ts: event.item.ts,
+          text: `<@${slackUser.id}> asegurate de mandar la tarea en un solo link de GitHub, no en varios.`,
+        });
+        return;
       }
 
       const validSubmissionFormat = validateSubmissionDeliveryFormat({
