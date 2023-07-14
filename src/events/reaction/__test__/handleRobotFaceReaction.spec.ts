@@ -569,7 +569,7 @@ describe('handleRobotFaceReaction', () => {
         expect(clientMock.chat.postMessage).toHaveBeenCalledWith({
           channel: messageAuthorEvent.item.channel,
           thread_ts: messageAuthorEvent.item.ts,
-          text: `Che <@${usersInfoResponse.user.id}>, estás queriendo subir más de un formato a la vez, subí solo uno. O subis un bloque de código, o subís un link de GitHub.`,
+          text: `Che <@${usersInfoResponse.user.id}>, estás queriendo subir más de un formato a la vez. Intentá enviar tu tarea en uno solo. \n\n\nAcordate que si estás en la clase 4 o menos, tenés que enviar la tarea como bloque de código, y a partir de la clase 5 tenés que enviar el link de GitHub.`,
         });
       });
 
