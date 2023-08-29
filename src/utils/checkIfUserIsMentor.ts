@@ -1,5 +1,4 @@
-import { Role } from '../api/marketplace/user/entity/Role';
-import { User } from '../api/marketplace/user/entity/User';
+import { IUserResponse } from '../api/marketplace/user/IUserResponse';
 
-export const checkIfUserIsMentor = (user: User) =>
-  user.roles.includes(Role.MENTOR);
+export const checkIfUserIsMentor = (user: IUserResponse) =>
+  user.roles.includes('Student');

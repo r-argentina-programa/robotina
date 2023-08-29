@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import marketplaceClient from '../../config/client';
-import { CreateThreadDto } from '../dto/CreateThreadDto';
+import { ICreateThreadDto } from '../ICreateThreadDto';
 import threadApi from '../threadApi';
 
 describe('Marketplace Thread API', () => {
@@ -10,7 +10,7 @@ describe('Marketplace Thread API', () => {
 
   describe('create', () => {
     it('should create a new thread', async () => {
-      const newThread: CreateThreadDto = {
+      const newThread: ICreateThreadDto = {
         authorId: '123',
         studentId: 1,
         taskId: 1,
@@ -29,7 +29,7 @@ describe('Marketplace Thread API', () => {
     });
 
     it('should throw an error when creating a thread fails', async () => {
-      const newThread: CreateThreadDto = {
+      const newThread: ICreateThreadDto = {
         authorId: '123',
         studentId: 1,
         taskId: 1,

@@ -1,38 +1,34 @@
 /* eslint-disable no-console */
 import axios from 'axios';
 import marketplaceClient from '../config/client';
-import { Task } from './entity/Task';
-import { ErrorResponse } from '../interface/ErrorResponse';
-import { RequestOptions } from '../interface/RequestOptions';
-import { mapOptionsToQueryString } from '../helper/url';
+import { ITaskResponse } from './ITaskResponse';
+import { IErrorResponse } from '../common/IErrorResponse';
+import { mapQueryOptionsToQueryString } from '../common/url';
+import { IGetAllOptions } from '../common/IGetAllOptions';
+import { IPaginatedResponse } from '../common/IPaginatedResponse';
+import { IBaseFilterOptions } from '../common/IBaseFilterOptions';
 
-interface TaskFilters {
+interface ITaskFilterOptions extends IBaseFilterOptions {
   lessonId?: number;
 }
 
-interface TaskAssociations {
+interface ITaskIncludeOptions {
   submissions?: true;
 }
 
-export const getAll = async (
-  options?: RequestOptions<TaskFilters, TaskAssociations>
-): Promise<Task[]> => {
+export const getAllPaginated = async (
+  options?: IGetAllOptions<ITaskFilterOptions, ITaskIncludeOptions>
+): Promise<IPaginatedResponse<ITaskResponse>> => {
   try {
-    let queryString = '';
+    const { data } = await marketplaceClient.get<
+      IPaginatedResponse<ITaskResponse>
+    >(`/api/task${mapQueryOptionsToQueryString(options)}`);
 
-    if (options) {
-      queryString = mapOptionsToQueryString(options);
-    }
-
-    const { data: tasks } = await marketplaceClient.get<Task[]>(
-      `/api/task${queryString}`
-    );
-
-    return tasks;
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[taskApi Error: GetAll]', error.response);
-      throw new Error((error.response?.data as ErrorResponse).message);
+      throw new Error((error.response?.data as IErrorResponse).message);
     } else {
       console.error('[taskApi Error: GetAll]', error);
       throw new Error(`Getting tasks failed, check logs for more information.`);
@@ -41,7 +37,7 @@ export const getAll = async (
 };
 
 const taskApi = {
-  getAll,
+  getAllPaginated,
 };
 
 export default taskApi;

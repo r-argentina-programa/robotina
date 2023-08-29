@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import marketplaceClient from '../../config/client';
-import { CreateSubmissionDto } from '../dto/CreateSubmissionDto';
+import { ICreateSubmissionDto } from '../ICreateSubmissionDto';
 import submissionApi from '../submissionApi';
 
 describe('Marketplace Submission API', () => {
@@ -10,7 +10,7 @@ describe('Marketplace Submission API', () => {
 
   describe('create', () => {
     it('should create a new submission', async () => {
-      const newSubmission: CreateSubmissionDto = {
+      const newSubmission: ICreateSubmissionDto = {
         delivery: '```console.log("Hello World!")```',
         studentId: 1,
         taskId: 1,
@@ -27,7 +27,7 @@ describe('Marketplace Submission API', () => {
     });
 
     it('should throw an error when creating a submission fails', async () => {
-      const newSubmission: CreateSubmissionDto = {
+      const newSubmission: ICreateSubmissionDto = {
         delivery: '```console.log("Hello World!")```',
         studentId: 1,
         taskId: 1,

@@ -1,9 +1,9 @@
 import { AxiosError } from 'axios';
 import replyApi from '../replyApi';
 import marketplaceClient from '../../config/client';
-import { CreateReplyDto } from '../dto/CreateReplyDto';
-import { UpdateReplyDto } from '../dto/UpdateReplyDto';
-import { Reply } from '../entity/Reply';
+import { ICreateReplyDto } from '../ICreateReplyDto';
+import { IUpdateReplyDto } from '../IUpdateReplyDto';
+import { IReplyResponse } from '../IReplyResponse';
 
 jest.mock('../../config/client');
 
@@ -14,7 +14,7 @@ describe('Marketplace Reply API', () => {
 
   describe('create', () => {
     it('should create a new reply', async () => {
-      const newReply: CreateReplyDto = {
+      const newReply: ICreateReplyDto = {
         authorId: '1',
         text: 'Lorem Ipsum',
         threadTS: '123456',
@@ -33,7 +33,7 @@ describe('Marketplace Reply API', () => {
     });
 
     it('should throw an error when creating a reply fails', async () => {
-      const newReply: CreateReplyDto = {
+      const newReply: ICreateReplyDto = {
         authorId: '1',
         text: 'Lorem Ipsum',
         threadTS: '123456',
@@ -72,7 +72,7 @@ describe('Marketplace Reply API', () => {
 
   describe('update', () => {
     it('should update a reply', async () => {
-      const originalReply: Reply = {
+      const originalReply: IReplyResponse = {
         id: 1,
         authorId: '1',
         text: 'Lorem Ipsum',
@@ -81,7 +81,7 @@ describe('Marketplace Reply API', () => {
         username: 'test@test.com',
       };
 
-      const updates: UpdateReplyDto = {
+      const updates: IUpdateReplyDto = {
         text: 'Ipsum Lorem',
         timestamp: '654321',
         username: 'demo@test.com',
@@ -103,7 +103,7 @@ describe('Marketplace Reply API', () => {
     });
 
     it('should throw an error when updating a reply fails', async () => {
-      const originalReply: Reply = {
+      const originalReply: IReplyResponse = {
         id: 1,
         authorId: '1',
         text: 'Lorem Ipsum',
@@ -112,7 +112,7 @@ describe('Marketplace Reply API', () => {
         username: 'test@test.com',
       };
 
-      const updates: UpdateReplyDto = {
+      const updates: IUpdateReplyDto = {
         text: 'Ipsum Lorem',
         timestamp: '654321',
         username: 'demo@test.com',

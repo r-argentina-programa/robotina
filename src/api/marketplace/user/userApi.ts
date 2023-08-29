@@ -1,40 +1,34 @@
 /* eslint-disable no-console */
 import axios from 'axios';
 import marketplaceClient from '../config/client';
-import { User } from './entity/User';
-import { ErrorResponse } from '../interface/ErrorResponse';
-import { RequestOptions } from '../interface/RequestOptions';
-import { mapOptionsToQueryString } from '../helper/url';
-import { PaginatedResponse } from '../interface/PaginatedResponse';
-import { CreateUserDto } from './dto/CreateUserDto';
+import { IErrorResponse } from '../common/IErrorResponse';
+import { mapQueryOptionsToQueryString } from '../common/url';
+import { ICreateUserDto } from './ICreateUserDto';
+import { IGetAllOptions } from '../common/IGetAllOptions';
+import { IPaginatedResponse } from '../common/IPaginatedResponse';
+import { IUserResponse } from './IUserResponse';
 
-interface UserFilters {
+interface IUserFilterOptions {
   externalId?: string;
 }
 
-interface UserAssociations {
+interface IUserIncludeOptions {
   student?: boolean;
 }
 
-export const getAll = async (
-  options?: RequestOptions<UserFilters, UserAssociations>
-): Promise<User[]> => {
+export const getAllPaginated = async (
+  options?: IGetAllOptions<IUserFilterOptions, IUserIncludeOptions>
+): Promise<IPaginatedResponse<IUserResponse>> => {
   try {
-    let queryString = '';
+    const { data } = await marketplaceClient.get<
+      IPaginatedResponse<IUserResponse>
+    >(`/api/user${mapQueryOptionsToQueryString(options)}`);
 
-    if (options) {
-      queryString = mapOptionsToQueryString(options);
-    }
-
-    const { data: response } = await marketplaceClient.get<
-      PaginatedResponse<User>
-    >(`/api/user${queryString}`);
-
-    return response.results;
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[userApi Error: GetAll]', error.response);
-      throw new Error((error.response?.data as ErrorResponse).message);
+      throw new Error((error.response?.data as IErrorResponse).message);
     } else {
       console.error('[userApi Error: GetAll]', error);
       throw new Error(`Getting users failed, check logs for more information.`);
@@ -42,17 +36,19 @@ export const getAll = async (
   }
 };
 
-export const create = async (newUser: CreateUserDto): Promise<User> => {
+export const create = async (
+  newUser: ICreateUserDto
+): Promise<IUserResponse> => {
   try {
-    const { data: user } = await marketplaceClient.post<User>(
+    const { data } = await marketplaceClient.post<IUserResponse>(
       '/api/user',
       newUser
     );
-    return user;
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[userApi Error: Create]', error.response);
-      throw new Error((error.response?.data as ErrorResponse).message);
+      throw new Error((error.response?.data as IErrorResponse).message);
     } else {
       console.error('[userApi Error: Create]', error);
       throw new Error(`Creating user failed, check logs for more information.`);
@@ -61,7 +57,7 @@ export const create = async (newUser: CreateUserDto): Promise<User> => {
 };
 
 const userApi = {
-  getAll,
+  getAllPaginated,
   create,
 };
 

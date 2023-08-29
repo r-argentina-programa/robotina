@@ -1,23 +1,23 @@
 /* eslint-disable no-console */
 import axios from 'axios';
 import marketplaceClient from '../config/client';
-import { Submission } from './entity/Submission';
-import { ErrorResponse } from '../interface/ErrorResponse';
-import { CreateSubmissionDto } from './dto/CreateSubmissionDto';
+import { ISubmissionResponse } from './ISubmissionResponse';
+import { IErrorResponse } from '../common/IErrorResponse';
+import { ICreateSubmissionDto } from './ICreateSubmissionDto';
 
 export const create = async (
-  submission: CreateSubmissionDto
-): Promise<Submission> => {
+  newSubmission: ICreateSubmissionDto
+): Promise<ISubmissionResponse> => {
   try {
-    const { data: newSubmission } = await marketplaceClient.post<Submission>(
+    const { data } = await marketplaceClient.post<ISubmissionResponse>(
       '/api/submission',
-      submission
+      newSubmission
     );
-    return newSubmission;
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[submissionApi Error: Create]', error.response);
-      throw new Error((error.response?.data as ErrorResponse).message);
+      throw new Error((error.response?.data as IErrorResponse).message);
     } else {
       console.error('[submissionApi Error: Create]', error);
       throw new Error(

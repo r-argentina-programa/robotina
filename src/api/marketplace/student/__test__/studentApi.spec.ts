@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import marketplaceClient from '../../config/client';
-import { CreateStudentDto } from '../dto/CreateStudentDto';
+import { ICreateStudentDto } from '../ICreateStudentDto';
 import studentApi from '../studentApi';
 
 describe('Marketplace Student API', () => {
@@ -10,7 +10,7 @@ describe('Marketplace Student API', () => {
 
   describe('create', () => {
     it('should create a new student', async () => {
-      const newStudent: CreateStudentDto = {
+      const newStudent: ICreateStudentDto = {
         email: 'test@test.com',
         userId: 1,
         firstName: 'John',
@@ -28,7 +28,7 @@ describe('Marketplace Student API', () => {
     });
 
     it('should throw an error when creating a student fails', async () => {
-      const newStudent: CreateStudentDto = {
+      const newStudent: ICreateStudentDto = {
         email: 'test@test.com',
         userId: 1,
         firstName: 'John',

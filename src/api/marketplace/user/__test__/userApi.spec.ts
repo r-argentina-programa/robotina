@@ -1,10 +1,9 @@
 import { AxiosError } from 'axios';
 import marketplaceClient from '../../config/client';
-import { CreateUserDto } from '../dto/CreateUserDto';
-import { Role } from '../entity/Role';
+import { ICreateUserDto } from '../ICreateUserDto';
 import userApi from '../userApi';
-import { User } from '../entity/User';
-import { PaginatedResponse } from '../../interface/PaginatedResponse';
+import { IPaginatedResponse } from '../../common/IPaginatedResponse';
+import { IUserResponse } from '../IUserResponse';
 
 describe('Marketplace User API', () => {
   beforeEach(() => {
@@ -13,64 +12,72 @@ describe('Marketplace User API', () => {
 
   describe('getAll', () => {
     it('should get all users', async () => {
-      const paginatedUsers: PaginatedResponse<User> = {
-        count: 2,
-        next: 'next',
-        previous: 'previous',
-        results: [
+      const mockedResponse: IPaginatedResponse<IUserResponse> = {
+        data: [
           {
             id: 1,
-            externalId: 'oauth|sign-in-with-slack|000000-000000',
-            roles: [Role.STUDENT],
+            externalId: 'oauth2|sign-in-with-slack|T00000000-U0000000001',
+            roles: ['Student'],
             username: 'john.doe@test.com',
           },
           {
             id: 2,
-            externalId: 'oauth|sign-in-with-slack|000000-000001',
-            roles: [Role.STUDENT],
+            externalId: 'oauth2|sign-in-with-slack|T00000000-U0000000002',
+            roles: ['student'],
             username: 'jane.doe@test.com',
           },
         ],
+        meta: {
+          page: 1,
+          itemCount: 2,
+          pageCount: 1,
+          take: 10,
+        },
       };
 
       const getMock = jest
         .spyOn(marketplaceClient, 'get')
-        .mockResolvedValueOnce({ data: paginatedUsers });
+        .mockResolvedValueOnce(mockedResponse);
 
-      const response = await userApi.getAll();
+      const { data } = await userApi.getAllPaginated();
 
-      expect(response[0]).toEqual(paginatedUsers.results[0]);
-      expect(response[1]).toEqual(paginatedUsers.results[1]);
+      expect(data[0]).toEqual(mockedResponse.data[0]);
+      expect(data[1]).toEqual(mockedResponse.data[1]);
       expect(getMock).toHaveBeenCalledWith('/api/user');
     });
 
     it('should filter users', async () => {
-      const paginatedUsers: PaginatedResponse<User> = {
-        count: 1,
-        next: 'next',
-        previous: 'previous',
-        results: [
+      const mockedResponse: IPaginatedResponse<IUserResponse> = {
+        data: [
           {
             id: 1,
-            externalId: 'oauth|sign-in-with-slack|000000-000000',
-            roles: [Role.STUDENT],
+            externalId: 'oauth2|sign-in-with-slack|T00000000-U0000000001',
+            roles: ['Student'],
             username: 'john.doe@test.com',
           },
         ],
+        meta: {
+          page: 1,
+          itemCount: 2,
+          pageCount: 1,
+          take: 10,
+        },
       };
 
       const getMock = jest
         .spyOn(marketplaceClient, 'get')
-        .mockResolvedValueOnce({ data: paginatedUsers });
+        .mockResolvedValueOnce(mockedResponse);
 
-      const response = await userApi.getAll({
-        filter: { externalId: 'oauth|sign-in-with-slack|000000-000000' },
+      const { data } = await userApi.getAllPaginated({
+        filter: {
+          externalId: 'oauth2|sign-in-with-slack|T00000000-U0000000001',
+        },
       });
 
-      expect(response.length).toBe(1);
-      expect(response[0]).toEqual(paginatedUsers.results[0]);
+      expect(data.length).toBe(1);
+      expect(data[0]).toEqual(mockedResponse.data[0]);
       expect(getMock).toHaveBeenCalledWith(
-        '/api/user?filter%5BexternalId%5D=oauth%7Csign-in-with-slack%7C000000-000000'
+        '/api/user?filter%5BexternalId%5D=oauth2%7Csign-in-with-slack%7CT00000000-U0000000001'
       );
     });
 
@@ -97,16 +104,18 @@ describe('Marketplace User API', () => {
           )
         );
 
-      await expect(userApi.getAll()).rejects.toThrowError(expectedErrorMessage);
+      await expect(userApi.getAllPaginated()).rejects.toThrowError(
+        expectedErrorMessage
+      );
       expect(getMock).toHaveBeenCalledWith('/api/user');
     });
   });
 
   describe('create', () => {
     it('should create a new user', async () => {
-      const newUser: CreateUserDto = {
-        externalId: 'oauth|sign-in-with-slack|000000-000000',
-        roles: [Role.STUDENT],
+      const newUser: ICreateUserDto = {
+        externalId: 'oauth2|sign-in-with-slack|T00000000-U0000000001',
+        roles: ['Student'],
         username: 'john.doe@test.com',
       };
 
@@ -121,9 +130,9 @@ describe('Marketplace User API', () => {
     });
 
     it('should throw an error when creating an user fails', async () => {
-      const newUser: CreateUserDto = {
-        externalId: 'oauth|sign-in-with-slack|000000-000000',
-        roles: [Role.STUDENT],
+      const newUser: ICreateUserDto = {
+        externalId: 'oauth2|sign-in-with-slack|T00000000-U0000000001',
+        roles: ['Student'],
         username: 'john.doe@test.com',
       };
 
