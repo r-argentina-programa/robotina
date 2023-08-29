@@ -38,7 +38,7 @@ describe('Marketplace Task API', () => {
 
       const getMock = jest
         .spyOn(marketplaceClient, 'get')
-        .mockResolvedValueOnce(mockedResponse);
+        .mockResolvedValueOnce({ data: mockedResponse });
 
       const { data } = await taskApi.getAllPaginated();
 
@@ -68,7 +68,7 @@ describe('Marketplace Task API', () => {
 
       const getMock = jest
         .spyOn(marketplaceClient, 'get')
-        .mockResolvedValueOnce(mockedResponse);
+        .mockResolvedValueOnce({ data: mockedResponse });
 
       const { data } = await taskApi.getAllPaginated({
         filter: { lessonId: 1 },

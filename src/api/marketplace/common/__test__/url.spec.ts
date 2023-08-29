@@ -33,9 +33,9 @@ describe('mapOptionsToQueryString', () => {
     expect(queryString).toContain('filter%5Bkey1%5D=value1');
   });
 
-  it('should throw an error if options is undefined', () => {
-    expect(() => {
-      mapQueryOptionsToQueryString(undefined);
-    }).toThrow('An options object must be defined create a query string.');
+  it('should return an empty string if options is undefined', () => {
+    const queryString = mapQueryOptionsToQueryString();
+
+    expect(queryString).toContain('');
   });
 });
