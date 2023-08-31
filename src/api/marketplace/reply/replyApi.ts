@@ -1,22 +1,24 @@
 /* eslint-disable no-console */
 import axios from 'axios';
 import marketplaceClient from '../config/client';
-import { Reply } from './entity/Reply';
-import { ErrorResponse } from '../interface/ErrorResponse';
-import { CreateReplyDto } from './dto/CreateReplyDto';
-import { UpdateReplyDto } from './dto/UpdateReplyDto';
+import { IReplyResponse } from './IReplyResponse';
+import { IErrorResponse } from '../common/IErrorResponse';
+import { ICreateReplyDto } from './ICreateReplyDto';
+import { IUpdateReplyDto } from './IUpdateReplyDto';
 
-export const create = async (newReply: CreateReplyDto): Promise<Reply> => {
+export const create = async (
+  newReply: ICreateReplyDto
+): Promise<IReplyResponse> => {
   try {
-    const { data: reply } = await marketplaceClient.post<Reply>(
+    const { data } = await marketplaceClient.post<IReplyResponse>(
       '/api/reply',
       newReply
     );
-    return reply;
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[replyApi Error: Create]', error.response);
-      throw new Error((error.response?.data as ErrorResponse).message);
+      throw new Error((error.response?.data as IErrorResponse).message);
     } else {
       console.error('[replyApi Error: Create]', error);
       throw new Error(
@@ -28,18 +30,18 @@ export const create = async (newReply: CreateReplyDto): Promise<Reply> => {
 
 export const update = async (
   timestamp: string,
-  updates: UpdateReplyDto
-): Promise<Reply> => {
+  updates: IUpdateReplyDto
+): Promise<IReplyResponse> => {
   try {
-    const { data: reply } = await marketplaceClient.post<Reply>(
+    const { data } = await marketplaceClient.post<IReplyResponse>(
       `/api/bot/reply/${timestamp}`,
       updates
     );
-    return reply;
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[replyApi Error: Update]', error.response);
-      throw new Error((error.response?.data as ErrorResponse).message);
+      throw new Error((error.response?.data as IErrorResponse).message);
     } else {
       console.error('[replyApi Error: Update]', error);
       throw new Error(
@@ -55,7 +57,7 @@ export const remove = async (timestamp: string): Promise<void> => {
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[replyApi Error: Remove]', error.response);
-      throw new Error((error.response?.data as ErrorResponse).message);
+      throw new Error((error.response?.data as IErrorResponse).message);
     } else {
       console.error('[replyApi Error: Remove]', error);
       throw new Error(

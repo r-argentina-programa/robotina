@@ -1,10 +1,9 @@
 import { createAuth0Id } from '../../utils/createAuth0Id';
-import { CreateUserDto } from '../../api/marketplace/user/dto/CreateUserDto';
-import { Role } from '../../api/marketplace/user/entity/Role';
+import { ICreateUserDto } from '../../api/marketplace/user/ICreateUserDto';
 import userApi from '../../api/marketplace/user/userApi';
 import studentApi from '../../api/marketplace/student/studentApi';
-import { CreateStudentDto } from '../../api/marketplace/student/dto/CreateStudentDto';
-import { CreateSubmissionDto } from '../../api/marketplace/submission/dto/CreateSubmissionDto';
+import { ICreateStudentDto } from '../../api/marketplace/student/ICreateStudentDto';
+import { ICreateSubmissionDto } from '../../api/marketplace/submission/ICreateSubmissionDto';
 import submissionApi from '../../api/marketplace/submission/submissionApi';
 import taskApi from '../../api/marketplace/task/TaskApi';
 
@@ -26,17 +25,16 @@ export const uploadTarea = async ({
   slackId,
 }: IUploadTarea) => {
   const auth0Id = createAuth0Id(slackId);
-  let createSubmissionDto: CreateSubmissionDto;
+  let createSubmissionDto: ICreateSubmissionDto;
 
-  const users = await userApi.getAll({
+  const { data: users } = await userApi.getAllPaginated({
     filter: { externalId: auth0Id },
     include: { student: true },
   });
 
-  const tasks = await taskApi.getAll({ filter: { lessonId: +classNumber } });
-
-  /* const userResponse = await getUser(auth0Id);
-  const taskResponse = await getTasks(classNumber); */
+  const { data: tasks } = await taskApi.getAllPaginated({
+    filter: { lessonId: +classNumber },
+  });
 
   if (!tasks.length) {
     throw new Error('Task not found');
@@ -45,22 +43,14 @@ export const uploadTarea = async ({
   const taskId = tasks[0].id;
 
   if (!users.length) {
-    const createUserDto: CreateUserDto = {
+    const createUserDto: ICreateUserDto = {
       externalId: auth0Id,
-      roles: [Role.STUDENT],
+      roles: ['Student'],
     };
-
-    /* const user: CreateUserDto = {
-      firstName: firstName || email,
-      email,
-      externalId: auth0Id,
-      lastName: lastName || email,
-      roles: [Role.STUDENT],
-    }; */
 
     const user = await userApi.create(createUserDto);
 
-    const createStudentDto: CreateStudentDto = {
+    const createStudentDto: ICreateStudentDto = {
       userId: user.id,
       email,
       firstName: firstName || email,
@@ -69,8 +59,6 @@ export const uploadTarea = async ({
 
     const student = await studentApi.create(createStudentDto);
 
-    /* const student = await createUserStudent(user); */
-
     createSubmissionDto = {
       taskId,
       studentId: student.id,
@@ -78,8 +66,6 @@ export const uploadTarea = async ({
     };
 
     return submissionApi.create(createSubmissionDto);
-
-    /* return sendSubmission(submission); */
   }
 
   const studentId = users[0].student!.id;

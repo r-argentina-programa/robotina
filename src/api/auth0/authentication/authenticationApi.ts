@@ -2,13 +2,13 @@
 import axios from 'axios';
 import * as dotenv from 'dotenv';
 import { auth0Client } from '../config/client';
-import { Credentials } from './entity/Credentials';
+import { ICredentialsResponse } from './ICredentialsResponse';
 
 dotenv.config();
 
-const getAccessToken = async (): Promise<Credentials> => {
+const getAccessToken = async (): Promise<ICredentialsResponse> => {
   try {
-    const { data: credentials } = await auth0Client.post<Credentials>(
+    const { data } = await auth0Client.post<ICredentialsResponse>(
       '/oauth/token',
       {
         client_id: process.env.AUTH0_CLIENT_ID || '',
@@ -19,7 +19,7 @@ const getAccessToken = async (): Promise<Credentials> => {
         password: process.env.AUTH0_PASSWORD || '',
       }
     );
-    return credentials;
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[getAccessToken error]: ', error.response);

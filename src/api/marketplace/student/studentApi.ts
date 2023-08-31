@@ -1,23 +1,23 @@
 /* eslint-disable no-console */
 import axios from 'axios';
 import marketplaceClient from '../config/client';
-import { Student } from './entity/Student';
-import { ErrorResponse } from '../interface/ErrorResponse';
-import { CreateStudentDto } from './dto/CreateStudentDto';
+import { IStudentResponse } from './IStudentResponse';
+import { IErrorResponse } from '../common/IErrorResponse';
+import { ICreateStudentDto } from './ICreateStudentDto';
 
 export const create = async (
-  newStudent: CreateStudentDto
-): Promise<Student> => {
+  newStudent: ICreateStudentDto
+): Promise<IStudentResponse> => {
   try {
-    const { data: student } = await marketplaceClient.post<Student>(
+    const { data } = await marketplaceClient.post<IStudentResponse>(
       '/api/student',
       newStudent
     );
-    return student;
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[studentApi Error: Create]', error.response);
-      throw new Error((error.response?.data as ErrorResponse).message);
+      throw new Error((error.response?.data as IErrorResponse).message);
     } else {
       console.error('[studentApi Error: Create]', error);
       throw new Error(

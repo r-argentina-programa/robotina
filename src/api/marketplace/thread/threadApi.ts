@@ -1,21 +1,23 @@
 /* eslint-disable no-console */
 import axios from 'axios';
 import marketplaceClient from '../config/client';
-import { Thread } from './entity/Thread';
-import { ErrorResponse } from '../interface/ErrorResponse';
-import { CreateThreadDto } from './dto/CreateThreadDto';
+import { IThreadResponse } from './IThreadResponse';
+import { IErrorResponse } from '../common/IErrorResponse';
+import { ICreateThreadDto } from './ICreateThreadDto';
 
-export const create = async (newThread: CreateThreadDto): Promise<Thread> => {
+export const create = async (
+  newThread: ICreateThreadDto
+): Promise<IThreadResponse> => {
   try {
-    const { data: thread } = await marketplaceClient.post<Thread>(
+    const { data } = await marketplaceClient.post<IThreadResponse>(
       '/api/thread',
       newThread
     );
-    return thread;
+    return data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[threadApi Error: Create]', error.response);
-      throw new Error((error.response?.data as ErrorResponse).message);
+      throw new Error((error.response?.data as IErrorResponse).message);
     } else {
       console.error('[threadApi Error: Create]', error);
       throw new Error(

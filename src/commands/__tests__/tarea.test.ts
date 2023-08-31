@@ -6,7 +6,7 @@ import { uploadTarea } from '../tarea/uploadTarea';
 import { unknownCommandBlock } from '../../blocks/unknownCommandBlock';
 import { wrongFormatBlock } from '../../blocks/wrongFormatBlock';
 import threadApi from '../../api/marketplace/thread/threadApi';
-import { Thread } from '../../api/marketplace/thread/entity/Thread';
+import { IThreadResponse } from '../../api/marketplace/thread/IThreadResponse';
 
 jest.mock('@slack/web-api', () => {
   const properties = {
@@ -75,7 +75,7 @@ describe('tareaCommandFunctiontarea', () => {
       createdAt: '2022-10-13T19:58:25.751Z',
       updatedAt: '2022-10-13T19:58:25.751Z',
     });
-    mockedThreadApiCreate.mockResolvedValue({} as unknown as Thread);
+    mockedThreadApiCreate.mockResolvedValue({} as unknown as IThreadResponse);
     webClientTest.users.info.mockResolvedValue({
       ok: true,
       user: {

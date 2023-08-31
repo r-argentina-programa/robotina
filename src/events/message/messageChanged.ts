@@ -2,7 +2,7 @@ import { Middleware, SlackEventMiddlewareArgs } from '@slack/bolt';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers';
 import { isTaskSubmission } from '../../utils/validateTaskSubmission';
 import replyApi from '../../api/marketplace/reply/replyApi';
-import { UpdateReplyDto } from '../../api/marketplace/reply/dto/UpdateReplyDto';
+import { IUpdateReplyDto } from '../../api/marketplace/reply/IUpdateReplyDto';
 import env from '../../config/env.config';
 
 export const handleSubmissionReplyChanged: Middleware<
@@ -36,7 +36,7 @@ export const handleSubmissionReplyChanged: Middleware<
         user: message.message.user,
       });
 
-      const updateReplyDto: UpdateReplyDto = {
+      const updateReplyDto: IUpdateReplyDto = {
         text: message.message.text!,
         timestamp: message.message.ts,
         username:

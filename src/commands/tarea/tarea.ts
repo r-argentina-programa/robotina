@@ -13,7 +13,7 @@ import { uploadTarea } from './uploadTarea';
 import { validateSubmissionDeliveryFormat } from '../../utils/validateSubmissionDeliveryFormat';
 import { validateChannelName } from '../../utils/validateChannelName';
 import threadApi from '../../api/marketplace/thread/threadApi';
-import { CreateThreadDto } from '../../api/marketplace/thread/dto/CreateThreadDto';
+import { ICreateThreadDto } from '../../api/marketplace/thread/ICreateThreadDto';
 
 dotenv.config();
 
@@ -79,7 +79,7 @@ export const tareaCommandFunction = async ({
         `Tarea subida con éxito <@${user.id}>! \n\nTarea:\n${command.text}\n\n*Para agregar correcciones responder en este hilo.*`
       );
 
-      const thread: CreateThreadDto = {
+      const thread: ICreateThreadDto = {
         authorId: process.env.BOT_ID!,
         studentId: tarea.fkStudentId,
         text: messageResponse.message?.text as string,

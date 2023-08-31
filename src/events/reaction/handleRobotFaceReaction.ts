@@ -7,7 +7,7 @@ import { checkIfBotAlreadyReacted } from '../../utils/checkIfBotAlreadyReacted';
 import { checkIfUserIsMentor } from '../../utils/checkIfUserIsMentor';
 import { validateSubmissionDeliveryFormat } from '../../utils/validateSubmissionDeliveryFormat';
 import userApi from '../../api/marketplace/user/userApi';
-import { CreateThreadDto } from '../../api/marketplace/thread/dto/CreateThreadDto';
+import { ICreateThreadDto } from '../../api/marketplace/thread/ICreateThreadDto';
 import threadApi from '../../api/marketplace/thread/threadApi';
 import env from '../../config/env.config';
 import { extractOnlySubmission } from '../../utils/extractOnlySubmission';
@@ -72,7 +72,7 @@ export const handleRobotFaceReaction: Middleware<
       if (event.item_user === event.user) {
         reactorIsValid = true;
       } else {
-        const users = await userApi.getAll({
+        const { data: users } = await userApi.getAllPaginated({
           filter: { externalId: createAuth0Id(event.user) },
         });
 
@@ -213,7 +213,7 @@ export const handleRobotFaceReaction: Middleware<
         thread_ts: event.item.ts,
       });
 
-      const createThreadDto: CreateThreadDto = {
+      const createThreadDto: ICreateThreadDto = {
         authorId: env.BOT_ID!,
         studentId: tarea.fkStudentId,
         text: botMessage.message!.text!,

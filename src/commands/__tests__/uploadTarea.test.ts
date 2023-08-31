@@ -4,33 +4,33 @@ import taskApi from '../../api/marketplace/task/TaskApi';
 import userApi from '../../api/marketplace/user/userApi';
 import submissionApi from '../../api/marketplace/submission/submissionApi';
 import studentApi from '../../api/marketplace/student/studentApi';
-import { User } from '../../api/marketplace/user/entity/User';
-import { Role } from '../../api/marketplace/user/entity/Role';
-import { Student } from '../../api/marketplace/student/entity/Student';
-import { Task } from '../../api/marketplace/task/entity/Task';
-import { ResolutionType } from '../../api/marketplace/task/entity/ResolutionType';
-import { Submission } from '../../api/marketplace/submission/entity/Submission';
-import { CreateStudentDto } from '../../api/marketplace/student/dto/CreateStudentDto';
-import { CreateUserDto } from '../../api/marketplace/user/dto/CreateUserDto';
+import { IStudentResponse } from '../../api/marketplace/student/IStudentResponse';
+import { ITaskResponse } from '../../api/marketplace/task/ITaskResponse';
+import { ISubmissionResponse } from '../../api/marketplace/submission/ISubmissionResponse';
+import { ICreateStudentDto } from '../../api/marketplace/student/ICreateStudentDto';
+import { ICreateUserDto } from '../../api/marketplace/user/ICreateUserDto';
+import { IUserResponse } from '../../api/marketplace/user/IUserResponse';
 
 jest.mock('../../api/marketplace/submission/submissionApi');
 jest.mock('../../api/marketplace/user/userApi');
 jest.mock('../../api/marketplace/student/studentApi');
 jest.mock('../../api/marketplace/task/TaskApi');
 
-const mockedUserGetAll = userApi.getAll as jest.Mocked<typeof userApi.getAll>;
+const mockedUserGetAll = userApi.getAllPaginated as jest.Mocked<
+  typeof userApi.getAllPaginated
+>;
 const mockedStudentApiCreate = studentApi.create as jest.Mocked<
   typeof studentApi.create
 >;
-const mockedTaskApiGetAll = taskApi.getAll as jest.Mocked<
-  typeof taskApi.getAll
+const mockedTaskApiGetAll = taskApi.getAllPaginated as jest.Mocked<
+  typeof taskApi.getAllPaginated
 >;
 const mockedSubmissionApiCreate = submissionApi.create as jest.Mocked<
   typeof submissionApi.create
 >;
 const mockedUserCreate = userApi.create as jest.Mocked<typeof userApi.create>;
 
-const EXPECTED_AXIOS_DATA: Submission = {
+const EXPECTED_AXIOS_DATA: ISubmissionResponse = {
   fkTaskId: 11,
   fkStudentId: 11,
   completed: false,
@@ -61,10 +61,10 @@ describe('uploadTarea test', () => {
     email: 'fake@email.com',
   };
 
-  const MOCKED_USER: User = {
+  const MOCKED_USER: IUserResponse = {
     externalId: 'external-id-test',
     id: 1,
-    roles: [Role.STUDENT],
+    roles: ['Student'],
     username: 'username-test',
     student: {
       email: 'mail@mail.com',
@@ -74,9 +74,9 @@ describe('uploadTarea test', () => {
     },
   };
 
-  const MOCKED_TASK: Task = {
+  const MOCKED_TASK: ITaskResponse = {
     id: 3,
-    resolutionType: ResolutionType.CODE,
+    resolutionType: 'Code',
     title: 'test-title',
     description: 'test-description',
     lessonId: 1,
@@ -84,7 +84,7 @@ describe('uploadTarea test', () => {
     statement: 'test-statement',
   };
 
-  const MOCKED_STUDENT: Student = {
+  const MOCKED_STUDENT: IStudentResponse = {
     email: 'test-email',
     firstName: 'firstName-test',
     id: 1,
@@ -93,9 +93,15 @@ describe('uploadTarea test', () => {
 
   it('should just send submission + user id ', async () => {
     expect.assertions(3);
-    mockedUserGetAll.mockResolvedValueOnce([MOCKED_USER]);
+    mockedUserGetAll.mockResolvedValueOnce({
+      data: [MOCKED_USER],
+      meta: { itemCount: 1, pageCount: 1, page: 1, take: 10 },
+    });
 
-    mockedTaskApiGetAll.mockResolvedValueOnce([MOCKED_TASK]);
+    mockedTaskApiGetAll.mockResolvedValueOnce({
+      data: [MOCKED_TASK],
+      meta: { itemCount: 1, pageCount: 1, page: 1, take: 10 },
+    });
     await uploadTarea(MOCKED_TAREA);
     expect(mockedTaskApiGetAll).toHaveBeenCalledTimes(1);
     expect(mockedUserGetAll).toHaveBeenCalledTimes(1);
@@ -104,10 +110,16 @@ describe('uploadTarea test', () => {
 
   it("should send submission and create user if it doesn't exist ", async () => {
     expect.assertions(5);
-    mockedUserGetAll.mockResolvedValueOnce([]);
+    mockedUserGetAll.mockResolvedValueOnce({
+      data: [],
+      meta: { itemCount: 0, pageCount: 1, page: 1, take: 10 },
+    });
     mockedUserCreate.mockResolvedValueOnce(MOCKED_USER);
     mockedStudentApiCreate.mockResolvedValue(MOCKED_STUDENT);
-    mockedTaskApiGetAll.mockResolvedValueOnce([MOCKED_TASK]);
+    mockedTaskApiGetAll.mockResolvedValueOnce({
+      data: [MOCKED_TASK],
+      meta: { itemCount: 1, pageCount: 1, page: 1, take: 10 },
+    });
 
     mockedSubmissionApiCreate.mockResolvedValueOnce({
       fkTaskId: 11,
@@ -139,19 +151,25 @@ describe('uploadTarea test', () => {
       lastName: undefined,
       email: 'fake@email.com',
     };
-    mockedUserGetAll.mockResolvedValueOnce([]);
+    mockedUserGetAll.mockResolvedValueOnce({
+      data: [],
+      meta: { itemCount: 0, pageCount: 1, page: 1, take: 10 },
+    });
     mockedUserCreate.mockResolvedValueOnce(MOCKED_USER);
     mockedStudentApiCreate.mockResolvedValue(MOCKED_STUDENT);
-    mockedTaskApiGetAll.mockResolvedValueOnce([MOCKED_TASK]);
+    mockedTaskApiGetAll.mockResolvedValueOnce({
+      data: [MOCKED_TASK],
+      meta: { itemCount: 1, pageCount: 1, page: 1, take: 10 },
+    });
     await uploadTarea(MOCKED_TAREA_WITH_UNDEFINED_USERNAME_AND_LASTNAME);
 
-    const expectedUser: CreateUserDto = {
-      roles: [Role.STUDENT],
+    const expectedUser: ICreateUserDto = {
+      roles: ['Student'],
       username: undefined,
       externalId: `oauth2|sign-in-with-slack|${MOCKED_SLACK_TEAM_ID}-mockId`,
     };
 
-    const expectedStudent: CreateStudentDto = {
+    const expectedStudent: ICreateStudentDto = {
       userId: 1,
       email: 'fake@email.com',
       firstName: 'fake@email.com',
@@ -175,8 +193,14 @@ describe('uploadTarea test', () => {
 
   it('should throw when task with given lesson id is not found', async () => {
     const EXPECTED_ERROR = new Error('Task not found');
-    mockedUserGetAll.mockResolvedValueOnce([MOCKED_USER]);
-    mockedTaskApiGetAll.mockResolvedValueOnce([]);
+    mockedUserGetAll.mockResolvedValueOnce({
+      data: [MOCKED_USER],
+      meta: { itemCount: 1, pageCount: 1, page: 1, take: 10 },
+    });
+    mockedTaskApiGetAll.mockResolvedValueOnce({
+      data: [],
+      meta: { itemCount: 0, pageCount: 1, page: 1, take: 10 },
+    });
     try {
       await uploadTarea(MOCKED_TAREA);
     } catch (err) {

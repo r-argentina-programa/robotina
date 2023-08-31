@@ -15,9 +15,8 @@ import {
   conversationsInfoResponse,
   usersInfoResponse,
 } from './fixture/webclient';
-import { Submission } from '../../../api/marketplace/submission/entity/Submission';
+import { ISubmissionResponse } from '../../../api/marketplace/submission/ISubmissionResponse';
 import threadApi from '../../../api/marketplace/thread/threadApi';
-import { Role } from '../../../api/marketplace/user/entity/Role';
 import env from '../../../config/env.config';
 
 jest.mock('../../../commands/tarea/uploadTarea');
@@ -65,7 +64,7 @@ describe('handleRobotFaceReaction', () => {
         id: 1,
         isActive: true,
         viewer: undefined,
-      } as Submission;
+      } as ISubmissionResponse;
 
       clientMock.conversations.history.mockResolvedValueOnce(
         // @ts-ignore
@@ -153,7 +152,7 @@ describe('handleRobotFaceReaction', () => {
         id: 1,
         isActive: true,
         viewer: undefined,
-      } as Submission;
+      } as ISubmissionResponse;
 
       clientMock.conversations.history.mockResolvedValueOnce(
         // @ts-ignore
@@ -161,10 +160,11 @@ describe('handleRobotFaceReaction', () => {
       );
 
       const userGetAllMock = jest
-        .spyOn(userApi, 'getAll')
-        .mockResolvedValueOnce([
-          { id: 1, username: '', externalId: '', roles: [Role.MENTOR] },
-        ]);
+        .spyOn(userApi, 'getAllPaginated')
+        .mockResolvedValueOnce({
+          data: [{ id: 1, username: '', externalId: '', roles: ['Mentor'] }],
+          meta: { itemCount: 1, pageCount: 1, page: 1, take: 10 },
+        });
 
       clientMock.users.info.mockResolvedValueOnce(
         // @ts-ignore
@@ -250,10 +250,11 @@ describe('handleRobotFaceReaction', () => {
       );
 
       const userGetAllMock = jest
-        .spyOn(userApi, 'getAll')
-        .mockResolvedValueOnce([
-          { id: 1, username: '', externalId: '', roles: [Role.STUDENT] },
-        ]);
+        .spyOn(userApi, 'getAllPaginated')
+        .mockResolvedValueOnce({
+          data: [{ id: 1, username: '', externalId: '', roles: ['Student'] }],
+          meta: { itemCount: 1, pageCount: 1, page: 1, take: 10 },
+        });
 
       await handleRobotFaceReaction({
         client: clientMock,
@@ -290,7 +291,7 @@ describe('handleRobotFaceReaction', () => {
           id: 1,
           isActive: true,
           viewer: undefined,
-        } as Submission;
+        } as ISubmissionResponse;
 
         clientMock.conversations.history.mockResolvedValueOnce(
           // @ts-ignore
@@ -426,7 +427,7 @@ describe('handleRobotFaceReaction', () => {
           id: 1,
           isActive: true,
           viewer: undefined,
-        } as Submission;
+        } as ISubmissionResponse;
 
         clientMock.conversations.history.mockResolvedValueOnce({
           ...conversationsHistoryResponse,
@@ -661,7 +662,7 @@ describe('handleRobotFaceReaction', () => {
         { messages: undefined }
       );
 
-      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+      const userGetAllMock = jest.spyOn(userApi, 'getAllPaginated');
 
       await handleRobotFaceReaction({
         client: clientMock,
@@ -691,7 +692,7 @@ describe('handleRobotFaceReaction', () => {
         { messages: [{ reactions: undefined }] }
       );
 
-      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+      const userGetAllMock = jest.spyOn(userApi, 'getAllPaginated');
 
       await handleRobotFaceReaction({
         client: clientMock,
@@ -723,7 +724,7 @@ describe('handleRobotFaceReaction', () => {
         ],
       });
 
-      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+      const userGetAllMock = jest.spyOn(userApi, 'getAllPaginated');
 
       await handleRobotFaceReaction({
         client: clientMock,
@@ -747,7 +748,7 @@ describe('handleRobotFaceReaction', () => {
         conversationsHistoryResponse
       );
 
-      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+      const userGetAllMock = jest.spyOn(userApi, 'getAllPaginated');
 
       await handleRobotFaceReaction({
         client: clientMock,
@@ -771,7 +772,7 @@ describe('handleRobotFaceReaction', () => {
         conversationsHistoryResponse
       );
 
-      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+      const userGetAllMock = jest.spyOn(userApi, 'getAllPaginated');
 
       clientMock.users.info.mockResolvedValueOnce(
         // @ts-ignore
@@ -804,7 +805,7 @@ describe('handleRobotFaceReaction', () => {
         conversationsHistoryResponse
       );
 
-      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+      const userGetAllMock = jest.spyOn(userApi, 'getAllPaginated');
 
       clientMock.users.info.mockResolvedValueOnce(
         // @ts-ignore
@@ -842,7 +843,7 @@ describe('handleRobotFaceReaction', () => {
         conversationsHistoryResponse
       );
 
-      const userGetAllMock = jest.spyOn(userApi, 'getAll');
+      const userGetAllMock = jest.spyOn(userApi, 'getAllPaginated');
 
       clientMock.users.info.mockResolvedValueOnce(
         // @ts-ignore
