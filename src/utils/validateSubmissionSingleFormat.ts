@@ -1,5 +1,5 @@
 export const validateSubmissionSingleFormat = (message: string): boolean => {
-  const codeBlockRegex = /```[^`]+```/;
+  const codeBlockRegex = /```[\s\S]*?```/;
   const linkRegex = /github\.com\/[a-zA-Z]/;
 
   const containsCodeBlock = codeBlockRegex.test(message);

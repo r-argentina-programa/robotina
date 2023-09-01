@@ -1,5 +1,5 @@
 export const validateNotMultipleSubmissions = (message: string) => {
-  const blockOfCodeCount = (message.match(/```[^`]+```/g) || []).length;
+  const blockOfCodeCount = (message.match(/```[\s\S]*?```/g) || []).length;
   const gitHubLinkCount = (message.match(/github\.com\/[a-zA-Z]/g) || [])
     .length;
 

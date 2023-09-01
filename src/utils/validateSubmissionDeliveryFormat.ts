@@ -8,7 +8,7 @@ export const validateSubmissionDeliveryFormat = ({
   delivery,
 }: IValidateSubmissionDeliveryFormat) => {
   const FIRST_LINK_FORMAT_LESSON_NUMBER = 5;
-  const codeFormatRegex = /```[^`]+```/;
+  const codeFormatRegex = /```[\s\S]*?```/;
   const linkFormatRegex = /github\.com\/[a-zA-Z]/;
 
   if (
