@@ -113,8 +113,7 @@ describe('handleRobotFaceReaction', () => {
       expect(clientMock.chat.postMessage).toBeCalledTimes(2);
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
         channel: messageAuthorEvent.item.channel,
-        text: `Tarea subida con éxito <@${messageAuthorEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original.\n\nTarea:
-      ${typeCodeText}\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
+        text: `Tarea subida con éxito <@${messageAuthorEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original.\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
       });
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
         channel: messageAuthorEvent.item.channel,
@@ -215,8 +214,7 @@ describe('handleRobotFaceReaction', () => {
       expect(clientMock.chat.postMessage).toBeCalledTimes(2);
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
         channel: randomUserEvent.item.channel,
-        text: `Tarea subida con éxito <@${randomUserEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original.\n\nTarea:
-      ${typeCodeText}\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
+        text: `Tarea subida con éxito <@${randomUserEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original.\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
       });
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
         channel: randomUserEvent.item.channel,
