@@ -203,8 +203,7 @@ export const handleRobotFaceReaction: Middleware<
 
       const botMessage = await client.chat.postMessage({
         channel: event.item.channel,
-        text: `Tarea subida con éxito <@${slackUser.id}>! \n\nAcá está el <${permalink}|Link> al mensaje original.\n\nTarea:
-      ${onlySubmissionContent}\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
+        text: `Tarea subida con éxito <@${slackUser.id}>! \n\nAcá está el <${permalink}|Link> al mensaje original.\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
       });
 
       await client.chat.postMessage({
