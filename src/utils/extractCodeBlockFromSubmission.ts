@@ -1,9 +1,9 @@
 export const extractCodeBlockFromSubmission = (message: string): string => {
-  const codeBlockRegex = /```([^`]*)```/;
+  const codeBlockRegex = /```[\s\S]*?```/;
   const matches = message.match(codeBlockRegex);
 
-  if (matches && matches.length >= 2) {
-    return matches[1];
+  if (matches) {
+    return matches[0];
   }
 
   return '';
