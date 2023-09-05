@@ -76,7 +76,9 @@ export const tareaCommandFunction = async ({
       });
 
       const messageResponse = await say(
-        `Tarea subida con éxito <@${user.id}>! \n\n*Para agregar correcciones responder en este hilo.*`
+        `Tarea subida con éxito <@${
+          user.id
+        }>!\n\nTarea:\n${command.text.trim()}\n\n*Para agregar correcciones responder en este hilo.*`
       );
 
       const thread: ICreateThreadDto = {
