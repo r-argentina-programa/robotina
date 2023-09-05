@@ -31,8 +31,8 @@ const mockedSubmissionApiCreate = submissionApi.create as jest.Mocked<
 const mockedUserCreate = userApi.create as jest.Mocked<typeof userApi.create>;
 
 const EXPECTED_AXIOS_DATA: ISubmissionResponse = {
-  fkTaskId: 11,
-  fkStudentId: 11,
+  taskId: 11,
+  studentId: 11,
   completed: false,
   viewer: null,
   delivery: 'https://github.com/r-argentina-programa/robotina',
@@ -122,8 +122,8 @@ describe('uploadTarea test', () => {
     });
 
     mockedSubmissionApiCreate.mockResolvedValueOnce({
-      fkTaskId: 11,
-      fkStudentId: 11,
+      taskId: 11,
+      studentId: 11,
       completed: false,
       viewer: null,
       delivery: 'https://github.com/r-argentina-programa/robotina',

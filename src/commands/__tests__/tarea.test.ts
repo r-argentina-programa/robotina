@@ -65,8 +65,8 @@ describe('tareaCommandFunctiontarea', () => {
 
     say.mockResolvedValueOnce({
       ok: true,
-      fkTaskId: 3,
-      fkStudentId: 1,
+      taskId: 3,
+      studentId: 1,
       completed: false,
       viewer: null,
       delivery: 'https://github.com/r-argentina-programa/robotina',
@@ -88,8 +88,8 @@ describe('tareaCommandFunctiontarea', () => {
       },
     });
     mockedUploadTarea.mockResolvedValue({
-      fkTaskId: 1,
-      fkStudentId: 7,
+      taskId: 1,
+      studentId: 7,
       completed: false,
       viewer: null,
       delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
@@ -105,8 +105,8 @@ describe('tareaCommandFunctiontarea', () => {
   it('should throw error if user is not found', async () => {
     say.mockResolvedValueOnce({
       ok: true,
-      fkTaskId: 3,
-      fkStudentId: 1,
+      taskId: 3,
+      studentId: 1,
       completed: false,
       viewer: null,
       delivery: 'https://github.com/r-argentina-programa/robotina',
@@ -116,8 +116,8 @@ describe('tareaCommandFunctiontarea', () => {
       updatedAt: '2022-10-13T19:58:25.751Z',
     });
     mockedUploadTarea.mockResolvedValue({
-      fkTaskId: 1,
-      fkStudentId: 7,
+      taskId: 1,
+      studentId: 7,
       completed: false,
       viewer: null,
       delivery: '```aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa```',
@@ -205,8 +205,8 @@ describe('tareaCommandFunctiontarea', () => {
   it('should throw error when there is a problem', async () => {
     say.mockResolvedValueOnce({
       ok: true,
-      fkTaskId: 3,
-      fkStudentId: 1,
+      taskId: 3,
+      studentId: 1,
       completed: false,
       viewer: null,
       delivery: 'https://github.com/r-argentina-programa/robotina',

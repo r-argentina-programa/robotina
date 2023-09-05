@@ -59,8 +59,8 @@ describe('handleRobotFaceReaction', () => {
       const submissionResponseMock = {
         completed: false,
         delivery: typeCodeText,
-        fkStudentId: 1,
-        fkTaskId: 1,
+        studentId: 1,
+        taskId: 1,
         id: 1,
         isActive: true,
         viewer: undefined,
@@ -124,8 +124,8 @@ describe('handleRobotFaceReaction', () => {
       expect(threadApi.create).toHaveBeenCalledTimes(1);
       expect(threadApi.create).toHaveBeenCalledWith({
         authorId: env.BOT_ID,
-        studentId: submissionResponseMock.fkStudentId,
-        taskId: submissionResponseMock.fkTaskId,
+        studentId: submissionResponseMock.studentId,
+        taskId: submissionResponseMock.taskId,
         text: chatPostMessageResponse.message.text,
         timestamp: chatPostMessageResponse.ts,
       });
@@ -146,8 +146,8 @@ describe('handleRobotFaceReaction', () => {
       const submissionResponseMock = {
         completed: false,
         delivery: typeCodeText,
-        fkStudentId: 1,
-        fkTaskId: 1,
+        studentId: 1,
+        taskId: 1,
         id: 1,
         isActive: true,
         viewer: undefined,
@@ -225,8 +225,8 @@ describe('handleRobotFaceReaction', () => {
       expect(threadApi.create).toHaveBeenCalledTimes(1);
       expect(threadApi.create).toHaveBeenCalledWith({
         authorId: env.BOT_ID,
-        studentId: submissionResponseMock.fkStudentId,
-        taskId: submissionResponseMock.fkTaskId,
+        studentId: submissionResponseMock.studentId,
+        taskId: submissionResponseMock.taskId,
         text: chatPostMessageResponse.message.text,
         timestamp: chatPostMessageResponse.ts,
       });
@@ -284,8 +284,8 @@ describe('handleRobotFaceReaction', () => {
         const submissionResponseMock = {
           completed: false,
           delivery: typeCodeText,
-          fkStudentId: 1,
-          fkTaskId: 1,
+          studentId: 1,
+          taskId: 1,
           id: 1,
           isActive: true,
           viewer: undefined,
@@ -420,8 +420,8 @@ describe('handleRobotFaceReaction', () => {
         const submissionResponseMock = {
           completed: false,
           delivery: typeLinkText,
-          fkStudentId: 1,
-          fkTaskId: 1,
+          studentId: 1,
+          taskId: 1,
           id: 1,
           isActive: true,
           viewer: undefined,

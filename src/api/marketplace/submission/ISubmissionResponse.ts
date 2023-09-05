@@ -1,7 +1,7 @@
 export interface ISubmissionResponse {
   id: number;
-  fkTaskId: number;
-  fkStudentId: number;
+  taskId: number;
+  studentId: number;
   completed: boolean;
   viewer?: any;
   delivery: string;

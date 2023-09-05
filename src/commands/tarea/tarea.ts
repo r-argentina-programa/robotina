@@ -81,10 +81,10 @@ export const tareaCommandFunction = async ({
 
       const thread: ICreateThreadDto = {
         authorId: process.env.BOT_ID!,
-        studentId: tarea.fkStudentId,
+        studentId: tarea.studentId,
         text: messageResponse.message?.text as string,
         timestamp: messageResponse.ts as string,
-        taskId: tarea.fkTaskId,
+        taskId: tarea.taskId,
       };
 
       await threadApi.create(thread);
