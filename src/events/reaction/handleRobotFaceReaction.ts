@@ -214,10 +214,10 @@ export const handleRobotFaceReaction: Middleware<
 
       const createThreadDto: ICreateThreadDto = {
         authorId: env.BOT_ID!,
-        studentId: tarea.fkStudentId,
+        studentId: tarea.studentId,
         text: botMessage.message!.text!,
         timestamp: botMessage.ts!,
-        taskId: tarea.fkTaskId,
+        taskId: tarea.taskId,
       };
 
       await threadApi.create(createThreadDto);
