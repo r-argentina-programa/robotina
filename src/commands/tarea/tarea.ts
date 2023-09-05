@@ -14,6 +14,7 @@ import { validateSubmissionDeliveryFormat } from '../../utils/validateSubmission
 import { validateChannelName } from '../../utils/validateChannelName';
 import threadApi from '../../api/marketplace/thread/threadApi';
 import { ICreateThreadDto } from '../../api/marketplace/thread/ICreateThreadDto';
+import { extractOnlySubmission } from '../../utils/extractOnlySubmission';
 
 dotenv.config();
 
@@ -65,11 +66,13 @@ export const tareaCommandFunction = async ({
       return;
     }
 
+    const onlySubmissionContent = extractOnlySubmission(command.text);
+
     if (command.text && validSubmissionFormat) {
       const tarea = await uploadTarea({
         classNumber,
         slackId: user.id as string,
-        delivery: command.text,
+        delivery: onlySubmissionContent,
         firstName: user.profile.first_name,
         lastName: user.profile.last_name,
         email: user.profile.email as string,
