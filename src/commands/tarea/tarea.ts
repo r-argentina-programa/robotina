@@ -15,6 +15,13 @@ import { validateChannelName } from '../../utils/validateChannelName';
 import threadApi from '../../api/marketplace/thread/threadApi';
 import { ICreateThreadDto } from '../../api/marketplace/thread/ICreateThreadDto';
 import { extractOnlySubmission } from '../../utils/extractOnlySubmission';
+import { validateNotMultipleSubmissions } from '../../utils/validateNotMultipleSubmissions';
+import { validateSubmissionFormat } from '../../utils/validateSubmissionFormat';
+import { validateSubmissionSingleFormat } from '../../utils/validateSubmissionSingleFormat';
+import { multipleBlocksOfCodeDetected } from '../../blocks/multipleBlocksOfCodeDetected';
+import { multipleSubmissionFormatsDetected } from '../../blocks/multipleSubmissionsDetected';
+import { wrongFormatSubmission } from '../../blocks/wrongFormatSubmission';
+import { multipleGitHubLinksDetected } from '../../blocks/multipleGitHubLinksDetected';
 
 dotenv.config();
 
@@ -53,6 +60,39 @@ export const tareaCommandFunction = async ({
 
     if (!classNumber) {
       await respond(unknownCommandBlock());
+      return;
+    }
+
+    const submissionHasValidFormat = validateSubmissionFormat(command.text);
+
+    if (!submissionHasValidFormat) {
+      await respond(wrongFormatSubmission());
+      return;
+    }
+
+    const submissionHasSingleFormat = validateSubmissionSingleFormat(
+      command.text
+    );
+
+    if (!submissionHasSingleFormat) {
+      await respond(multipleSubmissionFormatsDetected());
+      return;
+    }
+
+    const validateIsNotMultipleSubmissions = validateNotMultipleSubmissions(
+      command.text
+    );
+
+    if (!validateIsNotMultipleSubmissions && command.text.includes('```')) {
+      await respond(multipleBlocksOfCodeDetected());
+      return;
+    }
+
+    if (
+      !validateIsNotMultipleSubmissions &&
+      command.text.includes('github.com')
+    ) {
+      await respond(multipleGitHubLinksDetected());
       return;
     }
 
