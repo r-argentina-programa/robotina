@@ -47,7 +47,7 @@ const slackAppMock = {
   command: jest.fn(),
 } as unknown as jest.Mocked<App>;
 
-describe('tareaSlashCommand', () => {
+describe('tareaCommandFunction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
