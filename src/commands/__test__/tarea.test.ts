@@ -187,7 +187,7 @@ describe('tareaSlashCommand', () => {
       expect(commandMock.respond).toHaveBeenCalledWith(wrongFormatBlock());
     });
 
-    it('should responde with a block when trying to submit a block of code in class 5 or more', async () => {
+    it('should throw an error when trying to submit a block of code in class 5 or more', async () => {
       commandMock.command = {
         text: "Hola acá les dejo la tarea\n\n```console.log('Hello World!')```",
         channel_name: 'clase-7',
