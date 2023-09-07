@@ -415,7 +415,7 @@ describe('handleRobotFaceReaction', () => {
 
     describe('GitHub link type', () => {
       it('should save only the github link from the submission successfully', async () => {
-        const typeLinkText = 'github.com/r-argentina-programa/robotina';
+        const typeLinkText = 'https://github.com/r-argentina-programa/robotina';
 
         const submissionResponseMock = {
           completed: false,
