@@ -1,7 +1,7 @@
 import { expect, jest } from '@jest/globals';
-import { AckFn, RespondFn, SayFn } from '@slack/bolt';
+import { AckFn, App, RespondFn, SayFn } from '@slack/bolt';
 import { WebClient } from '@slack/web-api';
-import { tareaCommandFunction } from '../tarea/tarea';
+import { tareaCommandFunction, tareaSlashCommand } from '../tarea/tarea';
 import { uploadTarea } from '../tarea/uploadTarea';
 import { ISubmissionResponse } from '../../api/marketplace/submission/ISubmissionResponse';
 import {
@@ -42,6 +42,10 @@ const uploadTareaMock = uploadTarea as jest.Mocked<typeof uploadTarea>;
 const threadApiCreateMock = threadApi.create as jest.Mocked<
   typeof threadApi.create
 >;
+
+const slackAppMock = {
+  command: jest.fn(),
+} as unknown as jest.Mocked<App>;
 
 describe('tareaSlashCommand', () => {
   beforeEach(() => {
@@ -310,5 +314,17 @@ describe('tareaSlashCommand', () => {
       expect(commandMock.respond).toHaveBeenCalledTimes(1);
       expect(commandMock.respond).toHaveBeenCalledWith(unknownCommandBlock());
     });
+  });
+});
+
+describe('tareaSlashCommand', () => {
+  it('should call and configure command once ', () => {
+    const COMMAND_NAME = '/tarea';
+    tareaSlashCommand(slackAppMock);
+    expect(slackAppMock.command).toHaveBeenCalledTimes(1);
+    expect(slackAppMock.command).toHaveBeenCalledWith(
+      COMMAND_NAME,
+      tareaCommandFunction
+    );
   });
 });
