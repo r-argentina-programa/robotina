@@ -1,5 +1,5 @@
 export const extractLinkFromSubmission = (message: string): string => {
-  const linkRegex = /\bgithub\.com\/\S+\b/;
+  const linkRegex = /\bhttps?:\/\/github\.com\/\S+\b/;
   const match = message.match(linkRegex);
 
   if (match) {
