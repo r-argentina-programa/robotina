@@ -17,7 +17,6 @@ import { multipleBlocksOfCodeDetected } from '../../blocks/multipleBlocksOfCodeD
 import { multipleGitHubLinksDetected } from '../../blocks/multipleGitHubLinksDetected';
 import { IThreadResponse } from '../../api/marketplace/thread/IThreadResponse';
 import { unknownCommandBlock } from '../../blocks/unknownCommandBlock';
-// import { IThreadResponse } from '../../api/marketplace/thread/IThreadResponse';
 
 jest.mock('../tarea/uploadTarea');
 jest.mock('../../api/marketplace/user/userApi');
@@ -78,7 +77,6 @@ describe('tareaSlashCommand', () => {
 
       uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
 
-      // Va en fixture aparte?
       commandMock.say.mockResolvedValueOnce({
         ok: true,
         ts: chatPostMessageResponse.ts,
