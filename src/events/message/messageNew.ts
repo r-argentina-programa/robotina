@@ -47,6 +47,12 @@ export const handleSubmissionReplyNew: Middleware<
 
       const reply = await replyApi.create(createReplyDto);
 
+      await client.reactions.add({
+        channel: message.channel,
+        name: 'white_check_mark',
+        timestamp: message.ts,
+      });
+
       logger.info(
         `Reply with ID "${reply.id}" from user "${
           slackUser!.id
