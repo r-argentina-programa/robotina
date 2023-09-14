@@ -22,6 +22,9 @@ jest.mock('@slack/web-api', () => ({
     users: {
       info: jest.fn(),
     },
+    reactions: {
+      add: jest.fn(),
+    },
   })),
 }));
 
@@ -76,6 +79,7 @@ describe('handleSubmissionReply', () => {
     expect(userInfoMock).toHaveBeenCalledWith({
       user: messageNewEvent.user,
     });
+
     expect(replyCreateMock).toHaveBeenCalledTimes(1);
     expect(replyCreateMock).toHaveBeenCalledWith({
       authorId: userInfoResponse.user.id,
@@ -84,6 +88,14 @@ describe('handleSubmissionReply', () => {
       timestamp: messageNewEvent.ts,
       username: expect.any(String),
     });
+
+    expect(webClientMock.reactions.add).toBeCalledTimes(1);
+    expect(webClientMock.reactions.add).toBeCalledWith({
+      channel: messageNewEvent.channel,
+      name: 'white_check_mark',
+      timestamp: messageNewEvent.ts,
+    });
+
     expect(loggerMock.info).toHaveBeenCalledTimes(1);
     expect(loggerMock.error).toHaveBeenCalledTimes(0);
   });
