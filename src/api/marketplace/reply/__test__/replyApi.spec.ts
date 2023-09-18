@@ -89,15 +89,15 @@ describe('Marketplace Reply API', () => {
 
       const expectedResponse = expect.objectContaining(updates);
 
-      const postMock = jest
-        .spyOn(marketplaceClient, 'post')
+      const patchMock = jest
+        .spyOn(marketplaceClient, 'patch')
         .mockResolvedValueOnce({ data: { originalReply, ...updates } });
 
       const response = await replyApi.update(originalReply.timestamp, updates);
 
       expect(response).toEqual(expectedResponse);
-      expect(postMock).toHaveBeenCalledWith(
-        `/api/bot/reply/${originalReply.timestamp}`,
+      expect(patchMock).toHaveBeenCalledWith(
+        `/api/reply/timestamp/${originalReply.timestamp}`,
         updates
       );
     });
@@ -120,8 +120,8 @@ describe('Marketplace Reply API', () => {
 
       const expectedErrorMessage = 'Bad Request';
 
-      const postMock = jest
-        .spyOn(marketplaceClient, 'post')
+      const patchMock = jest
+        .spyOn(marketplaceClient, 'patch')
         .mockRejectedValueOnce(
           new AxiosError(
             undefined,
@@ -143,8 +143,8 @@ describe('Marketplace Reply API', () => {
       await expect(
         replyApi.update(originalReply.timestamp, updates)
       ).rejects.toThrowError(expectedErrorMessage);
-      expect(postMock).toHaveBeenCalledWith(
-        `/api/bot/reply/${originalReply.timestamp}`,
+      expect(patchMock).toHaveBeenCalledWith(
+        `/api/reply/timestamp/${originalReply.timestamp}`,
         updates
       );
     });
@@ -160,7 +160,9 @@ describe('Marketplace Reply API', () => {
 
       await replyApi.remove(timestamp);
 
-      expect(deleteMock).toHaveBeenCalledWith(`/api/bot/reply/${timestamp}`);
+      expect(deleteMock).toHaveBeenCalledWith(
+        `/api/reply/timestamp/${timestamp}`
+      );
     });
 
     it('should throw an error when deleting a reply fails', async () => {
@@ -191,7 +193,9 @@ describe('Marketplace Reply API', () => {
       await expect(replyApi.remove(timestamp)).rejects.toThrowError(
         expectedErrorMessage
       );
-      expect(deleteMock).toHaveBeenCalledWith(`/api/bot/reply/${timestamp}`);
+      expect(deleteMock).toHaveBeenCalledWith(
+        `/api/reply/timestamp/${timestamp}`
+      );
     });
   });
 });
