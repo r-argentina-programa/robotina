@@ -33,8 +33,8 @@ export const update = async (
   updates: IUpdateReplyDto
 ): Promise<IReplyResponse> => {
   try {
-    const { data } = await marketplaceClient.post<IReplyResponse>(
-      `/api/bot/reply/${timestamp}`,
+    const { data } = await marketplaceClient.patch<IReplyResponse>(
+      `/api/reply/timestamp/${timestamp}`,
       updates
     );
     return data;
@@ -53,7 +53,7 @@ export const update = async (
 
 export const remove = async (timestamp: string): Promise<void> => {
   try {
-    await marketplaceClient.delete(`/api/bot/reply/${timestamp}`);
+    await marketplaceClient.delete(`/api/reply/timestamp/${timestamp}`);
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('[replyApi Error: Remove]', error.response);
