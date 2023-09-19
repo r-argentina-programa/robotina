@@ -44,6 +44,7 @@ export const uploadTarea = async ({
 
   if (!users.length) {
     const createUserDto: ICreateUserDto = {
+      username: email,
       externalId: auth0Id,
       roles: ['Student'],
     };
