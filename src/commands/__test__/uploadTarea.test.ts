@@ -165,7 +165,7 @@ describe('uploadTarea test', () => {
 
     const expectedUser: ICreateUserDto = {
       roles: ['Student'],
-      username: undefined,
+      username: 'fake@email.com',
       externalId: `oauth2|sign-in-with-slack|${MOCKED_SLACK_TEAM_ID}-mockId`,
     };
 
