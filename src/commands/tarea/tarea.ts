@@ -46,11 +46,19 @@ export const tareaCommandFunction = async ({
   respond,
   client,
 }: Command): Promise<void> => {
+  console.log('HERE START TAREA COMMAND FUNCTION');
+  console.log('command: ', command);
+  console.log('client: ', client);
+
   await ack();
   try {
+    console.log('HERE ENTERS IN TRY BLOCK');
     const { user } = (await client.users.info({
       user: command.user_id,
     })) as IUserClient;
+
+    console.log('user: ', user);
+    console.log('client.users.info property "user": ', command.user_id);
 
     if (!user) {
       throw new Error('Slack-api Error: User not found');
@@ -58,12 +66,16 @@ export const tareaCommandFunction = async ({
 
     const classNumber = validateChannelName(command.channel_name);
 
+    console.log('classNumber: ', classNumber);
+
     if (!classNumber) {
       await respond(unknownCommandBlock());
       return;
     }
 
     const submissionHasValidFormat = validateSubmissionFormat(command.text);
+
+    console.log('submissionHasValidFormat: ', submissionHasValidFormat);
 
     if (!submissionHasValidFormat) {
       await respond(wrongFormatSubmission());
@@ -74,6 +86,8 @@ export const tareaCommandFunction = async ({
       command.text
     );
 
+    console.log('submissionHasSingleFormat: ', submissionHasSingleFormat);
+
     if (!submissionHasSingleFormat) {
       await respond(multipleSubmissionFormatsDetected());
       return;
@@ -81,6 +95,11 @@ export const tareaCommandFunction = async ({
 
     const validateIsNotMultipleSubmissions = validateNotMultipleSubmissions(
       command.text
+    );
+
+    console.log(
+      'validateIsNotMultipleSubmissions: ',
+      validateIsNotMultipleSubmissions
     );
 
     if (!validateIsNotMultipleSubmissions && command.text.includes('```')) {
@@ -101,12 +120,16 @@ export const tareaCommandFunction = async ({
       delivery: command.text,
     });
 
+    console.log('validSubmissionFormat: ', validSubmissionFormat);
+
     if (!validSubmissionFormat) {
       await respond(wrongFormatBlock());
       return;
     }
 
     const onlySubmissionContent = extractOnlySubmission(command.text);
+
+    console.log('onlySubmissionContent: ', onlySubmissionContent);
 
     if (command.text && validSubmissionFormat) {
       const tarea = await uploadTarea({
@@ -118,11 +141,24 @@ export const tareaCommandFunction = async ({
         email: user.profile.email as string,
       });
 
+      console.log('tarea: ', tarea);
+      console.log('uploadTarea property "classNumber": ', classNumber);
+      console.log('uploadTarea property "slackId": ', user.id);
+      console.log('uploadTarea property "delivery": ', onlySubmissionContent);
+      console.log(
+        'uploadTarea property "firstName": ',
+        user.profile.first_name
+      );
+      console.log('uploadTarea property "lastName": ', user.profile.last_name);
+      console.log('uploadTarea property "email": ', user.profile.email);
+
       const messageResponse = await say(
         `Tarea subida con éxito <@${
           user.id
         }>!\n\nTarea:\n${command.text.trim()}\n\n*Para agregar correcciones responder en este hilo.*`
       );
+
+      console.log('messageResponse: ', messageResponse);
 
       const thread: ICreateThreadDto = {
         authorId: process.env.BOT_ID!,
@@ -131,6 +167,13 @@ export const tareaCommandFunction = async ({
         timestamp: messageResponse.ts as string,
         taskId: tarea.taskId,
       };
+
+      console.log('thread: ', thread);
+      console.log('thread property "authorId": ', process.env.BOT_ID!);
+      console.log('thread property "studentId": ', tarea.studentId);
+      console.log('thread property "text": ', messageResponse.message?.text);
+      console.log('thread property "timestamp": ', messageResponse.ts);
+      console.log('thread property "taskId": ', tarea.taskId);
 
       await threadApi.create(thread);
     }
