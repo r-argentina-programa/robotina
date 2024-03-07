@@ -17,6 +17,7 @@ import { multipleBlocksOfCodeDetected } from '../../blocks/multipleBlocksOfCodeD
 import { multipleGitHubLinksDetected } from '../../blocks/multipleGitHubLinksDetected';
 import { IThreadResponse } from '../../api/marketplace/thread/IThreadResponse';
 import { unknownCommandBlock } from '../../blocks/unknownCommandBlock';
+import { assignmentCheatsheet } from '../../utils/assignmentCheatsheet';
 
 jest.mock('../tarea/uploadTarea');
 jest.mock('../../api/marketplace/user/userApi');
@@ -107,7 +108,72 @@ describe('tareaCommandFunction', () => {
       });
 
       expect(commandMock.say).toHaveBeenCalledWith(
-        `Tarea subida con éxito <@${usersInfoResponse.user.id}>!\n\nTarea:\n${fullMessage}\n\n*Para agregar correcciones responder en este hilo.*`
+        `Tarea subida con éxito <@${usersInfoResponse.user.id}>!\n\nTarea:\n${fullMessage}\n\nTe recomendamos leer las siguientes <${assignmentCheatsheet['1']} | notas> que pueden ayudarte a solucionar errores comunes. \n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`
+      );
+
+      expect(threadApi.create).toHaveBeenCalledTimes(1);
+      expect(threadApi.create).toHaveBeenCalledWith({
+        authorId: env.BOT_ID,
+        text: chatPostMessageResponse.message.text,
+        timestamp: chatPostMessageResponse.ts,
+      });
+    });
+
+    it("should not send a cheatsheet as part of the response if the lesson doesn't have one", async () => {
+      const typeCodeText = 'console.log("Hello World!!!")';
+      const fullMessage =
+        'Hola, aca dejo la tarea\n\n```console.log("Hello World!!!")```';
+
+      commandMock.command = {
+        text: fullMessage,
+        channel_name: 'clase-3',
+        user_id: 'mockId',
+      };
+
+      const submissionResponseMock = {
+        completed: false,
+        delivery: typeCodeText,
+        fkStudentId: 1,
+        fkTaskId: 3,
+        id: 1,
+        isActive: true,
+        viewer: undefined,
+      } as unknown as ISubmissionResponse;
+
+      commandMock.client.users.info.mockResolvedValueOnce(
+        // @ts-ignore
+        usersInfoResponse
+      );
+
+      uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
+
+      commandMock.say.mockResolvedValueOnce({
+        ok: true,
+        ts: chatPostMessageResponse.ts,
+        message: {
+          text: chatPostMessageResponse.message.text,
+        },
+      });
+
+      threadApiCreateMock.mockResolvedValue({} as unknown as IThreadResponse);
+
+      await tareaCommandFunction(
+        // @ts-ignore
+        commandMock
+      );
+
+      expect(uploadTareaMock).toBeCalledTimes(1);
+      expect(uploadTareaMock).toHaveBeenCalledWith({
+        classNumber: '3',
+        delivery: typeCodeText,
+        slackId: usersInfoResponse.user.id,
+        firstName: usersInfoResponse.user.profile.first_name,
+        lastName: usersInfoResponse.user.profile.last_name,
+        email: usersInfoResponse.user.profile.email,
+      });
+
+      expect(commandMock.say).toHaveBeenCalledWith(
+        `Tarea subida con éxito <@${usersInfoResponse.user.id}>!\n\nTarea:\n${fullMessage}\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`
       );
 
       expect(threadApi.create).toHaveBeenCalledTimes(1);
