@@ -18,6 +18,7 @@ import {
 import { ISubmissionResponse } from '../../../api/marketplace/submission/ISubmissionResponse';
 import threadApi from '../../../api/marketplace/thread/threadApi';
 import env from '../../../config/env.config';
+import { assignmentCheatsheet } from '../../../utils/assignmentCheatsheet';
 
 jest.mock('../../../commands/tarea/uploadTarea');
 jest.mock('../../../api/marketplace/user/userApi');
@@ -113,7 +114,7 @@ describe('handleRobotFaceReaction', () => {
       expect(clientMock.chat.postMessage).toBeCalledTimes(2);
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
         channel: messageAuthorEvent.item.channel,
-        text: `Tarea subida con éxito <@${messageAuthorEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original.\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
+        text: `Tarea subida con éxito <@${messageAuthorEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original. Te recomendamos leer las siguientes <${assignmentCheatsheet['1']} | notas> que pueden ayudarte a solucionar errores comunes. \n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
       });
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
         channel: messageAuthorEvent.item.channel,
@@ -214,7 +215,7 @@ describe('handleRobotFaceReaction', () => {
       expect(clientMock.chat.postMessage).toBeCalledTimes(2);
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
         channel: randomUserEvent.item.channel,
-        text: `Tarea subida con éxito <@${randomUserEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original.\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
+        text: `Tarea subida con éxito <@${messageAuthorEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original. Te recomendamos leer las siguientes <${assignmentCheatsheet['1']} | notas> que pueden ayudarte a solucionar errores comunes. \n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
       });
       expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
         channel: randomUserEvent.item.channel,
@@ -272,6 +273,99 @@ describe('handleRobotFaceReaction', () => {
       expect(clientMock.chat.postMessage).toBeCalledTimes(0);
       expect(threadApi.create).toHaveBeenCalledTimes(0);
       expect(clientMock.reactions.add).toBeCalledTimes(0);
+      expect(loggerMock.error).toBeCalledTimes(0);
+    });
+
+    it("should not send a cheatsheet as part of the response if the lesson doesn't have one", async () => {
+      const typeCodeText = 'console.log("Hello World!!!")';
+
+      const submissionResponseMock = {
+        completed: false,
+        delivery: typeCodeText,
+        studentId: 1,
+        taskId: 3,
+        id: 1,
+        isActive: true,
+        viewer: undefined,
+      } as ISubmissionResponse;
+
+      clientMock.conversations.history.mockResolvedValueOnce(
+        // @ts-ignore
+        conversationsHistoryResponse
+      );
+
+      clientMock.users.info.mockResolvedValueOnce(
+        // @ts-ignore
+        usersInfoResponse
+      );
+
+      clientMock.conversations.info.mockResolvedValueOnce(
+        // @ts-ignore
+        {
+          channel: {
+            ...conversationsInfoResponse,
+            name: 'clase-3',
+            name_normalized: 'clase-3',
+          },
+        }
+      );
+
+      uploadTareaMock.mockResolvedValueOnce(submissionResponseMock);
+
+      clientMock.chat.getPermalink.mockResolvedValueOnce(
+        // @ts-ignore
+        chatGetPermalinkResponse
+      );
+
+      clientMock.chat.postMessage.mockResolvedValueOnce(
+        // @ts-ignore
+        chatPostMessageResponse
+      );
+
+      await handleRobotFaceReaction({
+        client: clientMock,
+        // @ts-ignore
+        event: messageAuthorEvent,
+        logger: loggerMock,
+      });
+
+      expect(uploadTareaMock).toBeCalledTimes(1);
+      expect(uploadTareaMock).toHaveBeenCalledWith({
+        classNumber: '3',
+        delivery: typeCodeText,
+        slackId: messageAuthorEvent.item_user,
+        firstName: usersInfoResponse.user.profile.first_name,
+        lastName: usersInfoResponse.user.profile.last_name,
+        email: usersInfoResponse.user.profile.email,
+      });
+
+      expect(clientMock.chat.postMessage).toBeCalledTimes(2);
+      expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(1, {
+        channel: messageAuthorEvent.item.channel,
+        text: `Tarea subida con éxito <@${messageAuthorEvent.item_user}>! \n\nAcá está el <${chatGetPermalinkResponse.permalink}|Link> al mensaje original.\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
+      });
+      expect(clientMock.chat.postMessage).toHaveBeenNthCalledWith(2, {
+        channel: messageAuthorEvent.item.channel,
+        text: 'Si querés agregar una corrección a esta tarea hacelo como una respuesta al mensaje que mandó el bot.',
+        thread_ts: messageAuthorEvent.item.ts,
+      });
+
+      expect(threadApi.create).toHaveBeenCalledTimes(1);
+      expect(threadApi.create).toHaveBeenCalledWith({
+        authorId: env.BOT_ID,
+        studentId: submissionResponseMock.studentId,
+        taskId: submissionResponseMock.taskId,
+        text: chatPostMessageResponse.message.text,
+        timestamp: chatPostMessageResponse.ts,
+      });
+
+      expect(clientMock.reactions.add).toBeCalledTimes(1);
+      expect(clientMock.reactions.add).toBeCalledWith({
+        channel: messageAuthorEvent.item.channel,
+        name: 'white_check_mark',
+        timestamp: messageAuthorEvent.item.ts,
+      });
+
       expect(loggerMock.error).toBeCalledTimes(0);
     });
   });

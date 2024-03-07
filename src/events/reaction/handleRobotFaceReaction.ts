@@ -14,27 +14,18 @@ import { extractOnlySubmission } from '../../utils/extractOnlySubmission';
 import { validateSubmissionSingleFormat } from '../../utils/validateSubmissionSingleFormat';
 import { validateSubmissionFormat } from '../../utils/validateSubmissionFormat';
 import { validateNotMultipleSubmissions } from '../../utils/validateNotMultipleSubmissions';
+import { assignmentCheatsheet } from '../../utils/assignmentCheatsheet';
 
 export const handleRobotFaceReaction: Middleware<
   SlackEventMiddlewareArgs<'reaction_added'>,
   StringIndexed
 > = async ({ client, event, logger }): Promise<void> => {
-  console.log('HERE START HANDLE ROBOT FACE REACTION');
-  console.log('client: ', client);
-  console.log('event: ', event);
-
   if (
     event.type === 'reaction_added' &&
     event.reaction === 'robot_face' &&
     event.item.type === 'message'
   ) {
-    console.log('Event data: ', event);
-    console.log('Event type: ', event.type);
-    console.log('Event reaction: ', event.reaction);
-    console.log('Event item type: ', event.item.type);
-
     try {
-      console.log('HERE ENTERS IN TRY BLOCK');
       const { messages: messagesFromChannel } =
         await client.conversations.history({
           latest: event.item.ts,
@@ -43,16 +34,6 @@ export const handleRobotFaceReaction: Middleware<
           inclusive: true,
         });
 
-      console.log('messages from channel: ', messagesFromChannel);
-      console.log(
-        'client.conversations.history property "latest": ',
-        event.item.ts
-      );
-      console.log(
-        'client.conversations.history property "channel": ',
-        event.item.channel
-      );
-
       if (!messagesFromChannel) {
         throw new Error(
           `Message with ID ${event.item.ts} not found in channel ${event.item.channel}.`
@@ -60,8 +41,6 @@ export const handleRobotFaceReaction: Middleware<
       }
 
       const reactedMessage = messagesFromChannel[0];
-
-      console.log('reactedMessage: ', reactedMessage);
 
       if (!reactedMessage.reactions) {
         throw new Error(
@@ -72,8 +51,6 @@ export const handleRobotFaceReaction: Middleware<
       const botAlreadyReacted = checkIfBotAlreadyReacted(
         reactedMessage.reactions
       );
-
-      console.log('botAlreadyReacted: ', botAlreadyReacted);
 
       if (botAlreadyReacted) {
         logger.info(
@@ -115,16 +92,11 @@ export const handleRobotFaceReaction: Middleware<
         return;
       }
 
-      console.log('reactorIsValid: ', reactorIsValid);
-
       logger.info('Processing submission...');
 
       const { user: slackUser } = await client.users.info({
         user: event.item_user,
       });
-
-      console.log('slackUser: ', slackUser);
-      console.log('client.users.info property "user": ', event.item_user);
 
       if (!slackUser) {
         throw new Error(`User with ID ${event.item_user} not found.`);
@@ -134,20 +106,11 @@ export const handleRobotFaceReaction: Middleware<
         channel: event.item.channel,
       });
 
-      console.log('channel: ', channel);
-      console.log(
-        'client.conversations.info property "channel": ',
-        event.item.channel
-      );
-
       if (!channel) {
         throw new Error(`Channel ${event.item.channel} not found.`);
       }
 
       const lessonId = validateChannelName(channel.name!);
-
-      console.log('lessonId: ', lessonId);
-      console.log('validateChannelName property "name": ', channel.name);
 
       if (!lessonId) {
         throw new Error(
@@ -158,8 +121,6 @@ export const handleRobotFaceReaction: Middleware<
       const submissionHasValidFormat = validateSubmissionFormat(
         reactedMessage.text!
       );
-
-      console.log('submissionHasValidFormat: ', submissionHasValidFormat);
 
       if (!submissionHasValidFormat) {
         await client.chat.postMessage({
@@ -174,8 +135,6 @@ export const handleRobotFaceReaction: Middleware<
         reactedMessage.text!
       );
 
-      console.log('submissionHasSingleFormat: ', submissionHasSingleFormat);
-
       if (!submissionHasSingleFormat) {
         await client.chat.postMessage({
           channel: event.item.channel,
@@ -187,11 +146,6 @@ export const handleRobotFaceReaction: Middleware<
 
       const validateIsNotMultipleSubmissions = validateNotMultipleSubmissions(
         reactedMessage.text!
-      );
-
-      console.log(
-        'validateIsNotMultipleSubmissions: ',
-        validateIsNotMultipleSubmissions
       );
 
       if (
@@ -223,8 +177,6 @@ export const handleRobotFaceReaction: Middleware<
         delivery: reactedMessage.text!,
       });
 
-      console.log('validSubmissionFormat: ', validSubmissionFormat);
-
       if (!validSubmissionFormat) {
         await client.chat.postMessage({
           channel: event.item.channel,
@@ -236,8 +188,6 @@ export const handleRobotFaceReaction: Middleware<
 
       const onlySubmissionContent = extractOnlySubmission(reactedMessage.text!);
 
-      console.log('onlySubmissionContent: ', onlySubmissionContent);
-
       const tarea = await uploadTarea({
         classNumber: lessonId,
         slackId: slackUser.id!,
@@ -247,68 +197,28 @@ export const handleRobotFaceReaction: Middleware<
         email: slackUser.profile!.email!,
       });
 
-      console.log('tarea: ', tarea);
-      console.log('uploadTarea property "classNumber": ', lessonId);
-      console.log('uploadTarea property "slackId": ', slackUser.id);
-      console.log('uploadTarea property "delivery": ', onlySubmissionContent);
-      console.log(
-        'uploadTarea property "firstName": ',
-        slackUser.profile!.first_name
-      );
-      console.log(
-        'uploadTarea property "lastName": ',
-        slackUser.profile!.last_name
-      );
-      console.log('uploadTarea property "email": ', slackUser.profile!.email);
-
       const { permalink } = await client.chat.getPermalink({
         channel: event.item.channel,
         message_ts: event.item.ts,
       });
 
-      console.log('permalink: ', permalink);
-      console.log(
-        'client.chat.getPermalink property "channel": ',
-        event.item.channel
-      );
-      console.log(
-        'client.chat.getPermalink property "message_ts": ',
-        event.item.ts
-      );
+      const cheatsheet =
+        assignmentCheatsheet[lessonId as keyof typeof assignmentCheatsheet];
+
+      const submissionResponse = cheatsheet
+        ? `Tarea subida con éxito <@${slackUser.id}>! \n\nAcá está el <${permalink}|Link> al mensaje original. Te recomendamos leer las siguientes <${cheatsheet} | notas> que pueden ayudarte a solucionar errores comunes. \n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`
+        : `Tarea subida con éxito <@${slackUser.id}>! \n\nAcá está el <${permalink}|Link> al mensaje original.\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`;
 
       const botMessage = await client.chat.postMessage({
         channel: event.item.channel,
-        text: `Tarea subida con éxito <@${slackUser.id}>! \n\nAcá está el <${permalink}|Link> al mensaje original.\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`,
+        text: submissionResponse,
       });
-
-      console.log('botMessage: ', botMessage);
-      console.log(
-        'client.chat.postMessage property "channel": ',
-        event.item.channel
-      );
-      console.log(
-        'client.chat.postMessage property "text": ',
-        `Tarea subida con éxito <@${slackUser.id}>! \n\nAcá está el <${permalink}|Link> al mensaje original.\n\n*Para agregar correcciones responder en este hilo (no en el mensaje original).*`
-      );
 
       await client.chat.postMessage({
         channel: event.item.channel,
         text: 'Si querés agregar una corrección a esta tarea hacelo como una respuesta al mensaje que mandó el bot.',
         thread_ts: event.item.ts,
       });
-
-      console.log(
-        'client.chat.postMessage property "channel": ',
-        event.item.channel
-      );
-      console.log(
-        'client.chat.postMessage property "text": ',
-        'Si querés agregar una corrección a esta tarea hacelo como una respuesta al mensaje que mandó el bot.'
-      );
-      console.log(
-        'client.chat.postMessage property "thread_ts": ',
-        event.item.ts
-      );
 
       const createThreadDto: ICreateThreadDto = {
         authorId: env.BOT_ID!,
@@ -318,16 +228,6 @@ export const handleRobotFaceReaction: Middleware<
         taskId: tarea.taskId,
       };
 
-      console.log('createThreadDto: ', createThreadDto);
-      console.log('createThreadDto property "authorId": ', env.BOT_ID);
-      console.log('createThreadDto property "studentId": ', tarea.studentId);
-      console.log(
-        'createThreadDto property "text": ',
-        botMessage.message!.text!
-      );
-      console.log('createThreadDto property "timestamp": ', botMessage.ts);
-      console.log('createThreadDto property "taskId": ', tarea.taskId);
-
       await threadApi.create(createThreadDto);
 
       await client.reactions.add({
@@ -335,13 +235,6 @@ export const handleRobotFaceReaction: Middleware<
         name: 'white_check_mark',
         timestamp: event.item.ts,
       });
-
-      console.log(
-        'client.reactions.add property "channel": ',
-        event.item.channel
-      );
-      console.log('client.reactions.add property "name": ', 'white_check_mark');
-      console.log('client.reactions.add property "timestamp": ', event.item.ts);
 
       logger.info('Submission processed successfully!');
     } catch (error) {
