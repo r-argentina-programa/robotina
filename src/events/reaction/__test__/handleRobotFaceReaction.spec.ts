@@ -277,22 +277,28 @@ describe('handleRobotFaceReaction', () => {
     });
 
     it("should not send a cheatsheet as part of the response if the lesson doesn't have one", async () => {
-      const typeCodeText = 'console.log("Hello World!!!")';
+      const typeLinkText = 'https://github.com/r-argentina-programa/robotina';
 
       const submissionResponseMock = {
         completed: false,
-        delivery: typeCodeText,
+        delivery: typeLinkText,
         studentId: 1,
-        taskId: 3,
+        taskId: 9999,
         id: 1,
         isActive: true,
         viewer: undefined,
       } as ISubmissionResponse;
 
-      clientMock.conversations.history.mockResolvedValueOnce(
-        // @ts-ignore
-        conversationsHistoryResponse
-      );
+      clientMock.conversations.history.mockResolvedValueOnce({
+        ...conversationsHistoryResponse,
+        messages: [
+          // @ts-ignore
+          {
+            ...conversationsHistoryResponse.messages[0],
+            text: `Hola, aca dejo la tarea ${typeLinkText}`,
+          },
+        ],
+      });
 
       clientMock.users.info.mockResolvedValueOnce(
         // @ts-ignore
@@ -304,8 +310,8 @@ describe('handleRobotFaceReaction', () => {
         {
           channel: {
             ...conversationsInfoResponse,
-            name: 'clase-3',
-            name_normalized: 'clase-3',
+            name: 'clase-9999',
+            name_normalized: 'clase-9999',
           },
         }
       );
@@ -331,8 +337,8 @@ describe('handleRobotFaceReaction', () => {
 
       expect(uploadTareaMock).toBeCalledTimes(1);
       expect(uploadTareaMock).toHaveBeenCalledWith({
-        classNumber: '3',
-        delivery: typeCodeText,
+        classNumber: '9999',
+        delivery: typeLinkText,
         slackId: messageAuthorEvent.item_user,
         firstName: usersInfoResponse.user.profile.first_name,
         lastName: usersInfoResponse.user.profile.last_name,

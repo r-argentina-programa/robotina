@@ -120,21 +120,20 @@ describe('tareaCommandFunction', () => {
     });
 
     it("should not send a cheatsheet as part of the response if the lesson doesn't have one", async () => {
-      const typeCodeText = 'console.log("Hello World!!!")';
-      const fullMessage =
-        'Hola, aca dejo la tarea\n\n```console.log("Hello World!!!")```';
+      const typeLinkText = 'https://github.com/r-argentina-programa/robotina';
+      const fullMessage = `Hola, aca dejo la tarea ${typeLinkText}`;
 
       commandMock.command = {
         text: fullMessage,
-        channel_name: 'clase-3',
+        channel_name: 'clase-9999',
         user_id: 'mockId',
       };
 
       const submissionResponseMock = {
         completed: false,
-        delivery: typeCodeText,
+        delivery: typeLinkText,
         fkStudentId: 1,
-        fkTaskId: 3,
+        fkTaskId: 9999,
         id: 1,
         isActive: true,
         viewer: undefined,
@@ -164,8 +163,8 @@ describe('tareaCommandFunction', () => {
 
       expect(uploadTareaMock).toBeCalledTimes(1);
       expect(uploadTareaMock).toHaveBeenCalledWith({
-        classNumber: '3',
-        delivery: typeCodeText,
+        classNumber: '9999',
+        delivery: typeLinkText,
         slackId: usersInfoResponse.user.id,
         firstName: usersInfoResponse.user.profile.first_name,
         lastName: usersInfoResponse.user.profile.last_name,
